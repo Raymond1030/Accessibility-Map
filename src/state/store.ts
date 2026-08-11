@@ -3,6 +3,7 @@ import { cellKey, type BandMode, type Origin, type SetOp, type TransitPolicy } f
 import type { PolyFeature } from '../geometry/ops'
 import type { CellStatus } from '../geometry/result'
 import { getProvider } from '../providers'
+import { isConfigError, describeConfigError } from '../amap/errors'
 import { planRequests } from './compute'
 
 const PALETTE = ['#e4572e', '#3f88c5', '#2e933c', '#8b5cf6', '#d97706']
@@ -108,10 +109,7 @@ export const useStore = create<State>((set, get) => ({
         }))
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
-        // Key 配置错误是唯一需要全局提示的失败——它必然源于部署没配对
-        if (/Key|INVALID_USER_SCODE|USERKEY|DAILY_QUERY_OVER_LIMIT/i.test(msg)) {
-          set({ fatalError: msg })
-        }
+        if (isConfigError(msg)) set({ fatalError: describeConfigError(msg) })
         set((s) => ({
           cells: new Map(s.cells).set(key, 'error'),
           errors: new Map(s.errors).set(key, msg),
@@ -136,6 +134,7 @@ export const useStore = create<State>((set, get) => ({
       }))
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
+      if (isConfigError(msg)) set({ fatalError: describeConfigError(msg) })
       set((s) => ({
         cells: new Map(s.cells).set(key, 'error'),
         errors: new Map(s.errors).set(key, msg),
