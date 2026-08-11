@@ -1,0 +1,60 @@
+.sidebar {
+  width: 300px;
+  flex: none;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #f7f7f8;
+  border-right: 1px solid #e2e2e5;
+  font: 13px/1.5 system-ui, -apple-system, "PingFang SC", sans-serif;
+  overflow: hidden;
+}
+.sidebar h2 {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .05em;
+  color: #6b7280; margin: 0 0 8px;
+}
+.pane { padding: 12px; }
+.pane.origins { flex: 1; overflow-y: auto; }
+.pane.controls { border-top: 1px solid #e2e2e5; }
+.pane.results { border-top: 1px solid #e2e2e5; background: #fff; }
+
+.origin-card {
+  background: #fff; border: 1px solid #e2e2e5; border-left-width: 4px;
+  border-radius: 6px; padding: 8px; margin-bottom: 8px;
+}
+.origin-card header { display: flex; align-items: center; gap: 4px; }
+.label-input { flex: 1; border: none; background: transparent; font-weight: 600; font-size: 13px; }
+.label-input:focus { outline: 1px solid #cbd5e1; border-radius: 3px; }
+.icon { border: none; background: none; cursor: pointer; color: #9ca3af; font-size: 16px; }
+.row { display: flex; align-items: center; gap: 6px; margin: 6px 0; }
+select { width: 100%; padding: 3px; border: 1px solid #d1d5db; border-radius: 4px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
+.chip {
+  padding: 3px 8px; border: 1px solid #d1d5db; border-radius: 4px;
+  background: #fff; cursor: pointer; font-size: 12px;
+}
+.chip.on { background: #111827; color: #fff; border-color: #111827; }
+
+.cell-status { display: flex; flex-direction: column; gap: 3px; margin-top: 6px; }
+.tag { font-size: 11px; color: #6b7280; }
+.tag.muted { color: #9ca3af; }
+.retry {
+  font-size: 11px; color: #b91c1c; background: #fef2f2;
+  border: 1px solid #fecaca; border-radius: 4px; padding: 2px 6px; cursor: pointer; text-align: left;
+}
+
+.search-box { display: flex; gap: 4px; margin-bottom: 10px; }
+.search-box input { flex: 1; min-width: 0; padding: 4px 6px; border: 1px solid #d1d5db; border-radius: 4px; }
+.search-box button { padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; background: #fff; cursor: pointer; }
+
+.result-row { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; }
+.result-row .ok { color: #111827; font-weight: 600; }
+.result-row .muted { color: #9ca3af; }
+.result-row .warn { color: #b45309; text-align: right; font-size: 12px; }
+.hint { color: #9ca3af; font-size: 12px; margin: 4px 0; }
+.hint.error { color: #b91c1c; }
+.export {
+  width: 100%; margin-top: 8px; padding: 6px;
+  border: 1px solid #d1d5db; border-radius: 4px; background: #fff; cursor: pointer;
+}
