@@ -14,6 +14,7 @@
   "dependencies": {
     "@amap/amap-jsapi-loader": "^1.0.1",
     "@turf/turf": "^7.4.0",
+    "mapbox-gl": "^3.28.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "zustand": "^5.0.14"
@@ -21,6 +22,7 @@
   "devDependencies": {
     "@amap/amap-jsapi-types": "^0.0.15",
     "@types/geojson": "^7946.0.16",
+    "@types/mapbox-gl": "^3.4.1",
     "@types/node": "^22.20.1",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
