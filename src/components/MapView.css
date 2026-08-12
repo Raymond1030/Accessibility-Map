@@ -1,5 +1,40 @@
-.map-view {
+.map-view-wrap {
   flex: 1;
-  height: 100%;
+  position: relative;
   min-width: 0;
+  min-height: 0;
+}
+
+.map-view {
+  width: 100%;
+  height: 100%;
+}
+
+.picking-hint {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(17, 24, 39, .92);
+  color: #fff;
+  font: 13px system-ui, -apple-system, "PingFang SC", sans-serif;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, .25);
+  white-space: nowrap;
+}
+
+.picking-hint button {
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, .35);
+  border-radius: 6px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
 }
