@@ -1,6 +1,6 @@
 import { loadAmap } from '../amap/loader'
 import {
-  boundsToNormalizedFeature, interpretArrivalRangeResult, type AmapPath,
+  boundsToNormalizedFeature, interpretArrivalRangeResult, type AmapBounds,
 } from './transform'
 import type { IsochroneProvider } from './cache'
 import { MAX_MINUTES } from '../types'
@@ -28,7 +28,7 @@ export function createAmapTransitProvider(): IsochroneProvider {
       // 'ALL' 对应高德的缺省值：公交 + 地铁
       const policy = req.policy && req.policy !== 'ALL' ? { policy: req.policy } : {}
 
-      const bounds = await new Promise<AmapPath[]>((resolve, reject) => {
+      const bounds = await new Promise<AmapBounds>((resolve, reject) => {
         arrivalRange.search(
           req.lngLat,
           req.minutes,

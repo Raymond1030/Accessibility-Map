@@ -1,22 +1,76 @@
 import { polygon } from '@turf/turf'
 import { normalize, type PolyFeature } from '../geometry/ops'
 
-/** 高德回调里 result.bounds 的元素形状 */
-export type AmapPath = Array<{ lng: number; lat: number }>
+/**
+ * result.bounds 的形状实测下来并不统一，所以这里不写死类型。
+ *
+ * 线上真实返回的是 bounds[块][环][点]，且点是 ["116.3069", "40.052399"]
+ * 这样的**字符串**数组；文档和部分示例里则是 bounds[路径][{lng, lat}] 两层。
+ * 解析器对两者都兼容，靠识别「点」来定位环，而不是假定嵌套深度。
+ */
+export type AmapBounds = unknown
+
+type Coord = [number, number]
+
+function toCoord(v: unknown): Coord | null {
+  if (Array.isArray(v) && v.length >= 2) {
+    const lng = Number(v[0])
+    const lat = Number(v[1])
+    return Number.isFinite(lng) && Number.isFinite(lat) ? [lng, lat] : null
+  }
+  if (v && typeof v === 'object') {
+    const o = v as { lng?: unknown; lat?: unknown }
+    if (o.lng !== undefined && o.lat !== undefined) {
+      const lng = Number(o.lng)
+      const lat = Number(o.lat)
+      return Number.isFinite(lng) && Number.isFinite(lat) ? [lng, lat] : null
+    }
+  }
+  return null
+}
+
+/** 一个数组的元素全是点，它就是一个环 */
+function asRing(node: unknown): Coord[] | null {
+  if (!Array.isArray(node) || node.length === 0) return null
+  const coords: Coord[] = []
+  for (const item of node) {
+    const c = toCoord(item)
+    if (!c) return null
+    coords.push(c)
+  }
+  return coords
+}
 
 /**
- * 一条路径转一个 Polygon。
- * 高德的路径不闭合，GeoJSON 的环必须首尾相同，这里补上。
+ * 递归找出所有环，不关心 bounds 到底嵌套了几层。
+ *
+ * 已知简化：带洞的多边形会被拆成独立的外环，洞被填实。
+ * 公交等时圈里「可达区中间的不可达孤岛」极少见，为此引入外环/内环判定
+ * 不划算——真遇到了再说。
  */
-export function boundsToPolygons(bounds: AmapPath[]): PolyFeature[] {
+function collectRings(node: unknown, out: Coord[][]): void {
+  const ring = asRing(node)
+  if (ring) {
+    out.push(ring)
+    return
+  }
+  if (!Array.isArray(node)) return
+  for (const child of node) collectRings(child, out)
+}
+
+/** 环 → Polygon。高德的环不闭合，GeoJSON 要求首尾相同，这里补上 */
+export function boundsToPolygons(bounds: AmapBounds): PolyFeature[] {
+  const rings: Coord[][] = []
+  collectRings(bounds, rings)
+
   const out: PolyFeature[] = []
-  for (const path of bounds) {
-    if (!path || path.length < 3) continue
-    const ring: [number, number][] = path.map((p) => [p.lng, p.lat])
-    const [fx, fy] = ring[0]
-    const [lx, ly] = ring[ring.length - 1]
-    if (fx !== lx || fy !== ly) ring.push([fx, fy])
-    out.push(polygon([ring]) as PolyFeature)
+  for (const ring of rings) {
+    if (ring.length < 3) continue
+    const closed: Coord[] = [...ring]
+    const [fx, fy] = closed[0]
+    const [lx, ly] = closed[closed.length - 1]
+    if (fx !== lx || fy !== ly) closed.push([fx, fy])
+    out.push(polygon([closed]) as PolyFeature)
   }
   return out
 }
@@ -25,12 +79,12 @@ export function boundsToPolygons(bounds: AmapPath[]): PolyFeature[] {
  * Provider 出口的契约：无论高德返回多少块重叠区域，
  * 下游拿到的永远是一个干净、无自交的规范要素（或 null 表示无覆盖）。
  */
-export function boundsToNormalizedFeature(bounds: AmapPath[]): PolyFeature | null {
+export function boundsToNormalizedFeature(bounds: AmapBounds): PolyFeature | null {
   return normalize(boundsToPolygons(bounds))
 }
 
 export type ArrivalRangeResult =
-  | { ok: true; bounds: AmapPath[] }
+  | { ok: true; bounds: AmapBounds }
   | { ok: false; error: string }
 
 /**
@@ -57,7 +111,7 @@ export function interpretArrivalRangeResult(
     return { ok: false, error: status || 'UNKNOWN_ERROR' }
   }
 
-  const r = result as { bounds?: AmapPath[]; info?: string; infocode?: string }
+  const r = result as { bounds?: AmapBounds; info?: string; infocode?: string }
 
   if (r.infocode && r.infocode !== '10000') {
     return { ok: false, error: r.info ?? r.infocode }

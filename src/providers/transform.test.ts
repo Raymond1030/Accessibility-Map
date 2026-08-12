@@ -4,8 +4,33 @@ import {
   boundsToPolygons, boundsToNormalizedFeature, interpretArrivalRangeResult,
 } from './transform'
 import fixture from './fixtures/arrival-range.json'
+import realFixture from './fixtures/arrival-range-real.json'
 
-describe('boundsToPolygons', () => {
+describe('boundsToPolygons — 线上真实结构', () => {
+  // 线上抓到的形状是 bounds[块][环][点]，点为 ["lng","lat"] 字符串数组。
+  // 早先按 bounds[路径][{lng,lat}] 两层去解析，结果什么都提不出来，
+  // 于是把一次正常响应误判成「周边无公交可达数据」——错误被伪装成了合法结论。
+  it('解析三层嵌套 + 字符串坐标', () => {
+    const polys = boundsToPolygons(realFixture.bounds)
+    expect(polys).toHaveLength(2)
+  })
+
+  it('字符串坐标被转成数字', () => {
+    const polys = boundsToPolygons(realFixture.bounds)
+    const [lng, lat] = polys[0].geometry.coordinates[0][0] as number[]
+    expect(typeof lng).toBe('number')
+    expect(lng).toBeCloseTo(116.3069, 4)
+    expect(lat).toBeCloseTo(40.052399, 4)
+  })
+
+  it('未闭合的环会被补上闭合点', () => {
+    const polys = boundsToPolygons(realFixture.bounds)
+    const ring = polys[1].geometry.coordinates[0]
+    expect(ring[0]).toEqual(ring[ring.length - 1])
+  })
+})
+
+describe('boundsToPolygons — 兼容两层 {lng,lat} 结构', () => {
   it('把每条路径转成一个 Polygon', () => {
     const polys = boundsToPolygons(fixture.bounds)
     expect(polys).toHaveLength(3)
@@ -24,6 +49,14 @@ describe('boundsToPolygons', () => {
 
   it('空 bounds 得到空数组（该点无公交覆盖）', () => {
     expect(boundsToPolygons([])).toHaveLength(0)
+  })
+
+  it('undefined 不会崩溃', () => {
+    expect(boundsToPolygons(undefined)).toHaveLength(0)
+  })
+
+  it('坐标非法的点整环丢弃，不会产出 NaN 几何', () => {
+    expect(boundsToPolygons([[['abc', 'def'], ['1', '2'], ['3', '4']]])).toHaveLength(0)
   })
 })
 
