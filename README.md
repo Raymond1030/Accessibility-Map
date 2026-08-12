@@ -6,7 +6,7 @@
 
 **在线体验 → https://raymond1030.github.io/Accessibility-Map/**
 
-![状态](https://img.shields.io/badge/tests-92%20passing-brightgreen) ![状态](https://img.shields.io/badge/公交-仅支持-blue) ![状态](https://img.shields.io/badge/坐标系-GCJ--02-orange)
+![状态](https://img.shields.io/badge/tests-97%20passing-brightgreen) ![状态](https://img.shields.io/badge/公交-仅支持-blue) ![状态](https://img.shields.io/badge/坐标系-GCJ--02-orange)
 
 > 示例：西二旗 ∩ 国贸 —— 15 分钟「无共同可达区」、30 分钟「无共同可达区」、45 分钟 2.92 km²。
 > 两地直线约 20 公里，前两档碰不了头是正确答案，不是出错。
@@ -64,6 +64,14 @@ Key 从[高德开放平台](https://console.amap.com/dev/key/app)申请，类型
 
 差集需要额外指定基准点，语义是 `A \ (B ∪ C ∪ …)`。
 
+### 手机上怎么用
+
+地图全屏，控件收在底部抽屉里。点顶部把手展开或收起——折叠时那一行会一直显示当前的结果摘要，所以收起状态下也能看到交集变化。
+
+加点要先点「＋ 在地图上加点」进入选点模式，再点地图落点。**手机上不能直接点地图加点**：拖动浏览、收起抽屉都会命中地图，而每误加一个点会立刻发出 3 次高德请求，配额是实打实烧掉的。进入选点模式时抽屉会自动收起，落点后自动退出模式并保持折叠——加完点你要看的是地图上新出现的等时圈，不是控件。
+
+桌面端行为完全不变，仍是直接点地图加点。
+
 ## 空结果是答案，不是错误
 
 这是这个工具最容易被误读的地方，所以专门做了区分：
@@ -119,7 +127,7 @@ src/
 ## 测试
 
 ```bash
-npm test    # 92 个测试
+npm test    # 97 个测试
 ```
 
 测试集中在几何运算层和 provider 转换层——逻辑密度最高、出错最不显眼的地方。全部是纯函数测试，不碰网络。
