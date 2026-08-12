@@ -97,7 +97,11 @@ export const useStore = create<State>((set, get) => ({
   setFatalError: (fatalError) => set({ fatalError }),
   setDrawerOpen: (drawerOpen) => set({ drawerOpen }),
   toggleDrawer: () => set({ drawerOpen: !get().drawerOpen }),
-  setPickingMode: (pickingMode) => set({ pickingMode }),
+  // 进入选点模式必然收起抽屉——展开时抽屉占 72vh，地图只剩不到三成，
+  // 既难落点又会挡住提示条。退出时不动抽屉：那通常只是取消，
+  // 突然弹开面板反而唐突。
+  setPickingMode: (pickingMode) =>
+    set(pickingMode ? { pickingMode, drawerOpen: false } : { pickingMode }),
 
   refresh: async () => {
     const { origins, bandMode, globalThresholds } = get()
