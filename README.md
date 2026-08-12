@@ -6,7 +6,7 @@
 
 **在线体验 → https://raymond1030.github.io/Accessibility-Map/**
 
-![状态](https://img.shields.io/badge/tests-97%20passing-brightgreen) ![状态](https://img.shields.io/badge/公交-仅支持-blue) ![状态](https://img.shields.io/badge/坐标系-GCJ--02-orange)
+![状态](https://img.shields.io/badge/tests-121%20passing-brightgreen) ![状态](https://img.shields.io/badge/公交-仅支持-blue) ![状态](https://img.shields.io/badge/坐标系-GCJ--02-orange)
 
 > 示例：西二旗 ∩ 国贸 —— 15 分钟「无共同可达区」、30 分钟「无共同可达区」、45 分钟 2.92 km²。
 > 两地直线约 20 公里，前两档碰不了头是正确答案，不是出错。
@@ -27,9 +27,11 @@
 
 依赖高德的路网与公交数据。
 
-**3. 全程使用 GCJ-02 坐标系，不做任何转换。**
+**3. 全程使用 GCJ-02 坐标系，转换只发生在入口。**
 
 地图、等时圈、几何运算、导出的 GeoJSON 全部是 GCJ-02（火星坐标）。**导出的文件直接当 WGS-84 用会有几百米偏移**，所以导出时每个要素的 `properties.crs` 都标了 `GCJ-02`。
+
+唯一的例外在定位功能：浏览器的 `navigator.geolocation` 返回 WGS-84，进来时会经 `src/geo/coord.ts` 转成 GCJ-02。不转换的话，你的位置会偏出几百米——市区里足够把你从一个地铁站挪到另一个。境外坐标原样返回，因为 GCJ-02 只在国境内定义，强行偏移会把本来正确的坐标弄错。
 
 ---
 
@@ -52,7 +54,7 @@ Key 从[高德开放平台](https://console.amap.com/dev/key/app)申请，类型
 
 ## 怎么用
 
-1. 在地图上点击，或用搜索框按地名添加起点
+1. 在地图上点击、用搜索框按地名添加，或点右下角的 ◎ 定位到当前位置
 2. 每个起点可以单独设公交策略（公交+地铁 / 只坐地铁 / 只坐公交）
 3. 选运算方式和时间档位
 4. 结果面积显示在左下角，可导出 GeoJSON
@@ -95,6 +97,7 @@ src/
 │  ├─ cache.ts           参数指纹缓存 + 在飞请求合并
 │  ├─ gate.ts            并发闸门（上限 4）+ 指数退避重试
 │  └─ index.ts           withCache(withGate(provider))
+├─ geo/                ← WGS-84 ↔ GCJ-02 转换、定位
 ├─ geometry/           ← 纯函数，不碰网络
 │  ├─ ops.ts             交集/并集/差集/归一化/简化
 │  └─ result.ts          面积格式化、档位可用性判定
@@ -127,7 +130,7 @@ src/
 ## 测试
 
 ```bash
-npm test    # 97 个测试
+npm test    # 121 个测试
 ```
 
 测试集中在几何运算层和 provider 转换层——逻辑密度最高、出错最不显眼的地方。全部是纯函数测试，不碰网络。
@@ -148,7 +151,7 @@ npm test    # 97 个测试
 
 **国内驾车/步行等时圈。** 高德无原生接口，需要自己实现：用距离测量 API（`/v3/distance`，单次最多 100 个起点对 1 个终点）反向铺网格点批量求耗时，再用 marching squares 插值等时线。一个城市 30 分钟驾车范围约需 20~30 次请求。
 
-**海外覆盖。** 接 OpenRouteService（支持 driving-car / foot-walking / cycling-regular，单次请求可传多起点多档位）。届时需要在 provider 层出口做 GCJ-02 ↔ WGS-84 转换——那是唯一需要动坐标的地方。
+**海外覆盖。** 接 OpenRouteService（支持 driving-car / foot-walking / cycling-regular，单次请求可传多起点多档位）。它的路网是 WGS-84，需要在 provider 出入口做坐标转换——`src/geo/coord.ts` 里的 `gcj02ToWgs84` 已经备好了，写定位功能时顺手做的。
 
 ## 文档
 
