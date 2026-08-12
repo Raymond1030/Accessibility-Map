@@ -3,6 +3,7 @@ import { loadAmap } from '../amap/loader'
 import { useStore } from '../state/store'
 import { cellKey } from '../types'
 import { computeBand } from '../state/compute'
+import { shouldAddOnMapClick, useIsMobile } from '../ui/responsive'
 import type { PolyFeature } from '../geometry/ops'
 import './MapView.css'
 
@@ -30,6 +31,14 @@ export function MapView() {
   const addOrigin = useStore((s) => s.addOrigin)
   const updateOrigin = useStore((s) => s.updateOrigin)
   const setFatalError = useStore((s) => s.setFatalError)
+  const pickingMode = useStore((s) => s.pickingMode)
+  const setPickingMode = useStore((s) => s.setPickingMode)
+  const isMobile = useIsMobile()
+
+  // 建图的 effect 只跑一次，click 闭包会锁死首次渲染的 isMobile/pickingMode。
+  // 用 ref 让回调始终读到当前值。
+  const clickGuardRef = useRef({ isMobile: false, picking: false })
+  clickGuardRef.current = { isMobile, picking: pickingMode }
 
   // 建图，只做一次
   useEffect(() => {
@@ -42,7 +51,11 @@ export function MapView() {
           center: [116.397, 39.909],
           viewMode: '2D',
         })
-        map.on('click', (e: any) => addOrigin([e.lnglat.getLng(), e.lnglat.getLat()], ''))
+        map.on('click', (e: any) => {
+          const { isMobile: mob, picking } = clickGuardRef.current
+          if (!shouldAddOnMapClick(mob, picking)) return
+          addOrigin([e.lnglat.getLng(), e.lnglat.getLat()], '')
+        })
         mapRef.current = map
       })
       .catch((err) => setFatalError(err instanceof Error ? err.message : String(err)))
@@ -52,6 +65,13 @@ export function MapView() {
       mapRef.current = null
     }
   }, [addOrigin, setFatalError])
+
+  // 高德不会自己感知容器尺寸变化，旋转屏幕后地图会拉伸
+  useEffect(() => {
+    const onResize = () => mapRef.current?.resize?.()
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   // 起点标记，可拖拽；dragend 才触发重算，dragging 不触发
   useEffect(() => {
@@ -130,5 +150,15 @@ export function MapView() {
     }
   }, [origins, cells, geoms, op, bandMode, globalThresholds, baseOriginId])
 
-  return <div className="map-view" ref={containerRef} />
+  return (
+    <div className="map-view-wrap">
+      <div className="map-view" ref={containerRef} />
+      {pickingMode && (
+        <div className="picking-hint">
+          点击地图选择起点
+          <button onClick={() => setPickingMode(false)}>取消</button>
+        </div>
+      )}
+    </div>
+  )
 }
