@@ -97,8 +97,11 @@ select { width: 100%; padding: 3px; border: 1px solid #d1d5db; border-radius: 4p
     padding-bottom: env(safe-area-inset-bottom);
   }
 
+  /* 露出的高度 = 把手高度。两者必须相等：
+     露出的部分如果多于把手，多出来那截看得见却点不动——
+     视觉上是一整块面板，实际只有顶部一条能点，真机上就表现为「点不了」。 */
   .sidebar.collapsed {
-    transform: translateY(calc(72vh - 90px));
+    transform: translateY(calc(72vh - 88px));
   }
 
   .drawer-handle {
@@ -106,12 +109,19 @@ select { width: 100%; padding: 3px; border: 1px solid #d1d5db; border-radius: 4p
     align-items: center;
     gap: 10px;
     width: 100%;
-    min-height: 56px;
-    padding: 8px 14px;
+    height: 88px;
+    padding: 14px 16px 8px;
     border: none;
     background: transparent;
     cursor: pointer;
     position: relative;
+    /* 折叠时整块都是可点区域，不要被内部元素抢走点击 */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* 折叠时盖住把手下方的内容，避免露出半截「起点」标题 */
+  .sidebar.collapsed .drawer-handle {
+    background: #f7f7f8;
   }
 
   /* 顶部那条小横杠，提示这里可以点 */

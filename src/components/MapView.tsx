@@ -129,7 +129,8 @@ export function MapView() {
     resultLayerRef.current = []
 
     const visibleIds = origins.filter((o) => o.visible).map((o) => o.id)
-    if (visibleIds.length < 2) return
+    // 单个起点也要画结果层——那时它就是这个点自己的可达范围
+    if (visibleIds.length < 1) return
     const bands = bandMode === 'paired' ? globalThresholds : [globalThresholds[0]]
 
     for (const minutes of bands) {

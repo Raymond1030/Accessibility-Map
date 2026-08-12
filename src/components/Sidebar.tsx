@@ -44,7 +44,7 @@ export function Sidebar() {
   // 折叠时只露这一行，所以要挑最有信息量的那档：优先第一个算出结果的，
   // 否则退回第一档的状态描述。没有它，折叠状态下用户完全不知道发生了什么。
   const summary = (() => {
-    if (visibleIds.length < 2) return '至少需要两个起点'
+    if (visibleIds.length === 0) return '添加一个起点开始'
     const hit = results.find((r) => r.result.kind === 'ok')
     if (hit && hit.result.kind === 'ok') {
       return `${hit.minutes} 分钟 · ${formatArea(hit.result.areaSqM)}`
@@ -141,16 +141,20 @@ export function Sidebar() {
       </section>
 
       <section className="pane controls">
-        <h2>运算</h2>
-        <div className="chips">
-          {(Object.keys(OP_LABEL) as SetOp[]).map((op) => (
-            <button
-              key={op}
-              className={s.op === op ? 'chip on' : 'chip'}
-              onClick={() => s.setOp(op)}
-            >{OP_LABEL[op]}</button>
-          ))}
-        </div>
+        <h2>{visibleIds.length >= 2 ? '运算' : '时间档位'}</h2>
+        {/* 只有一个起点时三种运算结果完全相同（都等于它自己的可达范围），
+            露出切换只会让人以为选错了 */}
+        {visibleIds.length >= 2 && (
+          <div className="chips">
+            {(Object.keys(OP_LABEL) as SetOp[]).map((op) => (
+              <button
+                key={op}
+                className={s.op === op ? 'chip on' : 'chip'}
+                onClick={() => s.setOp(op)}
+              >{OP_LABEL[op]}</button>
+            ))}
+          </div>
+        )}
 
         <div className="chips">
           <button
@@ -179,7 +183,7 @@ export function Sidebar() {
           </div>
         )}
 
-        {s.op === 'difference' && (
+        {s.op === 'difference' && visibleIds.length >= 2 && (
           <label className="row">
             基准点
             <select
@@ -194,10 +198,10 @@ export function Sidebar() {
       </section>
 
       <section className="pane results">
-        <h2>结果</h2>
-        {visibleIds.length < 2 && <p className="hint">至少需要两个参与运算的起点</p>}
+        <h2>{visibleIds.length === 1 ? '可达范围' : '结果'}</h2>
+        {visibleIds.length === 0 && <p className="hint">添加起点后显示可达范围</p>}
 
-        {visibleIds.length >= 2 && results.map(({ minutes, result }) => (
+        {visibleIds.length >= 1 && results.map(({ minutes, result }) => (
           <div className="result-row" key={minutes}>
             <b>{minutes} 分钟</b>
             {result.kind === 'ok' && <span className="ok">{formatArea(result.areaSqM)}</span>}

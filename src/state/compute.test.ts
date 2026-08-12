@@ -131,6 +131,29 @@ describe('computeBand', () => {
     expect(r.kind).toBe('unavailable')
   })
 
+  it('单个起点直接给出它自己的可达范围——不需要凑够两个点才有结果', () => {
+    const one = new Map<string, PolyFeature | null>([['a@30', square(0, 0, 2)]])
+    const oneCell = new Map<string, CellStatus>([['a@30', 'ok']])
+    for (const op of ['intersect', 'union', 'difference'] as const) {
+      const r = computeBand({
+        op, minutes: 30, originIds: ['a'],
+        cells: oneCell, geoms: one, baseOriginId: 'a',
+      })
+      expect(r.kind, `${op} 单点应有结果`).toBe('ok')
+      if (r.kind === 'ok') expect(r.areaSqM).toBeGreaterThan(0)
+    }
+  })
+
+  it('单个起点无公交覆盖时结果为空，而非报错', () => {
+    const r = computeBand({
+      op: 'intersect', minutes: 30, originIds: ['a'],
+      cells: new Map<string, CellStatus>([['a@30', 'empty']]),
+      geoms: new Map<string, PolyFeature | null>([['a@30', null]]),
+      baseOriginId: 'a',
+    })
+    expect(r).toEqual({ kind: 'empty' })
+  })
+
   it('仍在加载时返回 loading', () => {
     const loading = new Map<string, CellStatus>([['a@30', 'ok'], ['b@30', 'loading']])
     const r = computeBand({
