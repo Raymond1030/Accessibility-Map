@@ -5,7 +5,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
-    "types": ["vite/client", "@amap/amap-jsapi-types"],
+    "types": ["vite/client", "@amap/amap-jsapi-types", "node"],
 
     "strict": true,
     "noUnusedLocals": true,
