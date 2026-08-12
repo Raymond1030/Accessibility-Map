@@ -18,8 +18,13 @@ export function areaOf(f: PolyFeature): number {
   return area(f)
 }
 
+/**
+ * 阈值定在 1 公顷而非 1 km²：等时圈的面积普遍是几十万平方米，
+ * 「490630 m²」得数位数才知道是半个平方公里，而「0.49 km²」一眼可读。
+ * 低于 1 公顷时数字本身已经够短，用 m² 反而更直观。
+ */
 export function formatArea(sqm: number): string {
-  if (sqm >= 1_000_000) return `${(sqm / 1_000_000).toFixed(2)} km²`
+  if (sqm >= 10_000) return `${(sqm / 1_000_000).toFixed(2)} km²`
   return `${Math.round(sqm)} m²`
 }
 

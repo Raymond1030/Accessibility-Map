@@ -9,7 +9,15 @@ describe('formatArea', () => {
     expect(formatArea(12_400_000)).toBe('12.40 km²')
   })
 
-  it('小面积用平方米', () => {
+  it('不足 1 km² 也用 km²——「490630 m²」要数位数才知道是半个平方公里', () => {
+    expect(formatArea(490_630)).toBe('0.49 km²')
+  })
+
+  it('刚过一公顷就换成 km²', () => {
+    expect(formatArea(10_000)).toBe('0.01 km²')
+  })
+
+  it('小于一公顷才用平方米，此时数字本身够短', () => {
     expect(formatArea(8500)).toBe('8500 m²')
   })
 
