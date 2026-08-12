@@ -4,6 +4,7 @@ import { computeBand } from '../state/compute'
 import { formatArea } from '../geometry/result'
 import { downloadGeoJSON, type ExportItem } from '../export'
 import { cellKey, MAX_MINUTES, type SetOp, type TransitPolicy } from '../types'
+import { useIsMobile } from '../ui/responsive'
 import './Sidebar.css'
 
 const OP_LABEL: Record<SetOp, string> = {
@@ -38,11 +39,43 @@ export function Sidebar() {
 
   const nameOf = (id: string) => s.origins.find((o) => o.id === id)?.label ?? id
 
+  const isMobile = useIsMobile()
+
+  // 折叠时只露这一行，所以要挑最有信息量的那档：优先第一个算出结果的，
+  // 否则退回第一档的状态描述。没有它，折叠状态下用户完全不知道发生了什么。
+  const summary = (() => {
+    if (visibleIds.length < 2) return '至少需要两个起点'
+    const hit = results.find((r) => r.result.kind === 'ok')
+    if (hit && hit.result.kind === 'ok') {
+      return `${hit.minutes} 分钟 · ${formatArea(hit.result.areaSqM)}`
+    }
+    const first = results[0]
+    if (!first) return '选择时间档位'
+    if (first.result.kind === 'loading') return '计算中'
+    if (first.result.kind === 'empty') return `${first.minutes} 分钟 · ${EMPTY_TEXT[s.op]}`
+    return '数据不全，无法计算'
+  })()
+
   return (
-    <aside className="sidebar">
+    <aside className={s.drawerOpen ? 'sidebar' : 'sidebar collapsed'}>
+      {/* 只在移动端显示（由 CSS 控制），点击切换抽屉两档 */}
+      <button className="drawer-handle" onClick={s.toggleDrawer}>
+        <span className="grip" />
+        <span className="summary">{summary}</span>
+        <span className="caret">{s.drawerOpen ? '▾' : '▴'}</span>
+      </button>
+
       <section className="pane origins">
         <h2>起点</h2>
         <SearchBox />
+        {isMobile && (
+          <button
+            className={s.pickingMode ? 'pick-btn on' : 'pick-btn'}
+            onClick={() => s.setPickingMode(!s.pickingMode)}
+          >
+            {s.pickingMode ? '选点中，点击地图落点' : '＋ 在地图上加点'}
+          </button>
+        )}
         {s.origins.length === 0 && <p className="hint">在地图上点击，或搜索地点来添加起点</p>}
 
         {s.origins.map((o) => (
