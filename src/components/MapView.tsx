@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { loadAmap } from '../amap/loader'
 import { useStore } from '../state/store'
 import { cellKey } from '../types'
 import { computeBand } from '../state/compute'
 import { shouldAddOnMapClick, useIsMobile } from '../ui/responsive'
+import { locateCurrentPosition, OUT_OF_CHINA_HINT } from '../geo/locate'
 import type { PolyFeature } from '../geometry/ops'
 import './MapView.css'
 
@@ -39,6 +40,25 @@ export function MapView() {
   // 用 ref 让回调始终读到当前值。
   const clickGuardRef = useRef({ isMobile: false, picking: false })
   clickGuardRef.current = { isMobile, picking: pickingMode }
+
+  const [locating, setLocating] = useState(false)
+  const [locateMsg, setLocateMsg] = useState<string | null>(null)
+
+  async function handleLocate() {
+    setLocating(true)
+    setLocateMsg(null)
+    try {
+      const r = await locateCurrentPosition()
+      addOrigin(r.lngLat, '我的位置')
+      // 境外定位成功但高德没有当地公交数据，结果会是「无可达数据」，
+      // 看起来像出错。先说清楚，省得对着空结果困惑。
+      if (r.outsideChina) setLocateMsg(OUT_OF_CHINA_HINT)
+    } catch (e) {
+      setLocateMsg(e instanceof Error ? e.message : String(e))
+    } finally {
+      setLocating(false)
+    }
+  }
 
   // 建图，只做一次
   useEffect(() => {
@@ -173,6 +193,23 @@ export function MapView() {
         <div className="picking-hint">
           点击地图选择起点
           <button onClick={() => setPickingMode(false)}>取消</button>
+        </div>
+      )}
+
+      <button
+        className="locate-btn"
+        onClick={() => void handleLocate()}
+        disabled={locating}
+        title="定位到我的位置"
+        aria-label="定位到我的位置"
+      >
+        {locating ? '···' : '◎'}
+      </button>
+
+      {locateMsg && (
+        <div className="locate-msg">
+          {locateMsg}
+          <button onClick={() => setLocateMsg(null)}>知道了</button>
         </div>
       )}
     </div>

@@ -38,3 +38,56 @@
   cursor: pointer;
   font-size: 13px;
 }
+
+.locate-btn {
+  position: absolute;
+  right: 14px;
+  bottom: 24px;
+  z-index: 200;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #d1d5db;
+  border-radius: 50%;
+  background: #fff;
+  color: #111827;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+}
+.locate-btn:disabled { color: #9ca3af; cursor: default; }
+
+.locate-msg {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 80px;
+  z-index: 210;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(17, 24, 39, .94);
+  color: #fff;
+  font: 13px/1.5 system-ui, -apple-system, "PingFang SC", sans-serif;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, .25);
+}
+
+.locate-msg button {
+  flex: none;
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, .35);
+  border-radius: 6px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  /* 抽屉折叠时露出 88px，定位按钮要抬到它上面 */
+  .locate-btn { bottom: 104px; }
+  .locate-msg { bottom: 160px; }
+}
