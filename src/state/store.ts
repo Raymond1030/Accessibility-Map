@@ -18,6 +18,8 @@ type State = {
   geoms: Map<string, PolyFeature | null>
   errors: Map<string, string>
   fatalError: string | null
+  drawerOpen: boolean
+  pickingMode: boolean
 
   addOrigin: (lngLat: [number, number], label: string) => void
   removeOrigin: (id: string) => void
@@ -28,6 +30,9 @@ type State = {
   setOp: (op: SetOp) => void
   setBaseOrigin: (id: string | null) => void
   setFatalError: (msg: string | null) => void
+  setDrawerOpen: (open: boolean) => void
+  toggleDrawer: () => void
+  setPickingMode: (on: boolean) => void
   refresh: () => Promise<void>
   retryCell: (originId: string, minutes: number) => Promise<void>
 }
@@ -42,6 +47,9 @@ export const useStore = create<State>((set, get) => ({
   geoms: new Map(),
   errors: new Map(),
   fatalError: null,
+  // 初始折叠：移动端首屏应该先看到地图。桌面端 CSS 不读这个值
+  drawerOpen: false,
+  pickingMode: false,
 
   addOrigin: (lngLat, label) => {
     const origins = get().origins
@@ -59,6 +67,10 @@ export const useStore = create<State>((set, get) => ({
     set({
       origins: [...origins, next],
       baseOriginId: get().baseOriginId ?? id,
+      // 加点后总是让用户看到地图：收起抽屉、退出选点模式。
+      // 点击加点和搜索加点都走这里，行为自然统一。
+      drawerOpen: false,
+      pickingMode: false,
     })
     void get().refresh()
   },
@@ -83,6 +95,9 @@ export const useStore = create<State>((set, get) => ({
   setOp: (op) => set({ op }),                    // 切换运算不触发请求，纯几何重算
   setBaseOrigin: (baseOriginId) => set({ baseOriginId }),
   setFatalError: (fatalError) => set({ fatalError }),
+  setDrawerOpen: (drawerOpen) => set({ drawerOpen }),
+  toggleDrawer: () => set({ drawerOpen: !get().drawerOpen }),
+  setPickingMode: (pickingMode) => set({ pickingMode }),
 
   refresh: async () => {
     const { origins, bandMode, globalThresholds } = get()
