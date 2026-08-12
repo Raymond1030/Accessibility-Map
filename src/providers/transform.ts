@@ -28,3 +28,44 @@ export function boundsToPolygons(bounds: AmapPath[]): PolyFeature[] {
 export function boundsToNormalizedFeature(bounds: AmapPath[]): PolyFeature | null {
   return normalize(boundsToPolygons(bounds))
 }
+
+export type ArrivalRangeResult =
+  | { ok: true; bounds: AmapPath[] }
+  | { ok: false; error: string }
+
+/**
+ * 判定 ArrivalRange 回调的成败。
+ *
+ * 不能只看 status —— 实测高德在**有数据时也会返回 `no_data`**，
+ * 同时 infocode 是 10000（成功）、bounds 里有几十块多边形。
+ * 只认 `status === 'complete'` 会把正常的成功响应当成失败丢掉。
+ *
+ * 所以以实际内容为准：
+ *   result 是字符串        → 那是错误码（如 INVALID_USER_DOMAIN）
+ *   infocode 存在且非 10000 → 失败，用 info 作为错误信息
+ *   其余                    → 成功，bounds 为空表示该点周边确实无公交覆盖
+ */
+export function interpretArrivalRangeResult(
+  status: string,
+  result: unknown,
+): ArrivalRangeResult {
+  if (typeof result === 'string') {
+    return { ok: false, error: result }
+  }
+
+  if (!result || typeof result !== 'object') {
+    return { ok: false, error: status || 'UNKNOWN_ERROR' }
+  }
+
+  const r = result as { bounds?: AmapPath[]; info?: string; infocode?: string }
+
+  if (r.infocode && r.infocode !== '10000') {
+    return { ok: false, error: r.info ?? r.infocode }
+  }
+
+  if (status === 'error') {
+    return { ok: false, error: r.info ?? status }
+  }
+
+  return { ok: true, bounds: r.bounds ?? [] }
+}

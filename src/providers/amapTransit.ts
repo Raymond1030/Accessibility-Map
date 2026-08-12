@@ -1,5 +1,7 @@
 import { loadAmap } from '../amap/loader'
-import { boundsToNormalizedFeature, type AmapPath } from './transform'
+import {
+  boundsToNormalizedFeature, interpretArrivalRangeResult, type AmapPath,
+} from './transform'
 import type { IsochroneProvider } from './cache'
 import { MAX_MINUTES } from '../types'
 
@@ -30,9 +32,10 @@ export function createAmapTransitProvider(): IsochroneProvider {
         arrivalRange.search(
           req.lngLat,
           req.minutes,
-          (status: string, result: { bounds?: AmapPath[]; info?: string }) => {
-            if (status === 'complete') resolve(result.bounds ?? [])
-            else reject(new Error(`高德到达圈请求失败：${result?.info ?? status}`))
+          (status: string, result: unknown) => {
+            const interpreted = interpretArrivalRangeResult(status, result)
+            if (interpreted.ok) resolve(interpreted.bounds)
+            else reject(new Error(`高德到达圈请求失败：${interpreted.error}`))
           },
           policy,
         )
