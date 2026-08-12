@@ -73,6 +73,21 @@ export function MapView() {
     return () => window.removeEventListener('resize', onResize)
   }, [])
 
+  // 新增起点时把视野移过去。
+  // 不这样的话，在深圳搜个点、地图却还停在默认的北京——加点后收起抽屉
+  // 本是为了让人看等时圈，结果看到的是一片无关区域。
+  // 只在「起点变多」时移动：用户手动平移缩放后不该被强行拉回。
+  const prevOriginCountRef = useRef(0)
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    const grew = origins.length > prevOriginCountRef.current
+    prevOriginCountRef.current = origins.length
+    if (!grew) return
+    const last = origins[origins.length - 1]
+    if (last) map.setZoomAndCenter(12, last.lngLat)
+  }, [origins])
+
   // 起点标记，可拖拽；dragend 才触发重算，dragging 不触发
   useEffect(() => {
     const map = mapRef.current
