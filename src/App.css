@@ -7,3 +7,10 @@ html, body, #root { height: 100%; margin: 0; }
   border-bottom: 1px solid #fecaca;
   font: 13px system-ui, -apple-system, "PingFang SC", sans-serif;
 }
+
+@media (max-width: 768px) {
+  /* 地图占满整个 app-body，抽屉用 fixed 浮在它上面。
+     侧栏不再参与 flex 排布，所以这里不用改 flex-direction。 */
+  .app-body { position: relative; }
+  .map-view-wrap { position: absolute; inset: 0; }
+}
