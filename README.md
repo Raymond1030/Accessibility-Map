@@ -4,7 +4,12 @@
 
 用来回答这类问题：**我们俩 30 分钟内都能到的地方在哪？** 几个门店的服务范围加起来覆盖了哪里？只有 A 能到、B 到不了的区域是哪些？
 
-![状态](https://img.shields.io/badge/tests-62%20passing-brightgreen) ![状态](https://img.shields.io/badge/公交-仅支持-blue) ![状态](https://img.shields.io/badge/坐标系-GCJ--02-orange)
+**在线体验 → https://raymond1030.github.io/Accessibility-Map/**
+
+![状态](https://img.shields.io/badge/tests-92%20passing-brightgreen) ![状态](https://img.shields.io/badge/公交-仅支持-blue) ![状态](https://img.shields.io/badge/坐标系-GCJ--02-orange)
+
+> 示例：西二旗 ∩ 国贸 —— 15 分钟「无共同可达区」、30 分钟「无共同可达区」、45 分钟 2.92 km²。
+> 两地直线约 20 公里，前两档碰不了头是正确答案，不是出错。
 
 ---
 
@@ -114,12 +119,22 @@ src/
 ## 测试
 
 ```bash
-npm test    # 62 个测试
+npm test    # 92 个测试
 ```
 
 测试集中在几何运算层和 provider 转换层——逻辑密度最高、出错最不显眼的地方。全部是纯函数测试，不碰网络。
 
 `amapTransit.ts` 和 UI 组件没有单元测试：可测逻辑已经抽到 `transform.ts` 了，剩下的是对浏览器全局 `AMap` 的薄封装，为外部地图 SDK 搭 mock 的收益低于成本。
+
+### 三个只有真实环境能暴露的坑
+
+单元测试用的 fixture 是自己造的，造的时候基于什么假设，测出来就还是那个假设。这三个都是上线实测才发现的：
+
+**1. `ArrivalRange` 的回调可能永远不触发。** 域名未授权时它静默失败。provider 用 Promise 包装回调，回调不来就是永久 pending——格子卡在「计算中」，无法重试，而且**并发闸门名额永不释放**，几个这样的请求就能把闸门整个堵死。现在有 `withTimeout` 包在闸门内层（包外层无效，闸门内部照样挂着）。
+
+**2. 有数据时 `status` 也可能是 `no_data`。** 同时 `infocode` 是 10000（成功）、`bounds` 里有几十块多边形。只认 `status === 'complete'` 会把正常成功当失败丢掉。现在以响应内容判定成败。
+
+**3. `bounds` 的真实结构是 `bounds[块][环][点]`，点是 `["116.3069","40.052399"]` 字符串数组。** 不是文档暗示的两层 `{lng,lat}`。按错误结构解析的结果是什么都提取不到，于是被判成「周边无公交可达数据」——**一个解析错误被伪装成了合法结论**，比直接报错难发现得多。现在的解析器靠递归识别「点」来定位环，不假定嵌套深度，两种点表示都兼容。
 
 ## 后续阶段
 
