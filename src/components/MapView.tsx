@@ -1,26 +1,35 @@
 import { useEffect, useRef, useState } from 'react'
-import { loadAmap } from '../amap/loader'
+import mapboxgl from 'mapbox-gl'
+import 'mapbox-gl/dist/mapbox-gl.css'
+import { getMapboxToken } from '../mapbox/token'
 import { useStore } from '../state/store'
 import { cellKey } from '../types'
 import { computeBand } from '../state/compute'
 import { shouldAddOnMapClick, useIsMobile } from '../ui/responsive'
-import { locateCurrentPosition, OUT_OF_CHINA_HINT } from '../geo/locate'
+import { locateCurrentPosition } from '../geo/locate'
 import type { PolyFeature } from '../geometry/ops'
+import type { FeatureCollection } from 'geojson'
 import './MapView.css'
 
-/** GeoJSON 环 → 高德 path。坐标已经是 GCJ-02，直接用 */
-function ringsOf(f: PolyFeature): number[][][] {
-  return f.geometry.type === 'Polygon'
-    ? [f.geometry.coordinates[0] as number[][]]
-    : (f.geometry.coordinates as number[][][][]).map((poly) => poly[0] as number[][])
+const EMPTY_FC: FeatureCollection = { type: 'FeatureCollection', features: [] }
+
+/** Mapbox streets 在中国区默认英文/拼音标注，逐层改成优先取中文 */
+function applyChineseLabels(map: mapboxgl.Map): void {
+  for (const layer of map.getStyle()?.layers ?? []) {
+    if (layer.type !== 'symbol') continue
+    try {
+      map.setLayoutProperty(layer.id, 'text-field', [
+        'coalesce', ['get', 'name_zh-Hans'], ['get', 'name_zh-Hant'], ['get', 'name'],
+      ])
+    } catch { /* 个别图层不支持覆盖，跳过 */ }
+  }
 }
 
 export function MapView() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const mapRef = useRef<any>(null)
-  const originLayerRef = useRef<any[]>([])
-  const resultLayerRef = useRef<any[]>([])
-  const markerRef = useRef<any[]>([])
+  const mapRef = useRef<mapboxgl.Map | null>(null)
+  const markersRef = useRef<mapboxgl.Marker[]>([])
+  const [mapReady, setMapReady] = useState(false)
 
   const origins = useStore((s) => s.origins)
   const cells = useStore((s) => s.cells)
@@ -36,8 +45,7 @@ export function MapView() {
   const setPickingMode = useStore((s) => s.setPickingMode)
   const isMobile = useIsMobile()
 
-  // 建图的 effect 只跑一次，click 闭包会锁死首次渲染的 isMobile/pickingMode。
-  // 用 ref 让回调始终读到当前值。
+  // 建图 effect 只跑一次，click 闭包会锁死首次渲染的状态，用 ref 兜住
   const clickGuardRef = useRef({ isMobile: false, picking: false })
   clickGuardRef.current = { isMobile, picking: pickingMode }
 
@@ -50,9 +58,6 @@ export function MapView() {
     try {
       const r = await locateCurrentPosition()
       addOrigin(r.lngLat, '我的位置')
-      // 境外定位成功但高德没有当地公交数据，结果会是「无可达数据」，
-      // 看起来像出错。先说清楚，省得对着空结果困惑。
-      if (r.outsideChina) setLocateMsg(OUT_OF_CHINA_HINT)
     } catch (e) {
       setLocateMsg(e instanceof Error ? e.message : String(e))
     } finally {
@@ -62,41 +67,83 @@ export function MapView() {
 
   // 建图，只做一次
   useEffect(() => {
-    let disposed = false
-    loadAmap()
-      .then((AMapNS) => {
-        if (disposed || !containerRef.current) return
-        const map = new AMapNS.Map(containerRef.current, {
-          zoom: 11,
-          center: [116.397, 39.909],
-          viewMode: '2D',
-        })
-        map.on('click', (e: any) => {
-          const { isMobile: mob, picking } = clickGuardRef.current
-          if (!shouldAddOnMapClick(mob, picking)) return
-          addOrigin([e.lnglat.getLng(), e.lnglat.getLat()], '')
-        })
-        mapRef.current = map
+    if (!containerRef.current) return
+    let map: mapboxgl.Map
+    try {
+      mapboxgl.accessToken = getMapboxToken()
+      map = new mapboxgl.Map({
+        container: containerRef.current,
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [113.9435, 22.5333],
+        zoom: 11,
+        attributionControl: false,
       })
-      .catch((err) => setFatalError(err instanceof Error ? err.message : String(err)))
-    return () => {
-      disposed = true
-      mapRef.current?.destroy?.()
-      mapRef.current = null
+    } catch (e) {
+      setFatalError(e instanceof Error ? e.message : String(e))
+      return
     }
-  }, [addOrigin, setFatalError])
 
-  // 高德不会自己感知容器尺寸变化，旋转屏幕后地图会拉伸
-  useEffect(() => {
-    const onResize = () => mapRef.current?.resize?.()
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
+    map.addControl(new mapboxgl.AttributionControl({ compact: true }))
+
+    map.on('style.load', () => applyChineseLabels(map))
+
+    map.on('load', () => {
+      // source/layer 必须在 load 后添加。两个空 source，渲染 effect 只 setData
+      map.addSource('origins-iso', { type: 'geojson', data: EMPTY_FC })
+      map.addSource('result-iso', { type: 'geojson', data: EMPTY_FC })
+
+      map.addLayer({
+        id: 'origins-fill',
+        type: 'fill',
+        source: 'origins-iso',
+        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.12 },
+      })
+      map.addLayer({
+        id: 'origins-line',
+        type: 'line',
+        source: 'origins-iso',
+        paint: { 'line-color': ['get', 'color'], 'line-opacity': 0.5, 'line-width': 1 },
+      })
+      map.addLayer({
+        id: 'result-fill',
+        type: 'fill',
+        source: 'result-iso',
+        paint: { 'fill-color': '#111827', 'fill-opacity': 0.3 },
+      })
+      map.addLayer({
+        id: 'result-line',
+        type: 'line',
+        source: 'result-iso',
+        paint: { 'line-color': '#f59e0b', 'line-width': 3 },
+      })
+
+      setMapReady(true)
+    })
+
+    map.on('click', (e) => {
+      const { isMobile: mob, picking } = clickGuardRef.current
+      if (!shouldAddOnMapClick(mob, picking)) return
+      addOrigin([e.lngLat.lng, e.lngLat.lat], '')
+    })
+
+    map.on('error', (e) => {
+      const msg = e.error?.message ?? ''
+      // 401/403 类的加载失败是配置问题，其余（瓦片超时等）不弹全局错误
+      if (/401|403|Unauthorized|Forbidden/i.test(msg)) {
+        setFatalError(`Mapbox 底图加载失败：${msg}`)
+      }
+    })
+
+    mapRef.current = map
+    return () => {
+      map.remove()
+      mapRef.current = null
+      setMapReady(false)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // 新增起点时把视野移过去。
-  // 不这样的话，在深圳搜个点、地图却还停在默认的北京——加点后收起抽屉
-  // 本是为了让人看等时圈，结果看到的是一片无关区域。
-  // 只在「起点变多」时移动：用户手动平移缩放后不该被强行拉回。
+  // 新增起点时把视野移过去；只在数量增加时移动，手动平移后不被拉回
   const prevOriginCountRef = useRef(0)
   useEffect(() => {
     const map = mapRef.current
@@ -105,24 +152,22 @@ export function MapView() {
     prevOriginCountRef.current = origins.length
     if (!grew) return
     const last = origins[origins.length - 1]
-    if (last) map.setZoomAndCenter(12, last.lngLat)
+    if (last) map.flyTo({ center: last.lngLat, zoom: 12 })
   }, [origins])
 
-  // 起点标记，可拖拽；dragend 才触发重算，dragging 不触发
+  // 起点标记，可拖拽；dragend 才触发重算
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
-    markerRef.current.forEach((m) => map.remove(m))
-    markerRef.current = origins.map((o) => {
-      const marker = new (window as any).AMap.Marker({
-        position: o.lngLat,
-        draggable: true,
-        title: o.label,
+    markersRef.current.forEach((m) => m.remove())
+    markersRef.current = origins.map((o) => {
+      const marker = new mapboxgl.Marker({ draggable: true, color: o.color })
+        .setLngLat(o.lngLat)
+        .addTo(map)
+      marker.on('dragend', () => {
+        const p = marker.getLngLat()
+        updateOrigin(o.id, { lngLat: [p.lng, p.lat] })
       })
-      marker.on('dragend', (e: any) => {
-        updateOrigin(o.id, { lngLat: [e.lnglat.getLng(), e.lnglat.getLat()] })
-      })
-      map.add(marker)
       return marker
     })
   }, [origins, updateOrigin])
@@ -130,65 +175,44 @@ export function MapView() {
   // 各点原始等时圈：半透明铺底
   useEffect(() => {
     const map = mapRef.current
-    if (!map) return
-    originLayerRef.current.forEach((p) => map.remove(p))
-    originLayerRef.current = []
-
+    if (!map || !mapReady) return
+    const features: PolyFeature[] = []
     for (const o of origins) {
       if (!o.visible) continue
       const thresholds = bandMode === 'paired' ? globalThresholds : o.thresholds
       for (const minutes of thresholds) {
         const geom = geoms.get(cellKey(o.id, minutes))
         if (!geom) continue
-        for (const ring of ringsOf(geom)) {
-          const poly = new (window as any).AMap.Polygon({
-            path: ring,
-            fillColor: o.color,
-            fillOpacity: 0.12,
-            strokeColor: o.color,
-            strokeOpacity: 0.5,
-            strokeWeight: 1,
-          })
-          map.add(poly)
-          originLayerRef.current.push(poly)
-        }
+        features.push({ ...geom, properties: { ...geom.properties, color: o.color } })
       }
     }
-  }, [origins, geoms, bandMode, globalThresholds])
+    ;(map.getSource('origins-iso') as mapboxgl.GeoJSONSource)
+      .setData({ type: 'FeatureCollection', features })
+  }, [origins, geoms, bandMode, globalThresholds, mapReady])
 
   // 运算结果：高对比压在最上层
   useEffect(() => {
     const map = mapRef.current
-    if (!map) return
-    resultLayerRef.current.forEach((p) => map.remove(p))
-    resultLayerRef.current = []
-
+    if (!map || !mapReady) return
     const visibleIds = origins.filter((o) => o.visible).map((o) => o.id)
-    // 单个起点也要画结果层——那时它就是这个点自己的可达范围
-    if (visibleIds.length < 1) return
-    const bands = bandMode === 'paired' ? globalThresholds : [globalThresholds[0]]
+    const features: PolyFeature[] = []
 
-    for (const minutes of bands) {
-      const r = computeBand({ op, minutes, originIds: visibleIds, cells, geoms, baseOriginId })
-      if (r.kind !== 'ok') continue
-      for (const ring of ringsOf(r.geometry)) {
-        const poly = new (window as any).AMap.Polygon({
-          path: ring,
-          fillColor: '#111827',
-          fillOpacity: 0.3,
-          strokeColor: '#f59e0b',
-          strokeWeight: 3,
-          zIndex: 100,
-        })
-        map.add(poly)
-        resultLayerRef.current.push(poly)
+    if (visibleIds.length >= 1) {
+      const bands = bandMode === 'paired' ? globalThresholds : [globalThresholds[0]]
+      for (const minutes of bands) {
+        const r = computeBand({ op, minutes, originIds: visibleIds, cells, geoms, baseOriginId })
+        if (r.kind === 'ok') features.push(r.geometry)
       }
     }
-  }, [origins, cells, geoms, op, bandMode, globalThresholds, baseOriginId])
+
+    ;(map.getSource('result-iso') as mapboxgl.GeoJSONSource)
+      .setData({ type: 'FeatureCollection', features })
+  }, [origins, cells, geoms, op, bandMode, globalThresholds, baseOriginId, mapReady])
 
   return (
     <div className="map-view-wrap">
       <div className="map-view" ref={containerRef} />
+
       {pickingMode && (
         <div className="picking-hint">
           点击地图选择起点

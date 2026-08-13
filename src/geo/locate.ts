@@ -1,9 +1,4 @@
-import { wgs84ToGcj02, outOfChina } from './coord'
-
 export const GEO_UNSUPPORTED = '这个浏览器不支持定位，请用搜索加点。'
-
-export const OUT_OF_CHINA_HINT =
-  '当前位置不在中国大陆，本工具只支持国内公交数据，可能查不到可达范围。'
 
 /**
  * 把 GeolocationPositionError 翻译成能照着做的中文。
@@ -25,19 +20,15 @@ export function describeGeolocationError(err: { code: number; message: string })
 }
 
 export type LocateResult = {
-  /** 已转换为 GCJ-02，可直接用于高德 */
+  /** WGS-84——浏览器原生坐标系，与 Mapbox 一致，无需转换 */
   lngLat: [number, number]
   /** 定位精度，米 */
   accuracy: number
-  /** 人在中国境外时为 true，此时坐标未做偏移转换 */
-  outsideChina: boolean
 }
 
 /**
- * 取当前位置并转成 GCJ-02。
- *
- * 浏览器返回的是 WGS-84，直接交给高德会偏出几百米，
- * 所以这里必须过一道 wgs84ToGcj02。
+ * 取当前位置。浏览器与 Mapbox 都是 WGS-84，直接透传。
+ * （高德时代这里要过一道 wgs84ToGcj02，迁移后那是反向错误。）
  */
 export function locateCurrentPosition(): Promise<LocateResult> {
   return new Promise((resolve, reject) => {
@@ -48,11 +39,9 @@ export function locateCurrentPosition(): Promise<LocateResult> {
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const wgs: [number, number] = [pos.coords.longitude, pos.coords.latitude]
         resolve({
-          lngLat: wgs84ToGcj02(wgs),
+          lngLat: [pos.coords.longitude, pos.coords.latitude],
           accuracy: pos.coords.accuracy,
-          outsideChina: outOfChina(wgs[0], wgs[1]),
         })
       },
       (err) => reject(new Error(describeGeolocationError(err))),

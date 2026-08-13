@@ -1,7 +1,13 @@
 import { useState } from 'react'
-import { loadAmap } from '../amap/loader'
-import { isConfigError, describeConfigError } from '../amap/errors'
+import { getMapboxToken } from '../mapbox/token'
 import { useStore } from '../state/store'
+
+type GeocodeFeature = {
+  center: [number, number]
+  text_zh?: string
+  text?: string
+  place_name_zh?: string
+}
 
 export function SearchBox() {
   const [q, setQ] = useState('')
@@ -15,32 +21,31 @@ export function SearchBox() {
     setBusy(true)
     setErr(null)
     try {
-      const AMapNS = await loadAmap()
-      const ps = new (AMapNS as any).PlaceSearch({ pageSize: 1 })
-      const poi = await new Promise<any>((resolve, reject) => {
-        ps.search(q, (status: string, result: any) => {
-          if (status === 'complete' && result.poiList?.pois?.length) {
-            resolve(result.poiList.pois[0])
-            return
-          }
-          // 失败时 result 可能是错误码字符串（如 INVALID_USER_DOMAIN），
-          // 一律报「没有找到这个地点」会把配置问题伪装成搜索无结果，
-          // 让人对着正确的地名反复重试。
-          const raw = typeof result === 'string' ? result : result?.info
-          if (status === 'error' || (raw && raw !== 'OK')) {
-            reject(new Error(`搜索失败：${raw ?? status}`))
-          } else {
-            reject(new Error('没有找到这个地点'))
-          }
+      const url =
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q.trim())}.json?` +
+        new URLSearchParams({
+          access_token: getMapboxToken(),
+          language: 'zh',
+          country: 'cn',
+          limit: '1',
         })
-      })
-      addOrigin([poi.location.lng, poi.location.lat], poi.name)
+      const res = await fetch(url)
+      if (res.status === 401 || res.status === 403) {
+        // token 层面的失败影响整个应用，升为全局提示
+        const msg = `Mapbox token 无效或权限不足（HTTP ${res.status}）`
+        setFatalError(msg)
+        throw new Error(msg)
+      }
+      if (!res.ok) throw new Error(`搜索失败（HTTP ${res.status}）`)
+
+      const data = await res.json()
+      const f: GeocodeFeature | undefined = data.features?.[0]
+      if (!f) throw new Error('没有找到这个地点')
+
+      addOrigin(f.center, f.text_zh ?? f.text ?? q.trim())
       setQ('')
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e)
-      // 配置问题升到全局横幅——它影响的不只是搜索，整个应用都用不了
-      if (isConfigError(msg)) setFatalError(describeConfigError(msg))
-      setErr(msg)
+      setErr(e instanceof Error ? e.message : String(e))
     } finally {
       setBusy(false)
     }
@@ -50,7 +55,7 @@ export function SearchBox() {
     <div className="search-box">
       <input
         value={q}
-        placeholder="搜地点加点，如「西二旗地铁站」"
+        placeholder="搜地点加点，如「深圳湾公园」"
         onChange={(e) => setQ(e.target.value)}
         onKeyDown={(e) => { if (e.key === 'Enter') void search() }}
       />

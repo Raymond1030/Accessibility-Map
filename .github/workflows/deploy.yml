@@ -34,16 +34,7 @@ jobs:
       - run: npm run build
         env:
           VITE_BASE: /Accessibility-Map/
-          VITE_AMAP_KEY: ${{ secrets.VITE_AMAP_KEY }}
-          VITE_AMAP_SECURITY_CODE: ${{ secrets.VITE_AMAP_SECURITY_CODE }}
           VITE_MAPBOX_TOKEN: ${{ secrets.VITE_MAPBOX_TOKEN }}
-
-      # public/ 下的文件不经 Vite 处理，用不了 import.meta.env，
-      # 所以在产物里替换占位符。token 留在源码里会被 GitHub 推送保护拦截。
-      - name: Inject token into standalone pages
-        run: |
-          sed -i "s|__MAPBOX_TOKEN__|${{ secrets.VITE_MAPBOX_TOKEN }}|g" dist/mapbox-speed.html
-          grep -q "__MAPBOX_TOKEN__" dist/mapbox-speed.html && exit 1 || echo "token injected"
 
       - uses: actions/upload-pages-artifact@v3
         with:

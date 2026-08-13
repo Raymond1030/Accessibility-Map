@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { describeGeolocationError, GEO_UNSUPPORTED, OUT_OF_CHINA_HINT } from './locate'
+import { describeGeolocationError, GEO_UNSUPPORTED } from './locate'
 
 describe('describeGeolocationError', () => {
   it('权限被拒时告诉用户去哪儿改，并给出替代路径', () => {
@@ -36,9 +36,5 @@ describe('describeGeolocationError', () => {
 describe('固定文案', () => {
   it('不支持定位时提示改用搜索', () => {
     expect(GEO_UNSUPPORTED).toContain('搜索')
-  })
-
-  it('境外提示点明本工具只覆盖国内——否则用户只会看到空结果而困惑', () => {
-    expect(OUT_OF_CHINA_HINT).toContain('中国大陆')
   })
 })

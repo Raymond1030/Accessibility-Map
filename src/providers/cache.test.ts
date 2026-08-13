@@ -8,16 +8,15 @@ const shape = polygon([[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]]) as PolyFeature
 
 const req = (over: Partial<IsochroneRequest> = {}): IsochroneRequest => ({
   lngLat: [116.397, 39.909],
-  mode: 'transit',
+  mode: 'driving',
   minutes: 30,
-  policy: 'ALL',
   ...over,
 })
 
 function fakeProvider(): IsochroneProvider & { calls: number } {
   const p = {
     id: 'fake',
-    supportedModes: ['transit'] as const,
+    supportedModes: ['driving'] as const,
     calls: 0,
     async fetch() {
       p.calls++
@@ -27,26 +26,50 @@ function fakeProvider(): IsochroneProvider & { calls: number } {
   return p as unknown as IsochroneProvider & { calls: number }
 }
 
+describe('driving-traffic 的时间桶', () => {
+  const tReq = (over: Partial<IsochroneRequest> = {}): IsochroneRequest => ({
+    lngLat: [116.397, 39.909], mode: 'driving-traffic', minutes: 30, ...over,
+  })
+
+  // 对齐到桶起点，避免测试数据恰好踩在桶边界上
+  const bucketStart = 1666 * 600_000
+
+  it('同一 10 分钟窗口内指纹相同——会话内仍享受零请求', () => {
+    expect(requestFingerprint('mb', tReq(), bucketStart))
+      .toBe(requestFingerprint('mb', tReq(), bucketStart + 9 * 60_000))
+  })
+
+  it('跨窗口指纹不同——路况过期后重新获取', () => {
+    expect(requestFingerprint('mb', tReq(), bucketStart))
+      .not.toBe(requestFingerprint('mb', tReq(), bucketStart + 11 * 60_000))
+  })
+
+  it('普通驾车不含时间桶，任何时刻指纹一致', () => {
+    const d = (now: number) => requestFingerprint('mb', tReq({ mode: 'driving' }), now)
+    expect(d(0)).toBe(d(999_999_999))
+  })
+})
+
 describe('requestFingerprint', () => {
   it('相同参数得到相同指纹', () => {
-    expect(requestFingerprint('amap', req())).toBe(requestFingerprint('amap', req()))
+    expect(requestFingerprint('mb', req())).toBe(requestFingerprint('mb', req()))
   })
 
   it('档位不同则指纹不同', () => {
-    expect(requestFingerprint('amap', req())).not.toBe(
-      requestFingerprint('amap', req({ minutes: 45 })),
+    expect(requestFingerprint('mb', req())).not.toBe(
+      requestFingerprint('mb', req({ minutes: 45 })),
     )
   })
 
-  it('策略不同则指纹不同', () => {
-    expect(requestFingerprint('amap', req())).not.toBe(
-      requestFingerprint('amap', req({ policy: 'SUBWAY' })),
+  it('出行方式不同则指纹不同', () => {
+    expect(requestFingerprint('mb', req())).not.toBe(
+      requestFingerprint('mb', req({ mode: 'walking' })),
     )
   })
 
   it('坐标取到 5 位小数，抖动不影响命中', () => {
-    expect(requestFingerprint('amap', req({ lngLat: [116.3970001, 39.9090001] })))
-      .toBe(requestFingerprint('amap', req()))
+    expect(requestFingerprint('mb', req({ lngLat: [116.3970001, 39.9090001] })))
+      .toBe(requestFingerprint('mb', req()))
   })
 })
 
@@ -78,7 +101,7 @@ describe('withCache', () => {
     let n = 0
     const flaky: IsochroneProvider = {
       id: 'flaky',
-      supportedModes: ['transit'],
+      supportedModes: ['driving'],
       async fetch() {
         n++
         if (n === 1) throw new Error('boom')
@@ -95,7 +118,7 @@ describe('withCache', () => {
     let n = 0
     const emptyProvider: IsochroneProvider = {
       id: 'empty',
-      supportedModes: ['transit'],
+      supportedModes: ['driving'],
       async fetch() {
         n++
         return null

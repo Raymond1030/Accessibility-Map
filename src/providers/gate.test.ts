@@ -8,9 +8,8 @@ const shape = polygon([[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]]) as PolyFeature
 
 const req = (minutes: number): IsochroneRequest => ({
   lngLat: [116.397, 39.909],
-  mode: 'transit',
+  mode: 'driving',
   minutes,
-  policy: 'ALL',
 })
 
 describe('withGate', () => {
@@ -19,7 +18,7 @@ describe('withGate', () => {
     let peak = 0
     const slow: IsochroneProvider = {
       id: 'slow',
-      supportedModes: ['transit'],
+      supportedModes: ['driving'],
       async fetch() {
         active++
         peak = Math.max(peak, active)
@@ -36,7 +35,7 @@ describe('withGate', () => {
   it('所有请求最终都完成', async () => {
     const p: IsochroneProvider = {
       id: 'p',
-      supportedModes: ['transit'],
+      supportedModes: ['driving'],
       async fetch() { return shape },
     }
     const gated = withGate(p)
@@ -49,7 +48,7 @@ describe('withGate', () => {
     let n = 0
     const flaky: IsochroneProvider = {
       id: 'flaky',
-      supportedModes: ['transit'],
+      supportedModes: ['driving'],
       async fetch() {
         n++
         if (n < 3) throw new Error('QPS 超限')
@@ -64,7 +63,7 @@ describe('withGate', () => {
   it('重试用尽后抛出最后一次的错误', async () => {
     const broken: IsochroneProvider = {
       id: 'broken',
-      supportedModes: ['transit'],
+      supportedModes: ['driving'],
       async fetch() { throw new Error('一直失败') },
     }
     const gated = withGate(broken, { retries: 2, baseDelayMs: 1 })
@@ -75,7 +74,7 @@ describe('withGate', () => {
     let n = 0
     const mixed: IsochroneProvider = {
       id: 'mixed',
-      supportedModes: ['transit'],
+      supportedModes: ['driving'],
       async fetch() {
         n++
         if (n === 1) throw new Error('第一个失败')

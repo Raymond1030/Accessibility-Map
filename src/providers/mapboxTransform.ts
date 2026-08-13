@@ -8,6 +8,7 @@ import type { PolyFeature } from '../geometry/ops'
  */
 export const MAPBOX_PROFILE = {
   driving: 'mapbox/driving',
+  'driving-traffic': 'mapbox/driving-traffic',
   walking: 'mapbox/walking',
   cycling: 'mapbox/cycling',
 } as const

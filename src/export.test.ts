@@ -17,9 +17,9 @@ describe('buildExportCollection', () => {
     expect(fc.features[0].properties?.minutes).toBe(30)
   })
 
-  it('标注坐标系为 GCJ-02，避免下游误当 WGS-84 用', () => {
+  it('标注坐标系为 WGS-84 标准坐标', () => {
     const fc = buildExportCollection([{ minutes: 30, feature: shape }])
-    expect(fc.features[0].properties?.crs).toBe('GCJ-02')
+    expect(fc.features[0].properties?.crs).toBe('WGS-84')
   })
 
   it('空输入得到空集合', () => {

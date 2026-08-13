@@ -1,9 +1,8 @@
 import { create } from 'zustand'
-import { cellKey, type BandMode, type Origin, type SetOp, type TransitPolicy } from '../types'
+import { cellKey, type BandMode, type Mode, type Origin, type SetOp } from '../types'
 import type { PolyFeature } from '../geometry/ops'
 import type { CellStatus } from '../geometry/result'
 import { getProvider } from '../providers'
-import { isConfigError, describeConfigError } from '../amap/errors'
 import { planRequests } from './compute'
 
 const PALETTE = ['#e4572e', '#3f88c5', '#2e933c', '#8b5cf6', '#d97706']
@@ -24,7 +23,7 @@ type State = {
   addOrigin: (lngLat: [number, number], label: string) => void
   removeOrigin: (id: string) => void
   updateOrigin: (id: string, patch: Partial<Origin>) => void
-  setPolicy: (id: string, policy: TransitPolicy) => void
+  setMode: (id: string, mode: Mode) => void
   setBandMode: (m: BandMode) => void
   setGlobalThresholds: (t: number[]) => void
   setOp: (op: SetOp) => void
@@ -58,8 +57,7 @@ export const useStore = create<State>((set, get) => ({
       id,
       label: label || `起点 ${origins.length + 1}`,
       lngLat,
-      mode: 'transit',
-      policy: 'ALL',
+      mode: 'driving',
       thresholds: [...get().globalThresholds],
       color: PALETTE[origins.length % PALETTE.length],
       visible: true,
@@ -89,7 +87,7 @@ export const useStore = create<State>((set, get) => ({
     void get().refresh()
   },
 
-  setPolicy: (id, policy) => get().updateOrigin(id, { policy }),
+  setMode: (id, mode) => get().updateOrigin(id, { mode }),
   setBandMode: (bandMode) => { set({ bandMode }); void get().refresh() },
   setGlobalThresholds: (globalThresholds) => { set({ globalThresholds }); void get().refresh() },
   setOp: (op) => set({ op }),                    // 切换运算不触发请求，纯几何重算
@@ -119,7 +117,7 @@ export const useStore = create<State>((set, get) => ({
       const key = cellKey(p.originId, p.minutes)
       try {
         const geom = await provider.fetch({
-          lngLat: p.lngLat, mode: p.mode, minutes: p.minutes, policy: p.policy,
+          lngLat: p.lngLat, mode: p.mode, minutes: p.minutes,
         })
         set((s) => ({
           geoms: new Map(s.geoms).set(key, geom),
@@ -128,7 +126,8 @@ export const useStore = create<State>((set, get) => ({
         }))
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
-        if (isConfigError(msg)) set({ fatalError: describeConfigError(msg) })
+        // token 无效/额度用尽是配置问题，重试无意义，升为全局提示
+        if (/token|额度/i.test(msg)) set({ fatalError: msg })
         set((s) => ({
           cells: new Map(s.cells).set(key, 'error'),
           errors: new Map(s.errors).set(key, msg),
@@ -144,7 +143,7 @@ export const useStore = create<State>((set, get) => ({
     set((s) => ({ cells: new Map(s.cells).set(key, 'loading') }))
     try {
       const geom = await getProvider().fetch({
-        lngLat: origin.lngLat, mode: origin.mode, minutes, policy: origin.policy,
+        lngLat: origin.lngLat, mode: origin.mode, minutes,
       })
       set((s) => ({
         geoms: new Map(s.geoms).set(key, geom),
@@ -153,7 +152,7 @@ export const useStore = create<State>((set, get) => ({
       }))
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
-      if (isConfigError(msg)) set({ fatalError: describeConfigError(msg) })
+      if (/token|额度/i.test(msg)) set({ fatalError: msg })
       set((s) => ({
         cells: new Map(s.cells).set(key, 'error'),
         errors: new Map(s.errors).set(key, msg),

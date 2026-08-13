@@ -1,13 +1,17 @@
-export type Mode = 'transit' | 'driving' | 'walking' | 'cycling'
+export type Mode = 'driving' | 'driving-traffic' | 'walking' | 'cycling'
 
-export type TransitPolicy = 'ALL' | 'SUBWAY' | 'BUS'
+export const MODE_LABEL: Record<Mode, string> = {
+  driving: '驾车',
+  'driving-traffic': '驾车（实时路况）',
+  walking: '步行',
+  cycling: '骑行',
+}
 
 export type Origin = {
   id: string
   label: string
   lngLat: [number, number]
   mode: Mode
-  policy: TransitPolicy
   thresholds: number[]
   color: string
   visible: boolean
