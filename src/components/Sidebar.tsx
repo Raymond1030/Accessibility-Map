@@ -127,7 +127,7 @@ export function Sidebar() {
                   )
                 }
                 if (st === 'empty') {
-                  return <span key={m} className="tag muted">{m} 分钟：周边无公交可达数据</span>
+                  return <span key={m} className="tag muted">{m} 分钟：周边无可达路网</span>
                 }
                 if (st === 'loading') return <span key={m} className="tag">{m} 分钟：计算中</span>
                 return null

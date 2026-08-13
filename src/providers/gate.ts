@@ -13,8 +13,12 @@ type GateOptions = { retries?: number; baseDelayMs?: number }
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 export function withGate(inner: IsochroneProvider, opts: GateOptions = {}): IsochroneProvider {
-  const retries = opts.retries ?? 2
-  const baseDelayMs = opts.baseDelayMs ?? 400
+  // 退避为境外链路校准：实测国内连发十几个请求后，Mapbox 连接会
+  // 成片断掉（HTTP 000），且抖动窗口有数秒——0.4/0.8s 的退避会让
+  // 三次尝试全打在同一段抖动里，最终以「失败」示人。
+  // 0.8/1.6/3.2s 共约 5.6s 的退避能跨过多数抖动窗口。
+  const retries = opts.retries ?? 3
+  const baseDelayMs = opts.baseDelayMs ?? 800
 
   let active = 0
   const waiting: Array<() => void> = []
