@@ -1,9 +1,9 @@
 import { create } from 'zustand'
-import { cellKey, type BandMode, type Mode, type Origin, type SetOp } from '../types'
+import { cellKey, MAX_MINUTES, type BandMode, type Mode, type Origin, type SetOp } from '../types'
 import type { PolyFeature } from '../geometry/ops'
 import type { CellStatus } from '../geometry/result'
 import { getProvider } from '../providers'
-import { planRequests } from './compute'
+import { applyCustomThreshold, planRequests } from './compute'
 
 /**
  * 起点配色，经 CVD 验证的固定顺序（blue/orange/aqua/yellow/magenta）。
@@ -18,6 +18,7 @@ type State = {
   origins: Origin[]
   bandMode: BandMode
   globalThresholds: number[]
+  customMinutes: number
   op: SetOp
   baseOriginId: string | null
   cells: Map<string, CellStatus>
@@ -33,6 +34,7 @@ type State = {
   setMode: (id: string, mode: Mode) => void
   setBandMode: (m: BandMode) => void
   setGlobalThresholds: (t: number[]) => void
+  setCustomMinutes: (v: number) => void
   setOp: (op: SetOp) => void
   setBaseOrigin: (id: string | null) => void
   setFatalError: (msg: string | null) => void
@@ -47,6 +49,7 @@ export const useStore = create<State>((set, get) => ({
   origins: [],
   bandMode: 'paired',
   globalThresholds: [15, 30, 45],
+  customMinutes: 20,
   op: 'intersect',
   baseOriginId: null,
   cells: new Map(),
@@ -97,6 +100,17 @@ export const useStore = create<State>((set, get) => ({
   setMode: (id, mode) => get().updateOrigin(id, { mode }),
   setBandMode: (bandMode) => { set({ bandMode }); void get().refresh() },
   setGlobalThresholds: (globalThresholds) => { set({ globalThresholds }); void get().refresh() },
+  // 松手即生效：拖滑条就是「想用这个时间」的明确意图，不要求再点一次
+  // chip 激活；旧的自定义档同时被换掉，避免拖一路留下一串档位
+  setCustomMinutes: (v) => {
+    const clamped = Math.min(MAX_MINUTES, Math.max(1, Math.round(v)))
+    const { customMinutes, globalThresholds } = get()
+    set({
+      customMinutes: clamped,
+      globalThresholds: applyCustomThreshold(globalThresholds, customMinutes, clamped),
+    })
+    void get().refresh()
+  },
   setOp: (op) => set({ op }),                    // 切换运算不触发请求，纯几何重算
   setBaseOrigin: (baseOriginId) => set({ baseOriginId }),
   setFatalError: (fatalError) => set({ fatalError }),

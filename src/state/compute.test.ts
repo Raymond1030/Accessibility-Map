@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { polygon } from '@turf/turf'
-import { planRequests, computeBand } from './compute'
+import { planRequests, computeBand, applyCustomThreshold } from './compute'
 import type { Origin } from '../types'
 import type { PolyFeature } from '../geometry/ops'
 import type { CellStatus } from '../geometry/result'
@@ -51,6 +51,20 @@ describe('planRequests', () => {
 
   it('没有可见起点时得到空计划', () => {
     expect(planRequests([origin('a', { visible: false })], 'paired', [30])).toHaveLength(0)
+  })
+})
+
+describe('applyCustomThreshold', () => {
+  it('换档时旧的自定义档被替换，预设档不受影响', () => {
+    expect(applyCustomThreshold([15, 20, 30], 20, 25)).toEqual([15, 25, 30])
+  })
+
+  it('旧档不在场时直接加入新档并保持有序', () => {
+    expect(applyCustomThreshold([15, 30], 20, 25)).toEqual([15, 25, 30])
+  })
+
+  it('新档与已有档重合时不产生重复', () => {
+    expect(applyCustomThreshold([15, 20, 30], 20, 30)).toEqual([15, 30])
   })
 })
 

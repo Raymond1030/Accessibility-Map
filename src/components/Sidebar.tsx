@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { SearchBox } from './SearchBox'
 import { useStore } from '../state/store'
 import { computeBand } from '../state/compute'
@@ -14,6 +15,39 @@ const EMPTY_TEXT: Record<SetOp, string> = {
   intersect: '无共同可达区',
   union: '无可达区域',
   difference: '基准点范围已被完全覆盖',
+}
+
+/**
+ * 1–60 分钟滑条。拖动中只更新本地读数，松手（或按键抬起）才提交——
+ * 一次拖动会产生几十次 change，每次都提交就是几十个等时圈请求。
+ */
+function MinuteSlider({ value, onCommit }: { value: number; onCommit: (v: number) => void }) {
+  const [draft, setDraft] = useState(value)
+  const dragging = useRef(false)
+  // 外部换档（比如点了预设 chip）时跟随，但不打断拖动中的读数
+  useEffect(() => { if (!dragging.current) setDraft(value) }, [value])
+  const commit = () => {
+    dragging.current = false
+    if (draft !== value) onCommit(draft)
+  }
+  return (
+    <>
+      <input
+        type="range"
+        min={1}
+        max={MAX_MINUTES}
+        step={1}
+        value={draft}
+        aria-label="自定义时间（分钟）"
+        onPointerDown={() => { dragging.current = true }}
+        onChange={(e) => setDraft(Number(e.target.value))}
+        onPointerUp={commit}
+        onKeyUp={commit}
+        onBlur={commit}
+      />
+      <span className="slider-val">{draft} 分</span>
+    </>
+  )
 }
 
 export function Sidebar() {
@@ -105,15 +139,23 @@ export function Sidebar() {
             </select>
 
             {s.bandMode === 'custom' && (
-              <div className="chips">
-                {[15, 30, 45, 60].map((m) => (
-                  <button
-                    key={m}
-                    className={o.thresholds.includes(m) ? 'chip on' : 'chip'}
-                    onClick={() => s.updateOrigin(o.id, { thresholds: [m] })}
-                  >{m}</button>
-                ))}
-              </div>
+              <>
+                <div className="chips">
+                  {[15, 30, 45, 60].map((m) => (
+                    <button
+                      key={m}
+                      className={o.thresholds.includes(m) ? 'chip on' : 'chip'}
+                      onClick={() => s.updateOrigin(o.id, { thresholds: [m] })}
+                    >{m}</button>
+                  ))}
+                </div>
+                <div className="slider-row">
+                  <MinuteSlider
+                    value={o.thresholds[0] ?? 30}
+                    onCommit={(v) => s.updateOrigin(o.id, { thresholds: [v] })}
+                  />
+                </div>
+              </>
             )}
 
             <div className="cell-status">
@@ -165,19 +207,32 @@ export function Sidebar() {
         </div>
 
         {s.bandMode === 'paired' && (
-          <div className="chips">
-            {[15, 30, 45, MAX_MINUTES].map((m) => (
+          <>
+            <div className="chips">
+              {[15, 30, 45, MAX_MINUTES].map((m) => (
+                <button
+                  key={m}
+                  className={s.globalThresholds.includes(m) ? 'chip on' : 'chip'}
+                  onClick={() => s.setGlobalThresholds(
+                    s.globalThresholds.includes(m)
+                      ? s.globalThresholds.filter((x) => x !== m)
+                      : [...s.globalThresholds, m].sort((a, b) => a - b),
+                  )}
+                >{m} 分钟</button>
+              ))}
+            </div>
+            <div className="slider-row">
               <button
-                key={m}
-                className={s.globalThresholds.includes(m) ? 'chip on' : 'chip'}
+                className={s.globalThresholds.includes(s.customMinutes) ? 'chip on' : 'chip'}
                 onClick={() => s.setGlobalThresholds(
-                  s.globalThresholds.includes(m)
-                    ? s.globalThresholds.filter((x) => x !== m)
-                    : [...s.globalThresholds, m].sort((a, b) => a - b),
+                  s.globalThresholds.includes(s.customMinutes)
+                    ? s.globalThresholds.filter((x) => x !== s.customMinutes)
+                    : [...s.globalThresholds, s.customMinutes].sort((a, b) => a - b),
                 )}
-              >{m} 分钟</button>
-            ))}
-          </div>
+              >自定义</button>
+              <MinuteSlider value={s.customMinutes} onCommit={s.setCustomMinutes} />
+            </div>
+          </>
         )}
 
         {s.op === 'difference' && visibleIds.length >= 2 && (
