@@ -115,7 +115,7 @@ export function MapView() {
         id: 'result-fill',
         type: 'fill',
         source: 'result-iso',
-        paint: { 'fill-color': '#4a3aa7', 'fill-opacity': 0.25 },
+        paint: { 'fill-color': '#4a3aa7', 'fill-opacity': 0.18 },
       })
       map.addLayer({
         id: 'result-casing',
