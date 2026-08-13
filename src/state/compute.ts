@@ -29,6 +29,12 @@ export function planRequests(
   return out
 }
 
+/** 滑条提交：撤掉旧的自定义档、放入新档并保持有序。预设档不受影响 */
+export function applyCustomThreshold(thresholds: number[], prev: number, next: number): number[] {
+  const rest = thresholds.filter((m) => m !== prev && m !== next)
+  return [...rest, next].sort((a, b) => a - b)
+}
+
 export type ComputeBandInput = {
   op: SetOp
   minutes: number
