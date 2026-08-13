@@ -220,6 +220,12 @@ export function MapView() {
 
     ;(map.getSource('result-iso') as mapboxgl.GeoJSONSource)
       .setData({ type: 'FeatureCollection', features })
+
+    // 一次只让一个层次当主角：结果出来后，起点圈退到近乎只剩描边的
+    // 上下文层——否则两组起点圈加结果层叠四层颜色，交集区紫到发黑。
+    const hasResult = features.length > 0
+    map.setPaintProperty('origins-fill', 'fill-opacity', hasResult ? 0.05 : 0.15)
+    map.setPaintProperty('origins-line', 'line-opacity', hasResult ? 0.45 : 0.65)
   }, [origins, cells, geoms, op, bandMode, globalThresholds, baseOriginId, mapReady])
 
   return (
