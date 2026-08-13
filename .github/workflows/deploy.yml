@@ -35,6 +35,9 @@ jobs:
         env:
           VITE_BASE: /Accessibility-Map/
           VITE_MAPBOX_TOKEN: ${{ secrets.VITE_MAPBOX_TOKEN }}
+          # 高德只用于地名搜索（Mapbox Geocoding 国内不可用），结果转 WGS-84
+          VITE_AMAP_KEY: ${{ secrets.VITE_AMAP_KEY }}
+          VITE_AMAP_SECURITY_CODE: ${{ secrets.VITE_AMAP_SECURITY_CODE }}
 
       - uses: actions/upload-pages-artifact@v3
         with:

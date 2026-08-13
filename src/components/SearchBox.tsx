@@ -1,48 +1,25 @@
 import { useState } from 'react'
-import { getMapboxToken } from '../mapbox/token'
+import { searchPlace } from '../amap/search'
 import { useStore } from '../state/store'
 
-type GeocodeFeature = {
-  center: [number, number]
-  text_zh?: string
-  text?: string
-  place_name_zh?: string
-}
-
+/**
+ * 搜索走高德（结果转 WGS-84），等时圈与底图走 Mapbox。
+ * 实测 Mapbox Geocoding 在国内连「深圳北站」都只匹配到「深圳市」，
+ * 两个不同的搜索会落在同一个市中心点——搜索必须借高德。
+ */
 export function SearchBox() {
   const [q, setQ] = useState('')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   const addOrigin = useStore((s) => s.addOrigin)
-  const setFatalError = useStore((s) => s.setFatalError)
 
   async function search() {
     if (!q.trim()) return
     setBusy(true)
     setErr(null)
     try {
-      const url =
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q.trim())}.json?` +
-        new URLSearchParams({
-          access_token: getMapboxToken(),
-          language: 'zh',
-          country: 'cn',
-          limit: '1',
-        })
-      const res = await fetch(url)
-      if (res.status === 401 || res.status === 403) {
-        // token 层面的失败影响整个应用，升为全局提示
-        const msg = `Mapbox token 无效或权限不足（HTTP ${res.status}）`
-        setFatalError(msg)
-        throw new Error(msg)
-      }
-      if (!res.ok) throw new Error(`搜索失败（HTTP ${res.status}）`)
-
-      const data = await res.json()
-      const f: GeocodeFeature | undefined = data.features?.[0]
-      if (!f) throw new Error('没有找到这个地点')
-
-      addOrigin(f.center, f.text_zh ?? f.text ?? q.trim())
+      const hit = await searchPlace(q.trim())
+      addOrigin(hit.lngLat, hit.name)
       setQ('')
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e))
