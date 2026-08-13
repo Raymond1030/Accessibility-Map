@@ -28,6 +28,7 @@ const response = {
 describe('MAPBOX_PROFILE', () => {
   it('四种出行方式各自映射到 Mapbox 的 profile', () => {
     expect(MAPBOX_PROFILE.driving).toBe('mapbox/driving')
+    expect(MAPBOX_PROFILE['driving-traffic']).toBe('mapbox/driving-traffic')
     expect(MAPBOX_PROFILE.walking).toBe('mapbox/walking')
     expect(MAPBOX_PROFILE.cycling).toBe('mapbox/cycling')
   })

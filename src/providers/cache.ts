@@ -1,11 +1,10 @@
-import type { Mode, TransitPolicy } from '../types'
+import type { Mode } from '../types'
 import type { PolyFeature } from '../geometry/ops'
 
 export type IsochroneRequest = {
   lngLat: [number, number]
   mode: Mode
   minutes: number
-  policy?: TransitPolicy
 }
 
 export interface IsochroneProvider {
@@ -15,15 +14,26 @@ export interface IsochroneProvider {
   fetch(req: IsochroneRequest): Promise<PolyFeature | null>
 }
 
-export function requestFingerprint(providerId: string, req: IsochroneRequest): string {
+const TRAFFIC_BUCKET_MS = 600_000
+
+export function requestFingerprint(
+  providerId: string,
+  req: IsochroneRequest,
+  now: number = Date.now(),
+): string {
   const [lng, lat] = req.lngLat
+  // 实时路况会随时间变化，指纹拼入 10 分钟时间桶：
+  // 同一时段内切运算/拖回原点仍零请求，跨时段重新获取。
+  // now 可注入，保持纯函数可测。
+  const bucket = req.mode === 'driving-traffic'
+    ? `|t${Math.floor(now / TRAFFIC_BUCKET_MS)}`
+    : ''
   return [
     providerId,
     `${lng.toFixed(5)},${lat.toFixed(5)}`,
     req.mode,
-    req.policy ?? 'ALL',
     req.minutes,
-  ].join('|')
+  ].join('|') + bucket
 }
 
 /**

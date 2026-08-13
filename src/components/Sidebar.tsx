@@ -3,15 +3,12 @@ import { useStore } from '../state/store'
 import { computeBand } from '../state/compute'
 import { formatArea } from '../geometry/result'
 import { downloadGeoJSON, type ExportItem } from '../export'
-import { cellKey, MAX_MINUTES, type SetOp, type TransitPolicy } from '../types'
+import { cellKey, MAX_MINUTES, MODE_LABEL, type Mode, type SetOp } from '../types'
 import { useIsMobile } from '../ui/responsive'
 import './Sidebar.css'
 
 const OP_LABEL: Record<SetOp, string> = {
   intersect: '∩ 交集', union: '∪ 并集', difference: '− 差集',
-}
-const POLICY_LABEL: Record<TransitPolicy, string> = {
-  ALL: '公交+地铁', SUBWAY: '只坐地铁', BUS: '只坐公交',
 }
 const EMPTY_TEXT: Record<SetOp, string> = {
   intersect: '无共同可达区',
@@ -99,11 +96,11 @@ export function Sidebar() {
             </label>
 
             <select
-              value={o.policy}
-              onChange={(e) => s.setPolicy(o.id, e.target.value as TransitPolicy)}
+              value={o.mode}
+              onChange={(e) => s.setMode(o.id, e.target.value as Mode)}
             >
-              {(Object.keys(POLICY_LABEL) as TransitPolicy[]).map((p) => (
-                <option key={p} value={p}>{POLICY_LABEL[p]}</option>
+              {(Object.keys(MODE_LABEL) as Mode[]).map((m) => (
+                <option key={m} value={m}>{MODE_LABEL[m]}</option>
               ))}
             </select>
 

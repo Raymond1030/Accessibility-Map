@@ -9,7 +9,6 @@ export type PlannedRequest = {
   minutes: number
   lngLat: [number, number]
   mode: Origin['mode']
-  policy: Origin['policy']
 }
 
 /** 把当前状态摊平成「点 × 档位」的请求矩阵。隐藏的点与超限的档位在这里被剔除 */
@@ -24,9 +23,7 @@ export function planRequests(
     const thresholds = bandMode === 'paired' ? globalThresholds : o.thresholds
     for (const minutes of thresholds) {
       if (minutes <= 0 || minutes > MAX_MINUTES) continue
-      out.push({
-        originId: o.id, minutes, lngLat: o.lngLat, mode: o.mode, policy: o.policy,
-      })
+      out.push({ originId: o.id, minutes, lngLat: o.lngLat, mode: o.mode })
     }
   }
   return out

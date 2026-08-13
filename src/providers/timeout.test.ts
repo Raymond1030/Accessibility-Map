@@ -9,15 +9,14 @@ const shape = polygon([[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]]) as PolyFeature
 
 const req = (minutes: number): IsochroneRequest => ({
   lngLat: [116.397, 39.909],
-  mode: 'transit',
+  mode: 'driving',
   minutes,
-  policy: 'ALL',
 })
 
 /** 复现高德域名被拒时的行为：回调永不触发，Promise 永远 pending */
 const neverResolves: IsochroneProvider = {
   id: 'never',
-  supportedModes: ['transit'],
+  supportedModes: ['driving'],
   fetch() {
     return new Promise<PolyFeature | null>(() => {})
   },
@@ -37,7 +36,7 @@ describe('withTimeout', () => {
   it('正常返回时不受影响', async () => {
     const fast: IsochroneProvider = {
       id: 'fast',
-      supportedModes: ['transit'],
+      supportedModes: ['driving'],
       async fetch() { return shape },
     }
     const p = withTimeout(fast, 1000)
@@ -47,7 +46,7 @@ describe('withTimeout', () => {
   it('null 结果（无公交覆盖）能正常穿过', async () => {
     const emptyP: IsochroneProvider = {
       id: 'empty',
-      supportedModes: ['transit'],
+      supportedModes: ['driving'],
       async fetch() { return null },
     }
     const p = withTimeout(emptyP, 1000)
@@ -65,7 +64,7 @@ describe('withTimeout 与并发闸门组合', () => {
     // 闸门应已释放，后续请求还能进得来
     const healthy: IsochroneProvider = {
       id: 'healthy',
-      supportedModes: ['transit'],
+      supportedModes: ['driving'],
       async fetch() { return shape },
     }
     const gatedHealthy = withGate(withTimeout(healthy, 1000))
@@ -76,7 +75,7 @@ describe('withTimeout 与并发闸门组合', () => {
     let n = 0
     const slowThenFast: IsochroneProvider = {
       id: 'slowThenFast',
-      supportedModes: ['transit'],
+      supportedModes: ['driving'],
       fetch() {
         n++
         if (n === 1) return new Promise<PolyFeature | null>(() => {})
