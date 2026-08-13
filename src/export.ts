@@ -10,7 +10,7 @@ export function buildExportCollection(
     type: 'FeatureCollection',
     features: items.map((it) => ({
       ...it.feature,
-      properties: { ...it.feature.properties, minutes: it.minutes, crs: 'GCJ-02' },
+      properties: { ...it.feature.properties, minutes: it.minutes, crs: 'WGS-84' },
     })),
   }
 }

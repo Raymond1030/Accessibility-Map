@@ -52,24 +52,24 @@ describe('driving-traffic 的时间桶', () => {
 
 describe('requestFingerprint', () => {
   it('相同参数得到相同指纹', () => {
-    expect(requestFingerprint('amap', req())).toBe(requestFingerprint('amap', req()))
+    expect(requestFingerprint('mb', req())).toBe(requestFingerprint('mb', req()))
   })
 
   it('档位不同则指纹不同', () => {
-    expect(requestFingerprint('amap', req())).not.toBe(
-      requestFingerprint('amap', req({ minutes: 45 })),
+    expect(requestFingerprint('mb', req())).not.toBe(
+      requestFingerprint('mb', req({ minutes: 45 })),
     )
   })
 
   it('出行方式不同则指纹不同', () => {
-    expect(requestFingerprint('amap', req())).not.toBe(
-      requestFingerprint('amap', req({ mode: 'walking' })),
+    expect(requestFingerprint('mb', req())).not.toBe(
+      requestFingerprint('mb', req({ mode: 'walking' })),
     )
   })
 
   it('坐标取到 5 位小数，抖动不影响命中', () => {
-    expect(requestFingerprint('amap', req({ lngLat: [116.3970001, 39.9090001] })))
-      .toBe(requestFingerprint('amap', req()))
+    expect(requestFingerprint('mb', req({ lngLat: [116.3970001, 39.9090001] })))
+      .toBe(requestFingerprint('mb', req()))
   })
 })
 
