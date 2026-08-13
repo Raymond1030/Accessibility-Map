@@ -38,6 +38,9 @@
     <tr><td>Isochrone API</td><td id="t-api">待测</td></tr>
   </table>
   <div id="verdict" class="verdict ok">正在加载底图，请等它完全显示…</div>
+  <button id="zh-btn" style="width:100%;min-height:44px;margin-top:10px;border:1px solid #d1d5db;border-radius:8px;background:#fff;font-size:14px;cursor:pointer">
+    切换成中文标注
+  </button>
   <div class="hint">拖动地图几下再看数字——平移缩放会持续拉新瓦片，那才是真实使用感受。</div>
 </div>
 
@@ -94,6 +97,33 @@ map.on('error', (e) => {
 });
 
 map.on('idle', refresh);
+
+// Mapbox streets 在中国区默认标注英文/拼音。
+// 矢量瓦片里带 name_zh-Hans 字段，把每个 symbol 图层的 text-field
+// 改成优先取中文即可——但只有源数据有中文名的要素才会变，覆盖不全。
+let zhOn = false;
+document.getElementById('zh-btn').addEventListener('click', () => {
+  zhOn = !zhOn;
+  const layers = map.getStyle().layers || [];
+  let changed = 0;
+  for (const layer of layers) {
+    if (layer.type !== 'symbol') continue;
+    const tf = layer.layout && layer.layout['text-field'];
+    if (!tf) continue;
+    try {
+      map.setLayoutProperty(
+        layer.id,
+        'text-field',
+        zhOn
+          ? ['coalesce', ['get', 'name_zh-Hans'], ['get', 'name_zh-Hant'], ['get', 'name']]
+          : ['get', 'name'],
+      );
+      changed++;
+    } catch (e) { /* 个别图层不支持覆盖，跳过 */ }
+  }
+  document.getElementById('zh-btn').textContent =
+    (zhOn ? '切回原始标注' : '切换成中文标注') + `（已处理 ${changed} 个图层）`;
+});
 
 // 顺带测一次 Isochrone API
 const ta = performance.now();
