@@ -4,9 +4,13 @@
 
 **👉 打开就能用：https://raymond1030.github.io/Accessibility-Map/**
 
-不用注册、不用安装，手机电脑都行 📱💻
+不用注册、不用安装，手机电脑都行。
 
-![状态](https://img.shields.io/badge/tests-116%20passing-brightgreen) ![状态](https://img.shields.io/badge/数据源-Mapbox-blue) ![状态](https://img.shields.io/badge/坐标系-WGS--84-green)
+[![部署状态](https://github.com/Raymond1030/Accessibility-Map/actions/workflows/deploy.yml/badge.svg)](https://github.com/Raymond1030/Accessibility-Map/actions/workflows/deploy.yml) [![tests](https://img.shields.io/badge/tests-116%20passing-brightgreen)](https://github.com/Raymond1030/Accessibility-Map/actions) [![数据源](https://img.shields.io/badge/数据源-Mapbox-blue)](https://www.mapbox.com/) [![坐标系](https://img.shields.io/badge/坐标系-WGS--84-green)](https://zh.wikipedia.org/wiki/%E4%B8%96%E7%95%8C%E5%A4%A7%E5%9C%B0%E6%B5%8B%E9%87%8F%E7%B3%BB%E7%BB%9F) [![License: MIT](https://img.shields.io/badge/license-MIT-yellow)](LICENSE)
+
+长这样 👇 深圳南山两个起点，15 / 30 / 45 分钟驾车都能到的区域层层嵌套：
+
+![两个起点的驾车等时圈交集，左侧面板显示各时长的交集面积](docs/assets/screenshot-desktop.png)
 
 ---
 
@@ -23,24 +27,28 @@
 1. **加起点** —— 点一下地图，或搜地名，或点右下角 ◎ 定位到自己
 2. **选出行方式** —— 每个点可以不一样
 3. **选运算和时间** —— 交集（都能到）、并集（合起来）、差集（只有某点能到），1–60 分钟随便拖
-4. **看结果** —— 彩色区域就是答案，左下角有面积，还能导出 GeoJSON 📦
+4. **看结果** —— 彩色区域就是答案，左下角有面积，还能导出 GeoJSON
 
 ### ⏱️ 时间怎么选
 
 - **同档配对** —— 大家用同一组时间（比如 15 / 30 / 45 分钟），一眼看到层层嵌套的区域，适合「我们多快能碰头」
-- **自定义** —— 每个点单独设时间，比如「A 的 15 分钟 ∩ B 的 45 分钟」，适合一方赶路更辛苦的情况 😄
+- **自定义** —— 每个点单独设时间，比如「A 的 15 分钟 ∩ B 的 45 分钟」，适合一方赶路更辛苦的情况
 
 差集要指定一个基准点，结果是「基准点能到、其他点都到不了」的地盘。
 
 ### 📱 手机上用
 
-地图全屏，控件收在底部抽屉里，点顶部把手就能展开收起。抽屉收着的时候，结果摘要也一直看得见。
+<img src="docs/assets/screenshot-mobile.png" width="300" align="right" alt="手机端界面：地图全屏，底部抽屉折叠显示结果摘要">
+
+地图全屏，控件收在底部抽屉里，点顶部把手就能展开收起。抽屉收着的时候，结果摘要也一直看得见（右图底部那行「15 分钟 · 55.69 km²」就是）。
 
 手机上加点要先点「**＋ 在地图上加点**」再点地图落点——不然拖个地图就误加一个点，那可太烦了。电脑上直接点地图就行。
 
+<br clear="right">
+
 ## 🔍 怎么读结果
 
-**「无共同可达区」不是出 bug 了！** 两个离得很远的点，15 分钟内确实碰不了头——这就是工具想告诉你的结论。想找到共同区域？把时间调大试试 ⏰
+**「无共同可达区」不是出 bug 了！** 两个离得很远的点，15 分钟内确实碰不了头——这就是工具想告诉你的结论。想找到共同区域？把时间调大试试。
 
 其他几种提示：
 
@@ -65,3 +73,5 @@
 想本地运行、了解架构设计或参与开发？请看 [开发文档](docs/DEVELOPMENT.md)。
 
 React 18 · TypeScript · Mapbox GL JS · Turf.js —— 116 个单元测试全部通过 ✅
+
+基于 [MIT 协议](LICENSE)开源。
