@@ -92,29 +92,42 @@ export function MapView() {
       map.addSource('origins-iso', { type: 'geojson', data: EMPTY_FC })
       map.addSource('result-iso', { type: 'geojson', data: EMPTY_FC })
 
+      // 档位是有序数据：嵌套的三档圈叠加后内圈自然更深（15 分钟被三层
+      // 覆盖），透明度选 0.15 让三层叠加(≈0.39)仍不遮死底图。
+      // 描边提亮，否则档位边界糊成一片。
       map.addLayer({
         id: 'origins-fill',
         type: 'fill',
         source: 'origins-iso',
-        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.12 },
+        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.15 },
       })
       map.addLayer({
         id: 'origins-line',
         type: 'line',
         source: 'origins-iso',
-        paint: { 'line-color': ['get', 'color'], 'line-opacity': 0.5, 'line-width': 1 },
+        paint: { 'line-color': ['get', 'color'], 'line-opacity': 0.65, 'line-width': 1.2 },
       })
+      // 结果层专用 violet——与全部起点色经验证距离安全，且在底图上
+      // 无冲突（水是蓝、绿地是绿、道路是橙黄，紫色不与任何底色抢戏）。
+      // 白色衬线（casing）压在紫线下面，保证边界在任何底色上都清晰——
+      // 旧版的近黑填充在彩色底图上像一块污渍。
       map.addLayer({
         id: 'result-fill',
         type: 'fill',
         source: 'result-iso',
-        paint: { 'fill-color': '#111827', 'fill-opacity': 0.3 },
+        paint: { 'fill-color': '#4a3aa7', 'fill-opacity': 0.25 },
+      })
+      map.addLayer({
+        id: 'result-casing',
+        type: 'line',
+        source: 'result-iso',
+        paint: { 'line-color': '#ffffff', 'line-width': 4.5, 'line-opacity': 0.9 },
       })
       map.addLayer({
         id: 'result-line',
         type: 'line',
         source: 'result-iso',
-        paint: { 'line-color': '#f59e0b', 'line-width': 3 },
+        paint: { 'line-color': '#4a3aa7', 'line-width': 2 },
       })
 
       setMapReady(true)

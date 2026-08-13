@@ -5,7 +5,14 @@ import type { CellStatus } from '../geometry/result'
 import { getProvider } from '../providers'
 import { planRequests } from './compute'
 
-const PALETTE = ['#e4572e', '#3f88c5', '#2e933c', '#8b5cf6', '#d97706']
+/**
+ * 起点配色，经 CVD 验证的固定顺序（blue/orange/aqua/yellow/magenta）。
+ * 旧色板在全对检查下硬失败：1↔5 号色正常视力 ΔE 仅 7.5（阈值 15），
+ * 色盲模拟下 3↔5 号 ΔE 2.4——几乎同色。
+ * 前 3 色通过全对检查（ΔE 9.2/24.0）；4、5 号仅在 ≥4 个起点时出现，
+ * 靠 marker 颜色 + 侧栏色条 + 名字这层辅助编码兜底。
+ */
+const PALETTE = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4']
 
 type State = {
   origins: Origin[]

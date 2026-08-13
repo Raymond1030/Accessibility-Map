@@ -49,7 +49,8 @@ select { width: 100%; padding: 3px; border: 1px solid #d1d5db; border-radius: 4p
 .search-box button { padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; background: #fff; cursor: pointer; }
 
 .result-row { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; }
-.result-row .ok { color: #111827; font-weight: 600; }
+/* 与地图结果层同色，读数和图形连成一体 */
+.result-row .ok { color: #4a3aa7; font-weight: 600; }
 .result-row .muted { color: #9ca3af; }
 .result-row .warn { color: #b45309; text-align: right; font-size: 12px; }
 .hint { color: #9ca3af; font-size: 12px; margin: 4px 0; }
