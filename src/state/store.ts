@@ -3,6 +3,7 @@ import { cellKey, MAX_MINUTES, type BandMode, type Mode, type Origin, type SetOp
 import type { PolyFeature } from '../geometry/ops'
 import type { CellStatus } from '../geometry/result'
 import { getProvider } from '../providers'
+import { isConfigError } from '../amap/errors'
 import { applyCustomThreshold, planRequests } from './compute'
 
 /**
@@ -125,7 +126,6 @@ export const useStore = create<State>((set, get) => ({
   refresh: async () => {
     const { origins, bandMode, globalThresholds } = get()
     const plan = planRequests(origins, bandMode, globalThresholds)
-    const provider = getProvider()
 
     const cells = new Map(get().cells)
     for (const p of plan) {
@@ -137,7 +137,8 @@ export const useStore = create<State>((set, get) => ({
     await Promise.all(plan.map(async (p) => {
       const key = cellKey(p.originId, p.minutes)
       try {
-        const geom = await provider.fetch({
+        // 数据源按出行方式分发：不同起点可能各用各的 provider
+        const geom = await getProvider(p.mode).fetch({
           lngLat: p.lngLat, mode: p.mode, minutes: p.minutes,
         })
         set((s) => ({
@@ -147,8 +148,8 @@ export const useStore = create<State>((set, get) => ({
         }))
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
-        // token 无效/额度用尽是配置问题，重试无意义，升为全局提示
-        if (/token|额度/i.test(msg)) set({ fatalError: msg })
+        // token 无效/额度用尽/高德配置错误是配置问题，重试无意义，升为全局提示
+        if (/token|额度/i.test(msg) || isConfigError(msg)) set({ fatalError: msg })
         set((s) => ({
           cells: new Map(s.cells).set(key, 'error'),
           errors: new Map(s.errors).set(key, msg),
@@ -163,7 +164,7 @@ export const useStore = create<State>((set, get) => ({
     const key = cellKey(originId, minutes)
     set((s) => ({ cells: new Map(s.cells).set(key, 'loading') }))
     try {
-      const geom = await getProvider().fetch({
+      const geom = await getProvider(origin.mode).fetch({
         lngLat: origin.lngLat, mode: origin.mode, minutes,
       })
       set((s) => ({
@@ -173,7 +174,7 @@ export const useStore = create<State>((set, get) => ({
       }))
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
-      if (/token|额度/i.test(msg)) set({ fatalError: msg })
+      if (/token|额度/i.test(msg) || isConfigError(msg)) set({ fatalError: msg })
       set((s) => ({
         cells: new Map(s.cells).set(key, 'error'),
         errors: new Map(s.errors).set(key, msg),

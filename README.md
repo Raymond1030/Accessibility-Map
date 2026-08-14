@@ -1,12 +1,12 @@
 # 等时圈 · 多点可达性交集
 
-给定多个起点，计算各自的等时圈（驾车 / 驾车实时路况 / 步行 / 骑行），并对它们做交集、并集、差集运算。
+给定多个起点，计算各自的等时圈（驾车 / 驾车实时路况 / 步行 / 骑行 / 公交+步行 / 地铁+步行 / 地铁+骑行），并对它们做交集、并集、差集运算。
 
 用来回答这类问题：**我们俩 30 分钟内都能到的地方在哪？** 几个门店的服务范围加起来覆盖了哪里？只有 A 能到、B 到不了的区域是哪些？
 
 **在线体验 → https://raymond1030.github.io/Accessibility-Map/**
 
-![状态](https://img.shields.io/badge/tests-116%20passing-brightgreen) ![状态](https://img.shields.io/badge/数据源-Mapbox-blue) ![状态](https://img.shields.io/badge/坐标系-WGS--84-green)
+![状态](https://img.shields.io/badge/tests-173%20passing-brightgreen) ![状态](https://img.shields.io/badge/数据源-Mapbox%20%2B%20高德%20%2B%20自建-blue) ![状态](https://img.shields.io/badge/坐标系-WGS--84-green)
 
 > 空交集是答案而不是报错：两个相距很远的点在 15 分钟内「无共同可达区」，
 > 这本身就是要传达的结论。
@@ -17,9 +17,12 @@
 
 这些不是待办事项，是当前版本的设计边界。不了解它们会用错。
 
-**1. 不支持公共交通。**
+**1. 公共交通分三条路，各有边界。**
 
-v1 曾用高德 `ArrivalRange` 提供公交等时圈，迁移到 Mapbox 后该能力被移除——Mapbox Isochrone 只有 driving / driving-traffic / walking / cycling 四个 profile。这是接口的硬限制，v1 的高德实现保留在 git 历史中（`git log --oneline | grep 高德`）。
+Mapbox Isochrone 只有 driving / driving-traffic / walking / cycling 四个 profile，公共交通组合由两套机制补上：
+
+- **公交+步行、地铁+步行** 走高德 `ArrivalRange`（即 v1 的能力回归，按 mode 分流到第二数据源），需要配置 `VITE_AMAP_KEY`，上限 60 分钟，覆盖范围以高德为准。
+- **地铁+骑行** 是自建合成（`src/providers/composite.ts`）：骑行进站圈 → 静态地铁图上多源 Dijkstra → 每个可达车站的骑行出站圈取并集。**目前只覆盖深圳**（线网数据 `src/data/metro/shenzhen.json`，OSM 提取），换乘/班距/进出站用时是估算参数，结果偏保守（剩余时间向下取档）。首刷会发几十上百个腿级请求，靠缓存+抽稀+并发闸门控制，拖动起点后增量很小。
 
 **2. 国内首次加载偏慢，标注靠运行时中文化。**
 
@@ -51,7 +54,7 @@ Token 从 [Mapbox 控制台](https://account.mapbox.com/access-tokens/) 获取�
 ## 怎么用
 
 1. 在地图上点击、用搜索框按地名添加，或点右下角的 ◎ 定位到当前位置
-2. 每个起点可以单独选出行方式（驾车 / 驾车实时路况 / 步行 / 骑行）
+2. 每个起点可以单独选出行方式（驾车 / 驾车实时路况 / 步行 / 骑行 / 公交+步行 / 地铁+步行 / 地铁+骑行）
 3. 选运算方式和时间档位
 4. 结果面积显示在左下角，可导出 GeoJSON
 
@@ -126,7 +129,7 @@ src/
 ## 测试
 
 ```bash
-npm test    # 116 个测试
+npm test    # 173 个测试
 ```
 
 测试集中在几何运算层和 provider 转换层——逻辑密度最高、出错最不显眼的地方。全部是纯函数测试，不碰网络。
@@ -139,7 +142,7 @@ v1 用高德时踩过三个只有真实环境能暴露的坑（回调静默不�
 
 ## 后续阶段
 
-**公交等时圈回归。** 若需要，可将 v1 的高德 `ArrivalRange` provider 从 git 历史恢复为第二数据源，按 mode 分流，出入口做 GCJ-02 ↔ WGS-84 转换（搜索链路已在这么做）。
+**组合等时圈打磨。** 地铁+骑行目前只有深圳：其他城市的线网可用 `scripts/build-metro-data.mjs` 从 OSM 生成后按城市分发；区间运行时间/班距可换成实测数据；出站接驳圈可做渐进渲染（先出直达区，接驳圈陆续并入）。
 
 **批量档位请求。** Mapbox 单次请求最多可带 4 个档位，可把请求数从「点数 × 档位数」降到「点数」。当前额度充足（10 万次/月），未做。
 

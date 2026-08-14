@@ -1,4 +1,6 @@
-import { isochroneUrl, pickContour, describeMapboxError } from './mapboxTransform'
+import {
+  isochroneUrl, pickContour, describeMapboxError, MAPBOX_PROFILE, type MapboxMode,
+} from './mapboxTransform'
 import { getMapboxToken } from '../mapbox/token'
 import type { IsochroneProvider } from './cache'
 
@@ -13,7 +15,10 @@ export function createMapboxProvider(): IsochroneProvider {
     supportedModes: ['driving', 'driving-traffic', 'walking', 'cycling'],
 
     async fetch(req) {
-      const url = isochroneUrl(req.mode, req.lngLat, req.minutes, getMapboxToken())
+      if (!(req.mode in MAPBOX_PROFILE)) {
+        throw new Error(`Mapbox 等时圈不支持该出行方式：${req.mode}`)
+      }
+      const url = isochroneUrl(req.mode as MapboxMode, req.lngLat, req.minutes, getMapboxToken())
       const res = await fetch(url)
       if (!res.ok) {
         const body = await res.text().catch(() => '')
