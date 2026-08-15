@@ -1,187 +1,538 @@
 .sidebar {
-  width: 300px;
+  --ink: #17233b;
+  --muted: #687389;
+  --line: #dce3ee;
+  --panel: #f4f7fb;
+  --result: #5138c9;
+  width: 356px;
   flex: none;
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #f7f7f8;
-  border-right: 1px solid #e2e2e5;
-  font: 13px/1.5 system-ui, -apple-system, "PingFang SC", sans-serif;
+  overflow: hidden;
+  border-right: 1px solid #cfd8e6;
+  background: #f7f9fc;
+  color: var(--ink);
+  font: 13px/1.45 "Aptos", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  box-shadow: 10px 0 32px rgba(23, 35, 59, .055);
+  z-index: 10;
+}
+
+.sidebar button,
+.sidebar input,
+.sidebar select { font: inherit; }
+
+.sidebar button:focus-visible,
+.sidebar input:focus-visible,
+.sidebar select:focus-visible {
+  outline: 3px solid rgba(81, 56, 201, .22);
+  outline-offset: 2px;
+}
+
+.pane { padding: 16px 18px; }
+.pane.origins {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #c3ccda transparent;
+}
+.pane.controls {
+  border-top: 1px solid var(--line);
+  background: #f0f4f9;
+}
+.pane.results {
+  border-top: 1px solid #ccd5e2;
+  background: #fff;
+  box-shadow: 0 -10px 24px rgba(23, 35, 59, .045);
+}
+
+.sidebar-intro {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin: 1px 0 22px;
+}
+.sidebar-intro h1 {
+  margin: 1px 0 2px;
+  font: 700 22px/1.08 "Aptos Display", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  letter-spacing: -.035em;
+}
+.eyebrow {
+  margin: 0;
+  color: var(--result);
+  font: 650 9px/1.2 "Bahnschrift", "DIN Alternate", sans-serif;
+  letter-spacing: .18em;
+}
+.intro-copy { margin: 0; color: var(--muted); font-size: 12px; }
+
+.product-signature {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #d8dff0;
+  box-shadow: 0 7px 18px rgba(81, 56, 201, .11);
   overflow: hidden;
 }
-.sidebar h2 {
-  font-size: 11px; text-transform: uppercase; letter-spacing: .05em;
-  color: #6b7280; margin: 0 0 8px;
+.product-signature i {
+  position: absolute;
+  left: 50%;
+  bottom: 7px;
+  transform: translateX(-50%);
+  border: 1.5px solid var(--result);
+  border-bottom-color: transparent;
+  border-radius: 50% 50% 12px 12px;
 }
-.pane { padding: 12px; }
-.pane.origins { flex: 1; overflow-y: auto; }
-.pane.controls { border-top: 1px solid #e2e2e5; }
-.pane.results { border-top: 1px solid #e2e2e5; background: #fff; }
+.product-signature i:nth-child(1) { width: 34px; height: 28px; opacity: .22; }
+.product-signature i:nth-child(2) { width: 24px; height: 20px; opacity: .52; }
+.product-signature i:nth-child(3) { width: 12px; height: 12px; opacity: 1; background: rgba(81, 56, 201, .12); }
 
+.section-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.section-heading h2 {
+  margin: 0;
+  color: var(--ink);
+  font: 700 11px/1.2 "Bahnschrift", "Noto Sans SC", sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.section-heading > span {
+  color: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.search-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 13px;
+}
+.search-box input {
+  min-width: 0;
+  flex: 1;
+  height: 38px;
+  padding: 0 11px;
+  border: 1px solid #cbd4e1;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: inset 0 1px 2px rgba(23, 35, 59, .035);
+}
+.search-box input::placeholder { color: #8b96a9; }
+.search-box button {
+  height: 38px;
+  padding: 0 13px;
+  border: 1px solid var(--ink);
+  border-radius: 9px;
+  background: var(--ink);
+  color: #fff;
+  cursor: pointer;
+}
+.search-box button:disabled { opacity: .55; cursor: wait; }
+.search-box .hint { flex-basis: 100%; }
+
+.empty-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1px dashed #bfc9d8;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .62);
+}
+.empty-pin {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  place-items: center;
+  border: 1px solid #aeb9cb;
+  border-radius: 50% 50% 50% 8px;
+  color: var(--result);
+  font-size: 20px;
+}
+.empty-card strong { font-size: 13px; }
+.empty-card p { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+
+.origin-list { display: flex; flex-direction: column; gap: 11px; }
 .origin-card {
-  background: #fff; border: 1px solid #e2e2e5; border-left-width: 4px;
-  border-radius: 6px; padding: 8px; margin-bottom: 8px;
+  position: relative;
+  padding: 13px;
+  border: 1px solid #d5ddea;
+  border-left: 5px solid var(--origin-color);
+  border-radius: 11px;
+  background: linear-gradient(135deg, var(--origin-tint), #fff 42%);
+  box-shadow: 0 5px 14px rgba(23, 35, 59, .055);
+  transition: opacity .18s ease, transform .18s ease, box-shadow .18s ease;
 }
-.origin-card header { display: flex; align-items: center; gap: 4px; }
-.label-input { flex: 1; border: none; background: transparent; font-weight: 600; font-size: 13px; }
-.label-input:focus { outline: 1px solid #cbd5e1; border-radius: 3px; }
-.icon { border: none; background: none; cursor: pointer; color: #9ca3af; font-size: 16px; }
-.row { display: flex; align-items: center; gap: 6px; margin: 6px 0; }
-select { width: 100%; padding: 3px; border: 1px solid #d1d5db; border-radius: 4px; }
+.origin-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(23, 35, 59, .085);
+}
+.origin-card.inactive { opacity: .52; filter: saturate(.65); }
+.origin-card.inactive:hover { opacity: .72; }
 
-.chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
+.origin-header { display: flex; align-items: center; gap: 9px; }
+.origin-badge {
+  display: grid;
+  width: 33px;
+  height: 33px;
+  flex: none;
+  place-items: center;
+  border: 3px solid #fff;
+  border-radius: 50% 50% 50% 9px;
+  font: 750 13px/1 "Bahnschrift", sans-serif;
+  box-shadow: 0 0 0 1px var(--origin-color), 0 3px 8px rgba(23, 35, 59, .2);
+  transform: rotate(-5deg);
+}
+.origin-name {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.origin-name > span {
+  color: var(--origin-color);
+  font: 650 9px/1.2 "Bahnschrift", "Noto Sans SC", sans-serif;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.label-input {
+  min-width: 0;
+  width: 100%;
+  padding: 2px 0;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+.label-input:focus-visible { border-radius: 3px; }
+.icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  place-items: center;
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #8a95a7;
+  cursor: pointer;
+  font-size: 19px;
+}
+.icon:hover { background: #eef1f5; color: #9e2f2f; }
+
+.origin-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px 0;
+  padding-bottom: 9px;
+  border-bottom: 1px solid rgba(23, 35, 59, .09);
+}
+.participation {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #526076;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 650;
+}
+.participation input { position: absolute; opacity: 0; pointer-events: none; }
+.participation-track {
+  width: 28px;
+  height: 16px;
+  padding: 2px;
+  border-radius: 99px;
+  background: #bcc5d2;
+  transition: background .15s ease;
+}
+.participation-track i {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(23, 35, 59, .22);
+  transition: transform .15s ease;
+}
+.participation input:checked + .participation-track { background: var(--origin-color); }
+.participation input:checked + .participation-track i { transform: translateX(12px); }
+.participation input:focus-visible + .participation-track {
+  outline: 3px solid rgba(81, 56, 201, .24);
+  outline-offset: 2px;
+}
+
+.field { display: flex; align-items: center; gap: 10px; }
+.field > span,
+.field-label {
+  flex: none;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+.field select {
+  min-width: 0;
+  flex: 1;
+  height: 34px;
+  padding: 0 28px 0 9px;
+  border: 1px solid #cbd4e1;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.custom-time { margin-top: 11px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 7px 0; }
 .chip {
-  padding: 3px 8px; border: 1px solid #d1d5db; border-radius: 4px;
-  background: #fff; cursor: pointer; font-size: 12px;
+  min-height: 30px;
+  padding: 4px 10px;
+  border: 1px solid #c7d0de;
+  border-radius: 7px;
+  background: #fff;
+  color: #455269;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 650;
+  transition: background .12s ease, color .12s ease, border-color .12s ease;
 }
-.chip.on { background: #111827; color: #fff; border-color: #111827; }
+.chip:hover { border-color: #8e9bad; color: var(--ink); }
+.chip.on { border-color: var(--ink); background: var(--ink); color: #fff; }
+.chips.compact .chip { flex: 1; padding-inline: 6px; }
+.chips.segmented { gap: 0; flex-wrap: nowrap; }
+.chips.segmented .chip { flex: 1; border-radius: 0; }
+.chips.segmented .chip:first-child { border-radius: 8px 0 0 8px; }
+.chips.segmented .chip:last-child { border-radius: 0 8px 8px 0; }
+.chips.segmented .chip + .chip { margin-left: -1px; }
 
-.slider-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
-.slider-row input[type="range"] { flex: 1; min-width: 0; margin: 0; accent-color: #111827; }
-.slider-row .slider-val {
-  flex: none; width: 40px; text-align: right;
-  font-size: 12px; color: #374151; font-variant-numeric: tabular-nums;
+.slider-row { display: flex; align-items: center; gap: 8px; margin: 7px 0 0; }
+.slider-row input[type="range"] {
+  min-width: 0;
+  flex: 1;
+  margin: 0;
+  accent-color: var(--result);
+}
+.slider-val {
+  width: 40px;
+  flex: none;
+  color: #3e4b61;
+  font: 650 11px/1 "Bahnschrift", sans-serif;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
-.cell-status { display: flex; flex-direction: column; gap: 3px; margin-top: 6px; }
-.tag { font-size: 11px; color: #6b7280; }
-.tag.muted { color: #9ca3af; }
+.layer-key {
+  margin-top: 11px;
+  padding: 9px;
+  border: 1px solid rgba(23, 35, 59, .09);
+  border-radius: 9px;
+  background: rgba(245, 247, 251, .78);
+}
+.layer-key-heading { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 7px; }
+.layer-key-heading > span { color: #435067; font-size: 10px; font-weight: 750; }
+.layer-key-heading small { color: #8490a3; font-size: 9px; }
+.band-swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(68px, 1fr)); gap: 5px; }
+.band-swatch {
+  display: flex;
+  min-width: 0;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 1px solid;
+  border-radius: 7px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.band-swatch i { width: 5px; height: 14px; border-radius: 99px; }
+.band-swatch b { font: 750 12px/1 "Bahnschrift", sans-serif; }
+.band-swatch small { font-size: 9px; font-weight: 650; }
+.no-bands { color: #8a95a7; font-size: 11px; }
+
+.cell-status { display: flex; flex-direction: column; gap: 4px; margin-top: 7px; }
+.tag { color: #6b7689; font-size: 10px; }
+.tag.loading::before { content: ""; display: inline-block; width: 5px; height: 5px; margin-right: 5px; border-radius: 50%; background: var(--origin-color); }
+.tag.muted { color: #929cad; }
 .retry {
-  font-size: 11px; color: #b91c1c; background: #fef2f2;
-  border: 1px solid #fecaca; border-radius: 4px; padding: 2px 6px; cursor: pointer; text-align: left;
+  padding: 5px 7px;
+  border: 1px solid #efc0c0;
+  border-radius: 6px;
+  background: #fff3f3;
+  color: #a42f2f;
+  cursor: pointer;
+  font-size: 10px;
+  text-align: left;
 }
 
-.search-box { display: flex; gap: 4px; margin-bottom: 10px; }
-.search-box input { flex: 1; min-width: 0; padding: 4px 6px; border: 1px solid #d1d5db; border-radius: 4px; }
-.search-box button { padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; background: #fff; cursor: pointer; }
+.control-group + .control-group { margin-top: 11px; }
+.control-group > .field-label { display: block; margin-bottom: 2px; }
+.time-control .chips:not(.segmented) .chip { flex: 1; }
+.difference-base { margin-top: 12px; }
 
-.result-row { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; }
-/* 与地图结果层同色，读数和图形连成一体 */
-.result-row .ok { color: #4a3aa7; font-weight: 600; }
-.result-row .muted { color: #9ca3af; }
-.result-row .warn { color: #b45309; text-align: right; font-size: 12px; }
-.hint { color: #9ca3af; font-size: 12px; margin: 4px 0; }
-.hint.error { color: #b91c1c; }
+.result-heading { margin-bottom: 8px; }
+.composite-key { display: inline-flex; align-items: center; gap: 5px; }
+.composite-key i { width: 9px; height: 9px; border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 0 1px var(--result); }
+.result-row {
+  display: grid;
+  grid-template-columns: 20px minmax(80px, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 6px 0;
+  border-top: 1px solid #edf0f4;
+}
+.result-row:first-of-type { border-top: 0; }
+.result-swatch {
+  width: 18px;
+  height: 18px;
+  border: 2px solid;
+  border-radius: 50% 50% 50% 5px;
+  transform: rotate(-6deg);
+}
+.result-time { display: flex; flex-direction: column; }
+.result-time b { font-size: 12px; }
+.result-time small { color: #8a95a7; font: 9px/1.3 "Bahnschrift", sans-serif; }
+.result-row .ok { color: #33248f; font: 750 13px/1 "Bahnschrift", "Noto Sans SC", sans-serif; }
+.result-row .muted { max-width: 145px; color: #8791a2; font-size: 10px; text-align: right; }
+.result-row .warn { max-width: 155px; color: #a45b16; font-size: 10px; text-align: right; }
+
+.hint { margin: 4px 0; color: #8994a6; font-size: 11px; }
+.hint.error { color: #a42f2f; }
 .export {
-  width: 100%; margin-top: 8px; padding: 6px;
-  border: 1px solid #d1d5db; border-radius: 4px; background: #fff; cursor: pointer;
+  width: 100%;
+  min-height: 36px;
+  margin-top: 9px;
+  border: 1px solid #cbd4e1;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 700;
 }
+.export:hover { border-color: var(--result); color: var(--result); }
 
-/* 把手只属于移动端形态，桌面端不存在 */
 .drawer-handle { display: none; }
-
 .pick-btn {
   width: 100%;
   min-height: 44px;
-  margin-bottom: 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  margin-bottom: 12px;
+  border: 1px solid #c7d0de;
+  border-radius: 9px;
   background: #fff;
-  font-size: 14px;
+  color: var(--ink);
   cursor: pointer;
+  font-size: 14px;
 }
-.pick-btn.on {
-  background: #111827;
-  color: #fff;
-  border-color: #111827;
+.pick-btn.on { border-color: var(--result); background: var(--result); color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  .origin-card,
+  .participation-track,
+  .participation-track i,
+  .sidebar { transition: none !important; }
 }
 
 @media (max-width: 768px) {
-  /* 抽屉：浮在全屏地图之上。
-     72vh 与 90px 是这套位移的唯一两个输入——
-     改其中任何一个，下面 translateY 的计算式必须同步改。 */
   .sidebar {
     position: fixed;
     left: 0;
     bottom: 0;
     width: 100%;
     height: 72vh;
-    border-right: none;
-    border-top: 1px solid #e2e2e5;
-    border-radius: 14px 14px 0 0;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, .12);
-    transition: transform .25s ease;
+    border: none;
+    border-top: 1px solid #ccd5e2;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -8px 28px rgba(23, 35, 59, .17);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    transition: transform .25s cubic-bezier(.2, .75, .25, 1);
     z-index: 300;
     padding-bottom: env(safe-area-inset-bottom);
   }
 
-  /* 露出的高度 = 把手高度。两者必须相等：
-     露出的部分如果多于把手，多出来那截看得见却点不动——
-     视觉上是一整块面板，实际只有顶部一条能点，真机上就表现为「点不了」。 */
   .sidebar.collapsed {
+    overflow: hidden;
     transform: translateY(calc(72vh - 88px));
   }
 
   .drawer-handle {
+    position: sticky;
+    top: 0;
     display: flex;
-    align-items: center;
-    gap: 10px;
     width: 100%;
     height: 88px;
-    padding: 14px 16px 8px;
+    flex: none;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px 8px;
     border: none;
-    background: transparent;
+    background: rgba(247, 249, 252, .97);
+    color: var(--ink);
     cursor: pointer;
-    position: relative;
-    /* 折叠时整块都是可点区域，不要被内部元素抢走点击 */
     -webkit-tap-highlight-color: transparent;
+    z-index: 5;
   }
-
-  /* 折叠时盖住把手下方的内容，避免露出半截「起点」标题 */
-  .sidebar.collapsed .drawer-handle {
-    background: #f7f7f8;
-  }
-
-  /* 顶部那条小横杠，提示这里可以点 */
+  .sidebar.collapsed .drawer-handle { background: #f7f9fc; border-radius: 18px 18px 0 0; }
   .grip {
     position: absolute;
-    top: 6px;
+    top: 7px;
     left: 50%;
-    transform: translateX(-50%);
-    width: 36px;
+    width: 38px;
     height: 4px;
-    border-radius: 2px;
-    background: #d1d5db;
+    border-radius: 99px;
+    background: #c4cddd;
+    transform: translateX(-50%);
   }
-
   .summary {
+    min-width: 0;
     flex: 1;
-    text-align: left;
-    font-size: 14px;
-    font-weight: 600;
-    color: #111827;
     margin-top: 6px;
     overflow: hidden;
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 700;
+    text-align: left;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  .caret { margin-top: 6px; color: #818da0; }
 
-  .caret {
-    color: #9ca3af;
-    margin-top: 6px;
-  }
-
-  /* 内容滚到底时不要把整个页面一起拽动 */
+  .sidebar-intro { display: none; }
+  .pane { padding-inline: 16px; }
   .pane.origins {
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
+    flex: none;
+    overflow: visible;
+    padding-top: 8px;
   }
+  .origin-card:hover { transform: none; }
 
-  /* 触摸目标放大到 iOS 建议的 44px 下限 */
   .chip,
   .search-box button,
   .search-box input,
   select,
   .export,
   .retry,
-  .slider-row input[type="range"] {
-    min-height: 44px;
-  }
+  .slider-row input[type="range"] { min-height: 44px; }
 
-  .chip { padding: 0 14px; font-size: 14px; }
+  .chip { padding: 0 13px; font-size: 13px; }
   .icon { min-width: 44px; min-height: 44px; font-size: 20px; }
-  .label-input { min-height: 44px; font-size: 15px; }
-
-  /* iOS 上字号小于 16px 会在聚焦时自动放大页面 */
+  .label-input { min-height: 40px; font-size: 15px; }
   .search-box input { font-size: 16px; }
+  .field select { height: 44px; }
 }

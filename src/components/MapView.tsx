@@ -7,6 +7,14 @@ import { cellKey } from '../types'
 import { computeBand } from '../state/compute'
 import { shouldAddOnMapClick, useIsMobile } from '../ui/responsive'
 import { locateCurrentPosition } from '../geo/locate'
+import {
+  RESULT_COLOR,
+  originBandLineOpacity,
+  originBandLineWidth,
+  originBandOpacity,
+  resultBandLineWidth,
+  resultBandOpacity,
+} from '../ui/mapStyle'
 import type { PolyFeature } from '../geometry/ops'
 import type { FeatureCollection } from 'geojson'
 import './MapView.css'
@@ -92,42 +100,57 @@ export function MapView() {
       map.addSource('origins-iso', { type: 'geojson', data: EMPTY_FC })
       map.addSource('result-iso', { type: 'geojson', data: EMPTY_FC })
 
-      // 档位是有序数据：嵌套的三档圈叠加后内圈自然更深（15 分钟被三层
-      // 覆盖），透明度选 0.15 让三层叠加(≈0.39)仍不遮死底图。
-      // 描边提亮，否则档位边界糊成一片。
+      // 每个 feature 自带与侧栏图例一致的透明度和线宽：近时段更浓，
+      // 远时段更淡。不要在这里另写常量，否则图例会和地图失配。
       map.addLayer({
         id: 'origins-fill',
         type: 'fill',
         source: 'origins-iso',
-        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.15 },
+        paint: {
+          'fill-color': ['get', 'color'],
+          'fill-opacity': ['coalesce', ['get', 'fillOpacity'], 0.18],
+        },
       })
       map.addLayer({
         id: 'origins-line',
         type: 'line',
         source: 'origins-iso',
-        paint: { 'line-color': ['get', 'color'], 'line-opacity': 0.65, 'line-width': 1.2 },
+        paint: {
+          'line-color': ['get', 'color'],
+          'line-opacity': ['coalesce', ['get', 'lineOpacity'], 0.8],
+          'line-width': ['coalesce', ['get', 'lineWidth'], 1.8],
+        },
       })
-      // 结果层专用 violet——与全部起点色经验证距离安全，且在底图上
-      // 无冲突（水是蓝、绿地是绿、道路是橙黄，紫色不与任何底色抢戏）。
-      // 白色衬线（casing）压在紫线下面，保证边界在任何底色上都清晰——
-      // 旧版的近黑填充在彩色底图上像一块污渍。
+      // 紫色只表示「多个点的集合运算结果」。单点不画这一层，保留点本身
+      // 的识别色。白色 casing 让结果边界在道路、水面和绿地上都能读清。
       map.addLayer({
         id: 'result-fill',
         type: 'fill',
         source: 'result-iso',
-        paint: { 'fill-color': '#4a3aa7', 'fill-opacity': 0.18 },
+        paint: {
+          'fill-color': RESULT_COLOR,
+          'fill-opacity': ['coalesce', ['get', 'fillOpacity'], 0.18],
+        },
       })
       map.addLayer({
         id: 'result-casing',
         type: 'line',
         source: 'result-iso',
-        paint: { 'line-color': '#ffffff', 'line-width': 4.5, 'line-opacity': 0.9 },
+        paint: {
+          'line-color': '#ffffff',
+          'line-width': ['+', ['coalesce', ['get', 'lineWidth'], 2.8], 3.4],
+          'line-opacity': 0.94,
+        },
       })
       map.addLayer({
         id: 'result-line',
         type: 'line',
         source: 'result-iso',
-        paint: { 'line-color': '#4a3aa7', 'line-width': 2 },
+        paint: {
+          'line-color': RESULT_COLOR,
+          'line-width': ['coalesce', ['get', 'lineWidth'], 2.8],
+          'line-opacity': 0.98,
+        },
       })
 
       setMapReady(true)
@@ -174,7 +197,14 @@ export function MapView() {
     if (!map) return
     markersRef.current.forEach((m) => m.remove())
     markersRef.current = origins.map((o) => {
-      const marker = new mapboxgl.Marker({ draggable: true, color: o.color })
+      // 使用 Mapbox 原生 pin，颜色仍与左侧点位卡片一一对应。
+      const marker = new mapboxgl.Marker({ draggable: true, color: o.color, scale: 1.08 })
+      const element = marker.getElement()
+      element.classList.add('origin-map-pin')
+      if (!o.visible) element.classList.add('inactive')
+      element.setAttribute('aria-label', `地点：${o.label}`)
+      element.title = `${o.label} · 可拖动调整位置`
+      marker
         .setLngLat(o.lngLat)
         .addTo(map)
       marker.on('dragend', () => {
@@ -193,10 +223,21 @@ export function MapView() {
     for (const o of origins) {
       if (!o.visible) continue
       const thresholds = bandMode === 'paired' ? globalThresholds : o.thresholds
-      for (const minutes of thresholds) {
+      // 先画范围较大的浅色层，再画范围较小的深色层，边界不会被外圈盖住。
+      for (const minutes of [...thresholds].sort((a, b) => b - a)) {
         const geom = geoms.get(cellKey(o.id, minutes))
         if (!geom) continue
-        features.push({ ...geom, properties: { ...geom.properties, color: o.color } })
+        features.push({
+          ...geom,
+          properties: {
+            ...geom.properties,
+            color: o.color,
+            minutes,
+            fillOpacity: originBandOpacity(thresholds, minutes),
+            lineOpacity: originBandLineOpacity(thresholds, minutes),
+            lineWidth: originBandLineWidth(thresholds, minutes),
+          },
+        })
       }
     }
     ;(map.getSource('origins-iso') as mapboxgl.GeoJSONSource)
@@ -210,22 +251,37 @@ export function MapView() {
     const visibleIds = origins.filter((o) => o.visible).map((o) => o.id)
     const features: PolyFeature[] = []
 
-    if (visibleIds.length >= 1) {
+    // 单点结果和它自己的等时圈完全相同，重复铺一层紫色只会抹掉点位颜色。
+    if (visibleIds.length >= 2) {
       const bands = bandMode === 'paired' ? globalThresholds : [globalThresholds[0]]
-      for (const minutes of bands) {
+      for (const minutes of [...bands].sort((a, b) => b - a)) {
         const r = computeBand({ op, minutes, originIds: visibleIds, cells, geoms, baseOriginId })
-        if (r.kind === 'ok') features.push(r.geometry)
+        if (r.kind === 'ok') {
+          features.push({
+            ...r.geometry,
+            properties: {
+              ...r.geometry.properties,
+              minutes,
+              fillOpacity: resultBandOpacity(bands, minutes),
+              lineWidth: resultBandLineWidth(bands, minutes),
+            },
+          })
+        }
       }
     }
 
     ;(map.getSource('result-iso') as mapboxgl.GeoJSONSource)
       .setData({ type: 'FeatureCollection', features })
 
-    // 一次只让一个层次当主角：结果出来后，起点圈退到近乎只剩描边的
-    // 上下文层——否则两组起点圈加结果层叠四层颜色，交集区紫到发黑。
+    // 有合成结果时稍微压低单点填色，但保留足够浓度和强描边，让用户仍能
+    // 从地图追溯每一个点；旧版降到 0.05，实际几乎看不见。
     const hasResult = features.length > 0
-    map.setPaintProperty('origins-fill', 'fill-opacity', hasResult ? 0.05 : 0.15)
-    map.setPaintProperty('origins-line', 'line-opacity', hasResult ? 0.45 : 0.65)
+    map.setPaintProperty('origins-fill', 'fill-opacity', [
+      '*', ['coalesce', ['get', 'fillOpacity'], 0.18], hasResult ? 0.62 : 1,
+    ])
+    map.setPaintProperty('origins-line', 'line-opacity', [
+      '*', ['coalesce', ['get', 'lineOpacity'], 0.8], hasResult ? 0.88 : 1,
+    ])
   }, [origins, cells, geoms, op, bandMode, globalThresholds, baseOriginId, mapReady])
 
   return (
