@@ -1,11 +1,22 @@
-export type Mode = 'driving' | 'driving-traffic' | 'walking' | 'cycling'
+export type Mode =
+  | 'driving' | 'driving-traffic' | 'walking' | 'cycling'
+  // 公共交通组合。前两个走高德 ArrivalRange（公交/地铁 + 步行接驳），
+  // metro-cycling 是自建合成：骑行进站 + 地铁 + 骑行出站，见 providers/composite.ts
+  | 'transit-walking' | 'subway-walking' | 'metro-cycling'
 
 export const MODE_LABEL: Record<Mode, string> = {
   driving: '驾车',
   'driving-traffic': '驾车（实时路况）',
   walking: '步行',
   cycling: '骑行',
+  'transit-walking': '公交+步行',
+  'subway-walking': '地铁+步行',
+  'metro-cycling': '地铁+骑行（仅深圳）',
 }
+
+export type MarkerIcon =
+  | 'place' | 'home' | 'work' | 'school'
+  | 'transit' | 'food' | 'medical' | 'star'
 
 export type Origin = {
   id: string
@@ -14,6 +25,7 @@ export type Origin = {
   mode: Mode
   thresholds: number[]
   color: string
+  markerIcon?: MarkerIcon
   visible: boolean
 }
 

@@ -3,16 +3,9 @@ import { cellKey, MAX_MINUTES, type BandMode, type Mode, type Origin, type SetOp
 import type { PolyFeature } from '../geometry/ops'
 import type { CellStatus } from '../geometry/result'
 import { getProvider } from '../providers'
-import { applyCustomThreshold, planRequests } from './compute'
-
-/**
- * 起点配色，经 CVD 验证的固定顺序（blue/orange/aqua/yellow/magenta）。
- * 旧色板在全对检查下硬失败：1↔5 号色正常视力 ΔE 仅 7.5（阈值 15），
- * 色盲模拟下 3↔5 号 ΔE 2.4——几乎同色。
- * 前 3 色通过全对检查（ΔE 9.2/24.0）；4、5 号仅在 ≥4 个起点时出现，
- * 靠 marker 颜色 + 侧栏色条 + 名字这层辅助编码兜底。
- */
-const PALETTE = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4']
+import { isConfigError } from '../amap/errors'
+import { applyCustomThreshold, normalizeCustomThresholds, planRequests } from './compute'
+import { ORIGIN_PALETTE } from '../ui/mapStyle'
 
 type State = {
   origins: Origin[]
@@ -63,13 +56,17 @@ export const useStore = create<State>((set, get) => ({
   addOrigin: (lngLat, label) => {
     const origins = get().origins
     const id = `o${Date.now().toString(36)}${origins.length}`
+    const globalThresholds = get().globalThresholds
     const next: Origin = {
       id,
       label: label || `起点 ${origins.length + 1}`,
       lngLat,
       mode: 'driving',
-      thresholds: [...get().globalThresholds],
-      color: PALETTE[origins.length % PALETTE.length],
+      thresholds: get().bandMode === 'custom'
+        ? normalizeCustomThresholds([], globalThresholds[0] ?? 30)
+        : [...globalThresholds],
+      color: ORIGIN_PALETTE[origins.length % ORIGIN_PALETTE.length],
+      markerIcon: 'place',
       visible: true,
     }
     set({
@@ -94,11 +91,30 @@ export const useStore = create<State>((set, get) => ({
 
   updateOrigin: (id, patch) => {
     set({ origins: get().origins.map((o) => (o.id === id ? { ...o, ...patch } : o)) })
-    void get().refresh()
+    // 名称、颜色和 marker 图标只影响显示，不应重新请求等时圈。
+    if (patch.lngLat || patch.mode || patch.thresholds || patch.visible !== undefined) {
+      void get().refresh()
+    }
   },
 
   setMode: (id, mode) => get().updateOrigin(id, { mode }),
-  setBandMode: (bandMode) => { set({ bandMode }); void get().refresh() },
+  setBandMode: (bandMode) => {
+    if (bandMode === 'custom') {
+      const fallback = get().globalThresholds[0] ?? 30
+      set({
+        bandMode,
+        // 统一时间中每点可能保存了多个档位；进入分别设置时
+        // 立即收敛为单值，让存储、请求与界面显示保持一致。
+        origins: get().origins.map((origin) => ({
+          ...origin,
+          thresholds: normalizeCustomThresholds(origin.thresholds, fallback),
+        })),
+      })
+    } else {
+      set({ bandMode })
+    }
+    void get().refresh()
+  },
   setGlobalThresholds: (globalThresholds) => { set({ globalThresholds }); void get().refresh() },
   // 松手即生效：拖滑条就是「想用这个时间」的明确意图，不要求再点一次
   // chip 激活；旧的自定义档同时被换掉，避免拖一路留下一串档位
@@ -125,7 +141,6 @@ export const useStore = create<State>((set, get) => ({
   refresh: async () => {
     const { origins, bandMode, globalThresholds } = get()
     const plan = planRequests(origins, bandMode, globalThresholds)
-    const provider = getProvider()
 
     const cells = new Map(get().cells)
     for (const p of plan) {
@@ -137,7 +152,8 @@ export const useStore = create<State>((set, get) => ({
     await Promise.all(plan.map(async (p) => {
       const key = cellKey(p.originId, p.minutes)
       try {
-        const geom = await provider.fetch({
+        // 数据源按出行方式分发：不同起点可能各用各的 provider
+        const geom = await getProvider(p.mode).fetch({
           lngLat: p.lngLat, mode: p.mode, minutes: p.minutes,
         })
         set((s) => ({
@@ -147,8 +163,8 @@ export const useStore = create<State>((set, get) => ({
         }))
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
-        // token 无效/额度用尽是配置问题，重试无意义，升为全局提示
-        if (/token|额度/i.test(msg)) set({ fatalError: msg })
+        // token 无效/额度用尽/高德配置错误是配置问题，重试无意义，升为全局提示
+        if (/token|额度/i.test(msg) || isConfigError(msg)) set({ fatalError: msg })
         set((s) => ({
           cells: new Map(s.cells).set(key, 'error'),
           errors: new Map(s.errors).set(key, msg),
@@ -163,7 +179,7 @@ export const useStore = create<State>((set, get) => ({
     const key = cellKey(originId, minutes)
     set((s) => ({ cells: new Map(s.cells).set(key, 'loading') }))
     try {
-      const geom = await getProvider().fetch({
+      const geom = await getProvider(origin.mode).fetch({
         lngLat: origin.lngLat, mode: origin.mode, minutes,
       })
       set((s) => ({
@@ -173,7 +189,7 @@ export const useStore = create<State>((set, get) => ({
       }))
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
-      if (/token|额度/i.test(msg)) set({ fatalError: msg })
+      if (/token|额度/i.test(msg) || isConfigError(msg)) set({ fatalError: msg })
       set((s) => ({
         cells: new Map(s.cells).set(key, 'error'),
         errors: new Map(s.errors).set(key, msg),
