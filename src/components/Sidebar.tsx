@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { SearchBox } from './SearchBox'
-import { ResultsPanel, resultSummary, type ResultItem } from './ResultsPanel'
+import { ResultsPanel, isEmptyConclusion, resultSummary, type ResultItem } from './ResultsPanel'
 import { useStore } from '../state/store'
 import { computeBand, computeCustomBand } from '../state/compute'
 import { cellKey, MAX_MINUTES, MODE_LABEL, type MarkerIcon, type Mode, type SetOp } from '../types'
@@ -151,10 +151,15 @@ export function Sidebar() {
     }))
   }, [bands, s.bandMode, s.baseOriginId, s.cells, s.geoms, s.op, visible, visibleIds])
   const summary = resultSummary(visibleIds.length, results, s.op)
+  const hasEmptyConclusion = isEmptyConclusion(results)
 
   return (
     <aside className={s.drawerOpen ? 'sidebar' : 'sidebar collapsed'}>
-      <button className="drawer-handle" onClick={s.toggleDrawer} aria-expanded={s.drawerOpen}>
+      <button
+        className={hasEmptyConclusion ? 'drawer-handle has-empty-conclusion' : 'drawer-handle'}
+        onClick={s.toggleDrawer}
+        aria-expanded={s.drawerOpen}
+      >
         <span className="grip" />
         <span className="summary">{summary}</span>
         <span className="caret" aria-hidden="true">{s.drawerOpen ? '▾' : '▴'}</span>

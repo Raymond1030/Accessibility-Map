@@ -16,6 +16,12 @@ const EMPTY_TEXT: Record<SetOp, string> = {
   difference: '基准点范围已被完全覆盖',
 }
 
+const EMPTY_DETAIL: Record<SetOp, string> = {
+  intersect: '这些地点在该时限内没有重叠区域',
+  union: '这些地点在该时限内都没有可达区域',
+  difference: '基准点的可达范围没有剩余区域',
+}
+
 export type ResultItem = {
   minutes: number
   label?: string
@@ -44,6 +50,11 @@ export function resultSummary(
   return '数据不全，无法计算'
 }
 
+export function isEmptyConclusion(results: ResultItem[]): boolean {
+  return results.some((item) => item.result.kind === 'empty')
+    && !results.some((item) => item.result.kind === 'ok')
+}
+
 type ResultsPanelProps = {
   variant: 'overlay' | 'inline'
   allOrigins: Origin[]
@@ -59,6 +70,16 @@ function ExportIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 16 16">
       <path d="M8 1.75v7.5m0 0 2.75-2.75M8 9.25 5.25 6.5M2.25 10v3.25h11.5V10" />
+    </svg>
+  )
+}
+
+function EmptyResultIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 20 20">
+      <circle cx="7.25" cy="10" r="4.75" />
+      <circle cx="12.75" cy="10" r="4.75" />
+      <path d="M4 16 16 4" />
     </svg>
   )
 }
@@ -82,13 +103,16 @@ export function ResultsPanel({
     }]
   })
   const summary = resultSummary(visibleCount, results, op)
-  const title = visibleCount === 1 ? '可达范围' : '运算结果'
+  const hasEmptyConclusion = isEmptyConclusion(results)
+  const title = visibleCount === 1
+    ? '可达范围'
+    : hasEmptyConclusion ? EMPTY_TEXT[op] : '运算结果'
   const displayColor = visibleCount === 1 ? visibleOrigins[0].color : RESULT_COLOR
   const nameById = new Map(allOrigins.map((origin) => [origin.id, origin.label]))
 
   return (
     <section
-      className={`results-panel ${variant}${collapsed ? ' is-collapsed' : ''}`}
+      className={`results-panel ${variant}${collapsed ? ' is-collapsed' : ''}${hasEmptyConclusion ? ' has-empty-conclusion' : ''}`}
       aria-label={title}
     >
       <header className="results-panel-header">
@@ -136,6 +160,20 @@ export function ResultsPanel({
             const opacity = visibleCount === 1
               ? originBandOpacity(bands, minutes)
               : resultBandOpacity(bands, minutes)
+
+            if (result.kind === 'empty') {
+              return (
+                <div className="result-item is-empty" key={`${minutes}-${item.label ?? ''}`}>
+                  <span className="empty-result-icon"><EmptyResultIcon /></span>
+                  <span className="empty-result-copy">
+                    <span className="empty-result-time">{timeLabel(item)}</span>
+                    <strong>{EMPTY_TEXT[op]}</strong>
+                    <small>{EMPTY_DETAIL[op]}</small>
+                  </span>
+                </div>
+              )
+            }
+
             return (
               <div className="result-item" key={`${minutes}-${item.label ?? ''}`}>
                 <span
@@ -148,7 +186,6 @@ export function ResultsPanel({
                 />
                 <b>{timeLabel(item)}</b>
                 {result.kind === 'ok' && <strong>{formatArea(result.areaSqM)}</strong>}
-                {result.kind === 'empty' && <span className="result-muted">{EMPTY_TEXT[op]}</span>}
                 {result.kind === 'loading' && <span className="result-muted">计算中</span>}
                 {result.kind === 'unavailable' && (
                   <span className="result-warning">

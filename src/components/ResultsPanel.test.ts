@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { polygon } from '@turf/turf'
-import { resultSummary, type ResultItem } from './ResultsPanel'
+import { isEmptyConclusion, resultSummary, type ResultItem } from './ResultsPanel'
 import type { PolyFeature } from '../geometry/ops'
 
 const geometry = polygon([[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]]) as PolyFeature
@@ -42,5 +42,21 @@ describe('resultSummary', () => {
     expect(resultSummary(1, [], 'union')).toBe('选择时间档位')
     expect(resultSummary(1, [{ minutes: 15, result: { kind: 'unavailable', missing: ['a'] } }], 'union'))
       .toBe('数据不全，无法计算')
+  })
+})
+
+describe('isEmptyConclusion', () => {
+  it('只有空结果时突出结论', () => {
+    expect(isEmptyConclusion([
+      { minutes: 15, result: { kind: 'empty' } },
+      { minutes: 30, result: { kind: 'loading' } },
+    ])).toBe(true)
+  })
+
+  it('仍有可用档位时只突出对应的空结果行', () => {
+    expect(isEmptyConclusion([
+      { minutes: 15, result: { kind: 'empty' } },
+      { minutes: 30, result: { kind: 'ok', geometry, areaSqM: 2_500_000 } },
+    ])).toBe(false)
   })
 })
