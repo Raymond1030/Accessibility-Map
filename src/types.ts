@@ -14,6 +14,10 @@ export const MODE_LABEL: Record<Mode, string> = {
   'metro-cycling': '地铁+骑行（仅深圳）',
 }
 
+export type MarkerIcon =
+  | 'place' | 'home' | 'work' | 'school'
+  | 'transit' | 'food' | 'medical' | 'star'
+
 export type Origin = {
   id: string
   label: string
@@ -21,6 +25,7 @@ export type Origin = {
   mode: Mode
   thresholds: number[]
   color: string
+  markerIcon?: MarkerIcon
   visible: boolean
 }
 

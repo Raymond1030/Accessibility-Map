@@ -4,7 +4,7 @@ import type { PolyFeature } from '../geometry/ops'
 import type { CellStatus } from '../geometry/result'
 import { getProvider } from '../providers'
 import { isConfigError } from '../amap/errors'
-import { applyCustomThreshold, planRequests } from './compute'
+import { applyCustomThreshold, normalizeCustomThresholds, planRequests } from './compute'
 import { ORIGIN_PALETTE } from '../ui/mapStyle'
 
 type State = {
@@ -56,13 +56,17 @@ export const useStore = create<State>((set, get) => ({
   addOrigin: (lngLat, label) => {
     const origins = get().origins
     const id = `o${Date.now().toString(36)}${origins.length}`
+    const globalThresholds = get().globalThresholds
     const next: Origin = {
       id,
       label: label || `起点 ${origins.length + 1}`,
       lngLat,
       mode: 'driving',
-      thresholds: [...get().globalThresholds],
+      thresholds: get().bandMode === 'custom'
+        ? normalizeCustomThresholds([], globalThresholds[0] ?? 30)
+        : [...globalThresholds],
       color: ORIGIN_PALETTE[origins.length % ORIGIN_PALETTE.length],
+      markerIcon: 'place',
       visible: true,
     }
     set({
@@ -87,11 +91,30 @@ export const useStore = create<State>((set, get) => ({
 
   updateOrigin: (id, patch) => {
     set({ origins: get().origins.map((o) => (o.id === id ? { ...o, ...patch } : o)) })
-    void get().refresh()
+    // 名称、颜色和 marker 图标只影响显示，不应重新请求等时圈。
+    if (patch.lngLat || patch.mode || patch.thresholds || patch.visible !== undefined) {
+      void get().refresh()
+    }
   },
 
   setMode: (id, mode) => get().updateOrigin(id, { mode }),
-  setBandMode: (bandMode) => { set({ bandMode }); void get().refresh() },
+  setBandMode: (bandMode) => {
+    if (bandMode === 'custom') {
+      const fallback = get().globalThresholds[0] ?? 30
+      set({
+        bandMode,
+        // 统一时间中每点可能保存了多个档位；进入分别设置时
+        // 立即收敛为单值，让存储、请求与界面显示保持一致。
+        origins: get().origins.map((origin) => ({
+          ...origin,
+          thresholds: normalizeCustomThresholds(origin.thresholds, fallback),
+        })),
+      })
+    } else {
+      set({ bandMode })
+    }
+    void get().refresh()
+  },
   setGlobalThresholds: (globalThresholds) => { set({ globalThresholds }); void get().refresh() },
   // 松手即生效：拖滑条就是「想用这个时间」的明确意图，不要求再点一次
   // chip 激活；旧的自定义档同时被换掉，避免拖一路留下一串档位

@@ -10,11 +10,6 @@
   height: 100%;
 }
 
-/* Mapbox 原生 pin：只补充阴影和隐藏状态，不覆写 SVG 形状。 */
-.origin-map-pin { cursor: grab; filter: drop-shadow(0 4px 5px rgba(23, 35, 59, .3)); }
-.origin-map-pin:active { cursor: grabbing; }
-.origin-map-pin.inactive { opacity: .48; filter: grayscale(.35) drop-shadow(0 3px 4px rgba(23, 35, 59, .2)); }
-
 .picking-hint {
   position: absolute;
   top: 12px;
@@ -47,7 +42,7 @@
 .locate-btn {
   position: absolute;
   right: 14px;
-  bottom: 24px;
+  top: 14px;
   z-index: 200;
   width: 44px;
   height: 44px;
@@ -64,9 +59,8 @@
 
 .locate-msg {
   position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 80px;
+  top: 68px;
+  right: 14px;
   z-index: 210;
   display: flex;
   align-items: center;
@@ -77,6 +71,7 @@
   color: #fff;
   font: 13px/1.5 system-ui, -apple-system, "PingFang SC", sans-serif;
   box-shadow: 0 2px 12px rgba(0, 0, 0, .25);
+  max-width: min(360px, calc(100% - 28px));
 }
 
 .locate-msg button {
@@ -93,6 +88,12 @@
 
 @media (max-width: 768px) {
   /* 抽屉折叠时露出 88px，定位按钮要抬到它上面 */
-  .locate-btn { bottom: 104px; }
-  .locate-msg { bottom: 160px; }
+  .locate-btn { top: auto; bottom: 104px; }
+  .locate-msg {
+    top: auto;
+    right: 12px;
+    bottom: 160px;
+    left: 12px;
+    max-width: none;
+  }
 }

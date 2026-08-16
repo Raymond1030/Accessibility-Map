@@ -1,0 +1,169 @@
+.results-panel {
+  --results-ink: #17233b;
+  --results-muted: #687389;
+  --results-line: #d8e0eb;
+  color: var(--results-ink);
+  font: 13px/1.45 "Aptos", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+}
+
+.results-panel.overlay {
+  position: absolute;
+  right: 16px;
+  bottom: 50px;
+  z-index: 190;
+  width: 264px;
+  max-height: calc(100% - 96px);
+  overflow: hidden;
+  border: 1px solid rgba(190, 201, 216, .96);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 12px 30px rgba(23, 35, 59, .18);
+  backdrop-filter: blur(8px);
+}
+
+.results-panel.inline {
+  flex: none;
+  padding: 14px 16px;
+  border-top: 1px solid #ccd5e2;
+  background: #fff;
+}
+
+.results-panel-header {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.results-panel.overlay .results-panel-header { padding: 0 9px 0 13px; }
+.results-panel.inline .results-panel-header { min-height: 30px; margin-bottom: 4px; }
+
+.results-panel-heading {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.results-panel-heading h2 {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--results-ink);
+  font: 700 11px/1.2 "Bahnschrift", "Noto Sans SC", sans-serif;
+  letter-spacing: .07em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.results-panel.is-collapsed .results-panel-heading h2 {
+  font: 700 12px/1.25 "Aptos", "Noto Sans SC", sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.results-composite-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--results-muted);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.results-composite-key i {
+  width: 8px;
+  height: 8px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px #5138c9;
+}
+
+.results-panel-actions { display: flex; flex: none; align-items: center; gap: 2px; }
+.results-export,
+.results-collapse {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #536078;
+  cursor: pointer;
+  font: 650 10px/1 "Aptos", "Noto Sans SC", sans-serif;
+}
+
+.results-export { gap: 4px; padding: 0 7px; }
+.results-export svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+.results-collapse { width: 30px; padding: 0; font-size: 12px; }
+.results-export:hover,
+.results-collapse:hover { background: #edf1f6; color: #33248f; }
+
+.results-export:focus-visible,
+.results-collapse:focus-visible {
+  outline: 3px solid rgba(81, 56, 201, .22);
+  outline-offset: 1px;
+}
+
+.results-panel-body { padding: 0 13px 9px; }
+.results-panel.inline .results-panel-body { padding: 0; }
+
+.result-item {
+  display: grid;
+  grid-template-columns: 17px minmax(64px, 1fr) auto;
+  min-height: 38px;
+  align-items: center;
+  gap: 7px;
+  border-top: 1px solid #edf0f4;
+}
+
+.result-item-swatch {
+  width: 15px;
+  height: 15px;
+  border: 1.5px solid;
+  border-radius: 50% 50% 50% 4px;
+  transform: rotate(-6deg);
+}
+
+.result-item b { font-size: 11px; }
+.result-item strong {
+  color: #33248f;
+  font: 750 12px/1 "Bahnschrift", "Noto Sans SC", sans-serif;
+  white-space: nowrap;
+}
+
+.result-muted,
+.result-warning {
+  max-width: 128px;
+  font-size: 9px;
+  line-height: 1.25;
+  text-align: right;
+}
+.result-muted { color: #8791a2; }
+.result-warning { color: #9b5a19; }
+.result-hint { margin: 8px 0 4px; color: #7f8a9c; font-size: 11px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .results-panel { scroll-behavior: auto; }
+}
+
+@media (max-width: 768px) {
+  .results-panel.inline .results-panel-header { min-height: 44px; }
+  .results-export,
+  .results-collapse { min-height: 44px; }
+  .results-export { padding-inline: 10px; font-size: 12px; }
+  .result-item { min-height: 44px; }
+  .result-item b { font-size: 12px; }
+  .result-item strong { font-size: 13px; }
+}
