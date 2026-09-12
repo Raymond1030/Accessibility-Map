@@ -21,6 +21,11 @@
   backdrop-filter: blur(8px);
 }
 
+.results-panel.overlay.has-empty-conclusion {
+  border-color: rgba(218, 107, 92, .82);
+  box-shadow: 0 12px 32px rgba(118, 39, 29, .2);
+}
+
 .results-panel.inline {
   flex: none;
   padding: 14px 16px;
@@ -38,6 +43,10 @@
 
 .results-panel.overlay .results-panel-header { padding: 0 9px 0 13px; }
 .results-panel.inline .results-panel-header { min-height: 30px; margin-bottom: 4px; }
+.results-panel.has-empty-conclusion .results-panel-header {
+  background: linear-gradient(100deg, rgba(255, 237, 233, .96), rgba(255, 255, 255, 0));
+}
+.results-panel.overlay.has-empty-conclusion .results-panel-header { padding-left: 12px; }
 
 .results-panel-heading {
   min-width: 0;
@@ -56,6 +65,13 @@
   text-overflow: ellipsis;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+.results-panel.has-empty-conclusion .results-panel-heading h2 {
+  color: #9f2f25;
+  font-size: 12px;
+  letter-spacing: .015em;
+  text-transform: none;
 }
 
 .results-panel.is-collapsed .results-panel-heading h2 {
@@ -128,6 +144,62 @@
   border-top: 1px solid #edf0f4;
 }
 
+.result-item.is-empty {
+  grid-template-columns: 25px minmax(0, 1fr);
+  min-height: 0;
+  margin: 5px 0 7px;
+  padding: 9px 10px 10px;
+  align-items: start;
+  gap: 9px;
+  border: 1px solid #efb6ae;
+  border-left: 4px solid #d95548;
+  border-radius: 9px;
+  background: #fff2ef;
+}
+
+.empty-result-icon {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  margin-top: 1px;
+  place-items: center;
+  border-radius: 50%;
+  background: #d95548;
+  color: #fff;
+}
+.empty-result-icon svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 1.8;
+}
+.empty-result-copy {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 2px 8px;
+}
+.empty-result-copy strong {
+  color: #8f251d;
+  font-size: 12px;
+  line-height: 1.25;
+  text-align: right;
+}
+.empty-result-time {
+  color: #6e3a35;
+  font-size: 10px;
+  font-weight: 750;
+}
+.empty-result-copy small {
+  grid-column: 1 / -1;
+  color: #8b514b;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
 .result-item-swatch {
   width: 15px;
   height: 15px;
@@ -166,4 +238,8 @@
   .result-item { min-height: 44px; }
   .result-item b { font-size: 12px; }
   .result-item strong { font-size: 13px; }
+  .result-item.is-empty { padding-block: 11px; }
+  .empty-result-copy strong { font-size: 13px; }
+  .empty-result-time,
+  .empty-result-copy small { font-size: 11px; }
 }
