@@ -11,6 +11,15 @@ export type PlannedRequest = {
   mode: Origin['mode']
 }
 
+/** 分别设置模式每个起点只允许一个时间。 */
+export function normalizeCustomThresholds(
+  thresholds: number[],
+  fallback = 30,
+): number[] {
+  const selected = thresholds[0] ?? fallback
+  return [Math.min(MAX_MINUTES, Math.max(1, Math.round(selected)))]
+}
+
 /** 把当前状态摊平成「点 × 档位」的请求矩阵。隐藏的点与超限的档位在这里被剔除 */
 export function planRequests(
   origins: Origin[],
@@ -20,7 +29,9 @@ export function planRequests(
   const out: PlannedRequest[] = []
   for (const o of origins) {
     if (!o.visible) continue
-    const thresholds = bandMode === 'paired' ? globalThresholds : o.thresholds
+    const thresholds = bandMode === 'paired'
+      ? globalThresholds
+      : normalizeCustomThresholds(o.thresholds, globalThresholds[0] ?? 30)
     for (const minutes of thresholds) {
       if (minutes <= 0 || minutes > MAX_MINUTES) continue
       out.push({ originId: o.id, minutes, lngLat: o.lngLat, mode: o.mode })
@@ -44,12 +55,28 @@ export type ComputeBandInput = {
   baseOriginId: string | null
 }
 
-export function computeBand(input: ComputeBandInput): BandResult {
-  const { op, minutes, originIds, cells, geoms, baseOriginId } = input
+export type ComputeCustomBandInput = Omit<ComputeBandInput, 'minutes'> & {
+  minutesByOrigin: ReadonlyMap<string, number>
+}
 
-  // 把「点 × 档」的格状态投影成该档内的「点 → 状态」，再判定整档是否可运算
+type ComputeSelectionInput = Omit<ComputeBandInput, 'minutes'> & {
+  minutesByOrigin: ReadonlyMap<string, number>
+}
+
+/**
+ * 对一组「起点 → 时间」选择做集合运算。
+ *
+ * 统一时间与分别设置最终都走这里，避免分别设置时错用某个
+ * 全局档位查找所有起点的数据。
+ */
+function computeSelection(input: ComputeSelectionInput): BandResult {
+  const { op, originIds, cells, geoms, baseOriginId, minutesByOrigin } = input
+
+  // 把「点 × 档」的格状态投影成本次选择的「点 → 状态」。
   const bandCells = new Map<string, CellStatus>()
   for (const id of originIds) {
+    const minutes = minutesByOrigin.get(id)
+    if (minutes === undefined) continue
     const status = cells.get(cellKey(id, minutes))
     if (status) bandCells.set(id, status)
   }
@@ -60,6 +87,8 @@ export function computeBand(input: ComputeBandInput): BandResult {
   const present: PolyFeature[] = []
   const byOrigin = new Map<string, PolyFeature>()
   for (const id of originIds) {
+    const minutes = minutesByOrigin.get(id)
+    if (minutes === undefined) continue
     const g = geoms.get(cellKey(id, minutes))
     if (g) {
       const s = simplifyForOps(g)
@@ -88,4 +117,17 @@ export function computeBand(input: ComputeBandInput): BandResult {
 
   if (!result) return { kind: 'empty' }
   return { kind: 'ok', geometry: result, areaSqM: areaOf(result) }
+}
+
+/** 统一时间：所有起点使用同一档位。 */
+export function computeBand(input: ComputeBandInput): BandResult {
+  return computeSelection({
+    ...input,
+    minutesByOrigin: new Map(input.originIds.map((id) => [id, input.minutes])),
+  })
+}
+
+/** 分别设置：每个起点使用自己选中的档位，输出一个合成结果。 */
+export function computeCustomBand(input: ComputeCustomBandInput): BandResult {
+  return computeSelection(input)
 }

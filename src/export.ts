@@ -1,7 +1,11 @@
 import type { FeatureCollection, Polygon, MultiPolygon } from 'geojson'
 import type { PolyFeature } from './geometry/ops'
 
-export type ExportItem = { minutes: number; feature: PolyFeature }
+export type ExportItem = {
+  minutes?: number
+  minutesByOrigin?: Record<string, number>
+  feature: PolyFeature
+}
 
 export function buildExportCollection(
   items: ExportItem[],
@@ -10,7 +14,12 @@ export function buildExportCollection(
     type: 'FeatureCollection',
     features: items.map((it) => ({
       ...it.feature,
-      properties: { ...it.feature.properties, minutes: it.minutes, crs: 'WGS-84' },
+      properties: {
+        ...it.feature.properties,
+        ...(it.minutes === undefined ? {} : { minutes: it.minutes }),
+        ...(it.minutesByOrigin ? { minutesByOrigin: it.minutesByOrigin } : {}),
+        crs: 'WGS-84',
+      },
     })),
   }
 }

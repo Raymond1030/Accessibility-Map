@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest'
 import { polygon } from '@turf/turf'
-import { planRequests, computeBand, applyCustomThreshold } from './compute'
+import {
+  planRequests,
+  computeBand,
+  computeCustomBand,
+  applyCustomThreshold,
+  normalizeCustomThresholds,
+} from './compute'
 import type { Origin } from '../types'
 import type { PolyFeature } from '../geometry/ops'
 import type { CellStatus } from '../geometry/result'
@@ -36,6 +42,15 @@ describe('planRequests', () => {
       [30],
     )
     expect(plan.map((p) => p.minutes).sort()).toEqual([15, 45])
+  })
+
+  it('自定义模式即使遇到旧的多档数据也只请求第一档', () => {
+    const plan = planRequests(
+      [origin('a', { thresholds: [15, 30, 45] })],
+      'custom',
+      [15, 30, 45],
+    )
+    expect(plan.map((p) => p.minutes)).toEqual([15])
   })
 
   it('跳过隐藏的起点', () => {
@@ -174,5 +189,49 @@ describe('computeBand', () => {
       cells: loading, geoms, baseOriginId: null,
     })
     expect(r).toEqual({ kind: 'loading' })
+  })
+})
+
+describe('normalizeCustomThresholds', () => {
+  it('把多档数据收敛为第一个时间', () => {
+    expect(normalizeCustomThresholds([15, 30, 45])).toEqual([15])
+  })
+
+  it('无旧数据时使用指定的默认时间', () => {
+    expect(normalizeCustomThresholds([], 20)).toEqual([20])
+  })
+})
+
+describe('computeCustomBand', () => {
+  it('按每个起点各自的时间取数据并运算', () => {
+    const r = computeCustomBand({
+      op: 'intersect',
+      originIds: ['a', 'b'],
+      minutesByOrigin: new Map([['a', 15], ['b', 45]]),
+      cells: new Map<string, CellStatus>([['a@15', 'ok'], ['b@45', 'ok']]),
+      geoms: new Map<string, PolyFeature | null>([
+        ['a@15', square(0, 0, 2)],
+        ['b@45', square(1, 1, 2)],
+      ]),
+      baseOriginId: null,
+    })
+
+    expect(r.kind).toBe('ok')
+  })
+
+  it('不会错用另一起点的时间档位', () => {
+    const r = computeCustomBand({
+      op: 'intersect',
+      originIds: ['a', 'b'],
+      minutesByOrigin: new Map([['a', 15], ['b', 45]]),
+      cells: new Map<string, CellStatus>([['a@15', 'ok'], ['b@15', 'ok']]),
+      geoms: new Map<string, PolyFeature | null>([
+        ['a@15', square(0, 0, 2)],
+        ['b@15', square(1, 1, 2)],
+      ]),
+      baseOriginId: null,
+    })
+
+    expect(r).toEqual({ kind: 'unavailable', missing: ['b'] })
   })
 })

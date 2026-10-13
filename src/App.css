@@ -1,6 +1,12 @@
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }
-.app { height: 100%; display: flex; flex-direction: column; }
+.app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #eef2f7;
+  color: #17233b;
+}
 .app-body { flex: 1; display: flex; min-height: 0; }
 .fatal {
   background: #fef2f2; color: #991b1b; padding: 8px 12px;
