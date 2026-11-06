@@ -51,6 +51,9 @@ describe('driving-traffic 的时间桶', () => {
 })
 
 describe('requestFingerprint', () => {
+  it('出发和到达查询不能共享缓存', () => {
+    expect(requestFingerprint('metro', req())).not.toBe(requestFingerprint('metro', req({ direction: 'arrive' })))
+  })
   it('相同参数得到相同指纹', () => {
     expect(requestFingerprint('mb', req())).toBe(requestFingerprint('mb', req()))
   })

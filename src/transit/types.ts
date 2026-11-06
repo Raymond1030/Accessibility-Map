@@ -33,6 +33,9 @@ export type MetroDefaults = {
 }
 
 export type MetroNetwork = {
+  source?: string
+  generatedAt?: string
+  limitations?: string[]
   city: string
   crs: string
   defaults: MetroDefaults

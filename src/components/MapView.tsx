@@ -25,6 +25,12 @@ import {
 import type { PolyFeature } from '../geometry/ops'
 import type { FeatureCollection, Point } from 'geojson'
 import './MapView.css'
+import { useCommute } from '../commute/store'
+import { useCommuteMap } from '../commute/useCommuteMap'
+import { useNavigation } from '../state/navigation'
+import { useExplore } from '../explore/store'
+import { useLifeMap } from '../explore/useLifeMap'
+import { RANGE_LABELS } from '../commute/range'
 
 const EMPTY_FC: FeatureCollection = { type: 'FeatureCollection', features: [] }
 const ORIGIN_POINTS_SOURCE = 'origin-points'
@@ -76,6 +82,15 @@ export function MapView() {
   const mapRef = useRef<mapboxgl.Map | null>(null)
   const [mapReady, setMapReady] = useState(false)
   const [resultsCollapsed, setResultsCollapsed] = useState(false)
+  const scene = useNavigation(s => s.scene)
+  const explorePicking = useExplore(s => s.picking)
+  const commutePicking = useCommute(s => s.picking)
+  const commuteView = useCommute(s => s.view)
+  const rangeMode = useCommute(s => s.rangeMode)
+  const rangeMinutes = useCommute(s => s.rangeMinutes)
+  const rangeStatus = useCommute(s => s.rangeResult.status)
+  useCommuteMap(mapRef, mapReady)
+  useLifeMap(mapRef, mapReady)
 
   const origins = useStore((s) => s.origins)
   const cells = useStore((s) => s.cells)
@@ -156,7 +171,13 @@ export function MapView() {
     setLocateMsg(null)
     try {
       const r = await locateCurrentPosition()
-      addOrigin(r.lngLat, '我的位置')
+      if (useNavigation.getState().scene === 'explore') {
+        useExplore.getState().setCenter({ name: '我的位置', lngLat: r.lngLat })
+        mapRef.current?.flyTo({ center: r.lngLat, zoom: 14 })
+      } else if (useNavigation.getState().scene === 'commute') {
+        mapRef.current?.flyTo({ center: r.lngLat, zoom: 14 })
+        setLocateMsg('已定位，可用面板中的地图选点按钮标记公司或住处。')
+      } else addOrigin(r.lngLat, '我的位置')
     } catch (e) {
       setLocateMsg(e instanceof Error ? e.message : String(e))
     } finally {
@@ -215,6 +236,7 @@ export function MapView() {
     }
 
     const beginDragging = (event: mapboxgl.MapLayerMouseEvent | mapboxgl.MapLayerTouchEvent) => {
+      if (useNavigation.getState().scene !== 'isochrone') return false
       const originId = event.features?.[0]?.properties?.originId
       if (typeof originId !== 'string') return false
       const origin = originsRef.current.find((candidate) => candidate.id === originId)
@@ -363,6 +385,21 @@ export function MapView() {
 
     map.on('click', (e) => {
       if (performance.now() < suppressMapClickUntilRef.current) return
+      const commute = useCommute.getState()
+      if (useNavigation.getState().scene === 'explore') {
+        if (useExplore.getState().picking) {
+          useExplore.getState().setCenter({ name: '探索起点（地图选点）', lngLat: [e.lngLat.lng, e.lngLat.lat] })
+          useStore.getState().setDrawerOpen(true)
+        }
+        return
+      }
+      if (useNavigation.getState().scene === 'commute') {
+        const place = { lngLat: [e.lngLat.lng, e.lngLat.lat] as [number, number], name: commute.picking === 'work' ? '公司（地图选点）' : `候选住处 ${commute.homes.length + 1}` }
+        if (commute.picking === 'work') commute.setWorkplace(place)
+        if (commute.picking === 'home' && !commute.busy) commute.addHome(place)
+        if (commute.picking) useStore.getState().setDrawerOpen(true)
+        return
+      }
       if (
         map.getLayer(ORIGIN_POINT_HIT_LAYER)
         && map.queryRenderedFeatures(e.point, { layers: [ORIGIN_POINT_HIT_LAYER] }).length > 0
@@ -381,7 +418,10 @@ export function MapView() {
     })
 
     mapRef.current = map
+    const resizeObserver = new ResizeObserver(() => map.resize())
+    resizeObserver.observe(containerRef.current)
     return () => {
+      resizeObserver.disconnect()
       map.remove()
       mapRef.current = null
       setMapReady(false)
@@ -404,7 +444,7 @@ export function MapView() {
   // 起点作为 GeoJSON point 更新到 Mapbox source；图标由 symbol layer 绘制。
   useEffect(() => {
     const map = mapRef.current
-    if (!map || !mapReady || draggingRef.current) return
+    if (!map || !mapReady || !map.getSource(ORIGIN_POINTS_SOURCE) || draggingRef.current) return
     ;(map.getSource(ORIGIN_POINTS_SOURCE) as mapboxgl.GeoJSONSource)
       .setData(buildOriginPointCollection(origins))
   }, [mapReady, origins])
@@ -412,7 +452,7 @@ export function MapView() {
   // 各点原始等时圈：半透明铺底
   useEffect(() => {
     const map = mapRef.current
-    if (!map || !mapReady) return
+    if (!map || !mapReady || !map.getSource('result-iso')) return
     const features: PolyFeature[] = []
     for (const o of origins) {
       if (!o.visible) continue
@@ -441,7 +481,7 @@ export function MapView() {
   // 运算结果：高对比压在最上层
   useEffect(() => {
     const map = mapRef.current
-    if (!map || !mapReady) return
+    if (!map || !mapReady || !map.getSource('result-iso')) return
     const features: PolyFeature[] = []
 
     // 单点结果和它自己的等时圈完全相同，重复铺一层紫色只会抹掉点位颜色。
@@ -478,15 +518,24 @@ export function MapView() {
   return (
     <div className="map-view-wrap">
       <div className="map-view" ref={containerRef} />
+      {scene === 'explore' && explorePicking && <div className="picking-hint">点击地图标记探索起点<button onClick={() => useExplore.setState({ picking: false })}>取消</button></div>}
+      {scene === 'commute' && commuteView === 'range' && rangeStatus === 'ok' && !commutePicking && <div className="range-map-caption">
+        <strong>{RANGE_LABELS[rangeMode]} · {rangeMinutes} 分钟圈</strong><span>{rangeMode === 'subway-walking' ? '到达工作地 · 本地地铁估算' : '从工作地出发 · 通勤参考'}</span>
+      </div>}
 
-      {pickingMode && (
+      {scene === 'commute' && commutePicking && <div className="picking-hint">
+        点击地图标记{commutePicking === 'work' ? '公司' : '候选住处'}
+        <button onClick={() => useCommute.getState().setPicking(null)}>取消</button>
+      </div>}
+
+      {scene === 'isochrone' && pickingMode && (
         <div className="picking-hint">
           点击地图选择起点
           <button onClick={() => setPickingMode(false)}>取消</button>
         </div>
       )}
 
-      {!isMobile && (
+      {!isMobile && scene === 'isochrone' && (
         <ResultsPanel
           variant="overlay"
           allOrigins={origins}

@@ -282,7 +282,7 @@ export function Sidebar() {
                     <fieldset className="mode-picker">
                       <legend>出行方式</legend>
                       <div className="mode-options">
-                        {(Object.keys(MODE_LABEL) as Mode[]).map((mode) => (
+                        {(Object.keys(MODE_LABEL) as Mode[]).filter(mode => mode !== 'transit-walking').map((mode) => (
                           <button
                             type="button"
                             key={mode}

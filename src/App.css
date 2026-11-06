@@ -4,8 +4,8 @@ html, body, #root { height: 100%; margin: 0; }
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #eef2f7;
-  color: #17233b;
+  background: #fff;
+  color: #1c1c1c;
 }
 .app-body { flex: 1; display: flex; min-height: 0; }
 .fatal {
@@ -20,3 +20,84 @@ html, body, #root { height: 100%; margin: 0; }
   .app-body { position: relative; }
   .map-view-wrap { position: absolute; inset: 0; }
 }
+
+/* Shared editorial inks. White background follows the user’s preference. */
+:root {
+  --editorial-serif: "Bodoni 72", "Songti SC", "Noto Serif CJK SC", "STSong", Georgia, serif;
+  --editorial-sans: "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --editorial-ink: #1c1c1c;
+  --editorial-blue: #314e85;
+  --editorial-plum: #80506e;
+  --editorial-rust: #a44f3b;
+  --editorial-muted: #706a70;
+  --editorial-line: rgba(28, 28, 28, .14);
+}
+body { font-family: Helvetica, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif; }
+button, input, select, summary { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--editorial-blue); outline-offset: 3px; }
+.app .scene-switch { min-height: 68px; padding: 10px 24px; gap: 8px; background: #fff; border-color: var(--editorial-line); }
+.app .scene-switch button { background: #fff; color: #1c1c1c; }
+.app .scene-switch button[aria-pressed="true"] { background: #fff; color: var(--editorial-plum); border-bottom: 1px solid var(--editorial-plum); }
+.app .scene-switch .app-brand { display: flex; align-items: center; gap: 10px; padding: 4px 12px 4px 0; margin-right: auto; }
+.app-brand > span { font-size: 28px; }
+.app .scene-switch strong { color: var(--editorial-blue); font: 400 22px/1.4 var(--editorial-serif); letter-spacing: .05em; }
+.app .scene-switch .intro-link { margin-left: 16px; font-size: 12px; }
+.app .sidebar { --ink: #1c1c1c; --muted: #1c1c1c; --line: var(--editorial-line); --panel: #fff; --result: var(--editorial-blue); background: #fff; border-color: var(--editorial-line); box-shadow: none; font-family: inherit; border-radius: 0; transition-duration: 250ms; }
+.app .pane { padding: 18px; }
+.app .pane.controls, .app .drawer-handle, .app .origin-editor, .app .empty-card, .app .commute-empty, .app .origin-summary { background: #fff; }
+.app .sidebar-intro { margin-bottom: 24px; }
+.app .sidebar-intro h1 { font: 400 24px/1.5 var(--editorial-serif); color: var(--editorial-blue); }
+.app .product-signature { display: none; }
+.app .section-heading h2 { font: 400 18px/1.5 var(--editorial-serif); color: var(--editorial-plum); letter-spacing: .04em; }
+.app :is(button, input, select, .origin-card, .home-card, .empty-card, .workplace, .commute-empty, .place-options, .verdict, .results-panel, .result-item, .locate-btn, .locate-msg, .picking-hint) { border-radius: 0; box-shadow: none; font-family: inherit; }
+.app button { font-weight: 400; transition: color 300ms ease, background-color 300ms ease, border-color 300ms ease; }
+
+.app .app-brand::after { content: none; }
+.app :is(button, input, select):focus-visible { outline: 2px solid var(--editorial-blue); outline-offset: 2px; }
+.app :is(.origin-card, .home-card, .empty-card) { border: 1px solid var(--editorial-line); background: #fff; }
+.app :is(.search-box input, .editor-field input, .editor-field select, .commute-panel input:not([type="checkbox"]), .commute-panel select) { border: 1px solid var(--editorial-line); color: #1c1c1c; background: #fff; }
+.app :is(.search-box button, .commute-primary, .chip.on, .pick-btn.on) { background: var(--editorial-blue); border-color: var(--editorial-blue); color: #fff; }
+.app :is(.chip, .mode-option, .marker-option, .custom-time-toggle, .commute-mode-tabs button, .home-routes button) { background: #fff; color: #1c1c1c; border-color: var(--editorial-line); box-shadow: none; }
+.app :is(.mode-option.on, .marker-option.on, .commute-mode-tabs .active, .home-routes .active, .home-card.selected) { border-color: var(--editorial-blue); color: var(--editorial-blue); box-shadow: none; }
+.app :is(.commute-text-button, .home-card summary, .commute-section h2 > span, .eyebrow) { color: var(--editorial-blue); }
+.app :is(.commute-intro p, .commute-note, .commute-fields label, .commute-empty, .home-heading button, .route-facts, .home-card details, .workplace small, .origin-summary-copy small, .marker-option span, .time-disclosure > summary, .map-help > summary, .map-help p, .hint) { color: #1c1c1c; }
+.app .workplace { border: 1px solid var(--editorial-line); }
+.app .workplace > span { border-radius: 0; background: #1c1c1c; }
+.app .verdict { background: #fff; color: #1c1c1c; border: 1px solid var(--editorial-line); }
+.app .verdict.pass { background: var(--editorial-blue); color: #fff; border-color: var(--editorial-blue); }
+.app .locate-btn { border-color: var(--editorial-line); color: #1c1c1c; background: #fff; width: auto; min-width: 44px; padding-inline: 10px; }
+.app .results-panel { --results-ink: #1c1c1c; --results-muted: #1c1c1c; --results-line: var(--editorial-line); background: #fff; border-color: var(--editorial-line); backdrop-filter: none; }
+.app .results-panel-header { background: #fff; }
+.app .result-item.is-empty { border: 1px solid var(--editorial-rust); background: #fff; }
+.app :is(.result-item strong, .results-panel-heading h2, .result-hint, .result-muted, .empty-result-copy strong, .empty-result-copy small, .empty-result-time) { color: #1c1c1c; }
+.app .origin-badge, .app .origin-badge > svg, .app .origin-badge-code, .app .result-item-swatch { transform: none; box-shadow: none; border-radius: 0; }
+.app button:hover { border-color: var(--editorial-plum); background-color: #f6f5f7; color: var(--editorial-plum); }
+.app button:active { background-color: #1c1c1c; color: #fff; }
+.app button:disabled { cursor: not-allowed; }
+@media (max-width: 768px) {
+  .app .scene-switch { min-height: 60px; padding: 8px 12px; gap: 3px; }
+  .app .scene-switch button { padding: 8px 5px; font-size: 11px; }
+  .app .scene-switch .app-brand { padding-right: 4px; gap: 4px; }
+  .app-brand > span { font-size: 22px; }
+  .app .scene-switch strong { font-size: 12px; }
+  .app .scene-switch .intro-link { display: none; }
+  .app .pane { padding: 14px 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .app *, .app *::before, .app *::after { animation: none !important; transition: none !important; } }
+
+.app :is(.search-box input, .editor-field input, .editor-field select, .commute-panel input:not([type="checkbox"]), .commute-panel select) { border: 0; border-radius: 0; box-shadow: none; border-bottom: 1px solid #b9b5bb; font-family: var(--editorial-serif); font-size: 16px; color: var(--editorial-blue); padding-inline: 4px; }
+.app :is(.search-box input, .editor-field input, .editor-field select, .commute-panel input:not([type="checkbox"]), .commute-panel select):focus { border-bottom-color: var(--editorial-plum); }
+.app :is(.commute-intro h1, .commute-section h2, .results-panel-heading h2) { font-family: var(--editorial-serif); font-weight: 400; color: var(--editorial-blue); letter-spacing: -.02em; line-height: 1.5; }
+.app .commute-intro h1 { font-size: 30px; }
+.app .commute-section h2 { font-size: 20px; }
+.app .results-panel-heading h2 { font-size: 16px; }
+.app :is(.origin-summary-copy strong, .home-heading button) { color: var(--editorial-blue); font-weight: 500; }
+.app :is(.commute-section h2 > span, .eyebrow, .commute-text-button, .home-card summary) { color: var(--editorial-plum); }
+.app :is(.origin-card, .home-card) { border: 0; border-bottom: 1px solid var(--editorial-line); }
+.app .home-card { padding: 16px 0; }
+.app .origin-summary { padding-block: 14px; }
+.app .origin-editor { gap: 14px; }
+.app .commute-note, .app .commute-intro p { line-height: 1.8; color: var(--editorial-muted); }
+.app .scene-switch button { border-bottom: 1px solid transparent; }
+.app .scene-switch button:hover { border-bottom-color: var(--editorial-plum); background: #fff; }
+.app .commute-text-button:hover, .app .intro-link:hover { text-decoration: underline; text-underline-offset: 6px; }

@@ -5,6 +5,9 @@ export type IsochroneRequest = {
   lngLat: [number, number]
   mode: Mode
   minutes: number
+  direction?: 'depart' | 'arrive'
+  signal?: AbortSignal
+  onProgress?: (message: string) => void
 }
 
 export interface IsochroneProvider {
@@ -33,6 +36,7 @@ export function requestFingerprint(
     `${lng.toFixed(5)},${lat.toFixed(5)}`,
     req.mode,
     req.minutes,
+    req.direction ?? 'depart',
   ].join('|') + bucket
 }
 

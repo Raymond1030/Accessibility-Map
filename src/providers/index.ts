@@ -1,5 +1,5 @@
 import { createMapboxProvider } from './mapbox'
-import { createAmapTransitProvider } from './amapTransit'
+import { createMetroWalkingProvider } from './metroWalking'
 import { createCompositeProvider } from './composite'
 import { withCache } from './cache'
 import { withGate } from './gate'
@@ -24,17 +24,18 @@ let registry: IsochroneProvider[] | null = null
  */
 function buildRegistry(): IsochroneProvider[] {
   const mapbox = withCache(withGate(withTimeout(createMapboxProvider())))
-  const amapTransit = withCache(withGate(withTimeout(createAmapTransitProvider())))
+  const metroWalking = createMetroWalkingProvider({ leg: mapbox, network: shenzhenMetro as unknown as MetroNetwork })
   const composite = withCache(createCompositeProvider({
     leg: mapbox,
     // JSON 导入把坐标推断成 number[]，而 schema 是 [number, number] 二元组
     network: shenzhenMetro as unknown as MetroNetwork,
   }))
-  return [mapbox, amapTransit, composite]
+  return [mapbox, metroWalking, composite]
 }
 
-/** 按出行方式分发数据源：驾车/步行/骑行走 Mapbox，公交/地铁组合走高德，地铁+骑行走自建合成 */
+/** 按出行方式分发数据源：驾车/步行/骑行走 Mapbox，地铁+步行走本地网络，地铁+骑行走自建合成 */
 export function getProvider(mode: Mode): IsochroneProvider {
+  if (mode === 'transit-walking') throw new Error('公交等时圈服务已停用，请选择地铁、驾车、骑行或步行。')
   registry ??= buildRegistry()
   const hit = registry.find((p) => p.supportedModes.includes(mode))
   if (!hit) throw new Error(`没有支持「${mode}」的数据源`)

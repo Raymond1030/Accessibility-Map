@@ -19,7 +19,7 @@ export function createMapboxProvider(): IsochroneProvider {
         throw new Error(`Mapbox 等时圈不支持该出行方式：${req.mode}`)
       }
       const url = isochroneUrl(req.mode as MapboxMode, req.lngLat, req.minutes, getMapboxToken())
-      const res = await fetch(url)
+      const res = await fetch(url, { signal: req.signal })
       if (!res.ok) {
         const body = await res.text().catch(() => '')
         throw new Error(describeMapboxError(res.status, body))
