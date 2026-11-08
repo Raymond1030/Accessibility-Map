@@ -7,13 +7,20 @@ import { cellKey, MAX_MINUTES, MODE_LABEL, type MarkerIcon, type Mode, type SetO
 import { useIsMobile } from '../ui/responsive'
 import { colorWithAlpha, contrastText, originCode } from '../ui/mapStyle'
 import { MARKER_ICON_OPTIONS, MarkerIconGlyph, resolveMarkerIcon } from '../ui/markerIcons'
-import accessibilityMapIcon from '../assets/accessibility-map-icon.png'
 import './Sidebar.css'
+import { isLocalEngineEnabled } from '../providers/local'
+import { LocalEngineStatus, LocalQueryInputs } from './LocalEnginePanel'
 
 const OP_LABEL: Record<SetOp, string> = {
-  intersect: '交集',
-  union: '并集',
-  difference: '差集',
+  intersect: '大家都能到',
+  union: '任一人能到',
+  difference: '只有一人能到',
+}
+
+const OP_HINT: Record<SetOp, string> = {
+  intersect: '紫色区域：所有人都能在时间内到达，适合约见面。',
+  union: '紫色区域：至少有一个人能到达的范围。',
+  difference: '紫色区域：只有选中的那个人能到，其他人都到不了。',
 }
 
 const TIME_PRESETS = [15, 30, 45, MAX_MINUTES]
@@ -108,6 +115,7 @@ function MinuteSlider({ value, onCommit }: { value: number; onCommit: (v: number
 
 export function Sidebar() {
   const s = useStore()
+  const local = isLocalEngineEnabled()
   const isMobile = useIsMobile()
   const [expandedOriginId, setExpandedOriginId] = useState<string | null>(null)
 
@@ -166,17 +174,24 @@ export function Sidebar() {
       </button>
 
       <section className="pane origins">
-        <div className="sidebar-intro">
-          <img className="product-signature" src={accessibilityMapIcon} alt="" aria-hidden="true" />
-          <h1>可达性地图</h1>
-        </div>
+        <header className="sidebar-intro">
+          <h1>找一处大家都方便的地方</h1>
+          {s.origins.length < 2 && <p>添加每个人的出发地，看看大家都能按时到哪里。</p>}
+        </header>
 
-        <div className="section-heading">
-          <h2>地点</h2>
-          <span>{visible.length} / {s.origins.length} 已参与</span>
+        <div className="step-heading">
+          <span className="step-no" aria-hidden="true">1</span>
+          <h2>谁从哪里出发</h2>
+          {s.origins.length > 0 && <span className="step-meta">{visible.length < s.origins.length ? `${visible.length} / ${s.origins.length} 个参与计算` : `${s.origins.length} 个地点`}</span>}
         </div>
 
         <SearchBox />
+        {local && <>
+          <LocalEngineStatus />
+          <LocalQueryInputs direction={s.localDirection} onDirectionChange={value => s.setLocalQuery({ localDirection: value })}
+            {...(s.origins.some(origin => origin.mode === 'transit-walking') ? { dateTime: s.localDateTime, onDateTimeChange: (value: string) => s.setLocalQuery({ localDateTime: value }) } : {})} />
+          <small>公交线路可能不全；地铁耗时不含实时班次变化，跨境出行请另留通关时间。</small>
+        </>}
 
         {isMobile && (
           <button
@@ -184,14 +199,17 @@ export function Sidebar() {
             onClick={() => s.setPickingMode(!s.pickingMode)}
             aria-pressed={s.pickingMode}
           >
-            {s.pickingMode ? '选点中，点击地图落点' : '＋ 在地图上加点'}
+            {s.pickingMode ? '选点中，点一下地图放下地点' : '＋ 在地图上选点'}
           </button>
         )}
 
-        {s.origins.length === 0 && (
+        {s.origins.length < 2 && (
           <div className="empty-card">
             <span className="empty-pin" aria-hidden="true">＋</span>
-            <div><strong>添加第一个地点</strong><p>搜索地点，或直接点击地图。</p></div>
+            <div>
+              <strong>{s.origins.length === 0 ? '先添加两个出发地' : '再添加一个出发地'}</strong>
+              <p>{isMobile ? '搜索地点，或点上方按钮在地图上选点。' : '搜索地点，或在地图上点一下。'}</p>
+            </div>
           </div>
         )}
 
@@ -282,7 +300,7 @@ export function Sidebar() {
                     <fieldset className="mode-picker">
                       <legend>出行方式</legend>
                       <div className="mode-options">
-                        {(Object.keys(MODE_LABEL) as Mode[]).filter(mode => mode !== 'transit-walking').map((mode) => (
+                        {(Object.keys(MODE_LABEL) as Mode[]).filter(mode => local ? mode !== 'driving-traffic' && mode !== 'metro-cycling' : mode !== 'transit-walking').map((mode) => (
                           <button
                             type="button"
                             key={mode}
@@ -308,12 +326,12 @@ export function Sidebar() {
                               onClick={() => s.updateOrigin(origin.id, { thresholds: [minutes] })}
                               aria-pressed={customMinutes === minutes}
                             >
-                              {minutes} 分
+                              {minutes} 分钟
                             </button>
                           ))}
                         </div>
                         <details className="time-disclosure">
-                          <summary><span>自定义时间</span><b>{customMinutes} 分</b></summary>
+                          <summary><span>其他时长</span><b>{customMinutes} 分钟</b></summary>
                           <div className="slider-row">
                             <MinuteSlider
                               value={customMinutes}
@@ -332,7 +350,7 @@ export function Sidebar() {
                           onChange={(event) => s.updateOrigin(origin.id, { visible: event.target.checked })}
                         />
                         <span className="participation-track" aria-hidden="true"><i /></span>
-                        <span>{origin.visible ? '参与运算' : '已从运算排除'}</span>
+                        <span>{origin.visible ? '参与计算' : '暂不参与计算'}</span>
                       </label>
                     )}
 
@@ -365,6 +383,9 @@ export function Sidebar() {
                         {minutes} 分钟失败，重试
                       </button>
                     ))}
+                    {isLocalEngineEnabled() && [...new Set(errorMinutes.map(minutes => s.errors.get(cellKey(origin.id, minutes))).filter(Boolean))].map(message => (
+                      <span className="local-engine-error" role="alert" key={message}>{message}</span>
+                    ))}
                   </div>
                 )}
               </article>
@@ -374,46 +395,27 @@ export function Sidebar() {
       </section>
 
       <section className="pane controls">
-        <div className="section-heading">
-          <h2>{visibleIds.length >= 2 ? '分析与时间' : '时间'}</h2>
-          <span>{visibleIds.length >= 2 ? `${visibleIds.length} 点运算` : '单点范围'}</span>
+        <div className="step-heading">
+          <span className="step-no" aria-hidden="true">2</span>
+          <h2>愿意在路上花多久</h2>
         </div>
 
         {visibleIds.length >= 2 && (
           <div className="control-group">
-            <span className="field-label">运算方式</span>
-            <div className="chips segmented">
-              {(Object.keys(OP_LABEL) as SetOp[]).map((op) => (
-                <button
-                  key={op}
-                  className={s.op === op ? 'chip on' : 'chip'}
-                  onClick={() => s.setOp(op)}
-                  aria-pressed={s.op === op}
-                >
-                  {OP_LABEL[op]}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {visibleIds.length >= 2 && (
-          <div className="control-group">
-            <span className="field-label">时间设置</span>
-            <div className="chips segmented">
+            <div className="chips segmented" role="group" aria-label="时间怎么设">
               <button
                 className={s.bandMode === 'paired' ? 'chip on' : 'chip'}
                 onClick={() => s.setBandMode('paired')}
                 aria-pressed={s.bandMode === 'paired'}
               >
-                统一时间
+                大家时间一样
               </button>
               <button
                 className={s.bandMode === 'custom' ? 'chip on' : 'chip'}
                 onClick={() => s.setBandMode('custom')}
                 aria-pressed={s.bandMode === 'custom'}
               >
-                分别设置
+                每人分别设置
               </button>
             </div>
           </div>
@@ -421,8 +423,7 @@ export function Sidebar() {
 
         {s.bandMode === 'paired' && (
           <div className="control-group time-control">
-            <span className="field-label">时间档位</span>
-            <div className="chips time-presets">
+            <div className="chips time-presets" role="group" aria-label="时长，可多选">
               {TIME_PRESETS.map((minutes) => (
                 <button
                   key={minutes}
@@ -434,16 +435,20 @@ export function Sidebar() {
                   )}
                   aria-pressed={s.globalThresholds.includes(minutes)}
                 >
-                  {minutes} 分
+                  {minutes} 分钟
                 </button>
               ))}
             </div>
+            <p className="inline-guidance">可以多选，地图上会一圈一圈分层显示。</p>
             <details className="time-disclosure">
               <summary>
-                <span>自定义时间</span>
-                <b>{s.customMinutes} 分</b>
+                <span>其他时长</span>
+                <b>{s.customMinutes} 分钟</b>
               </summary>
               <div className="custom-time-controls">
+                <div className="slider-row">
+                  <MinuteSlider value={s.customMinutes} onCommit={s.setCustomMinutes} />
+                </div>
                 <button
                   className={s.globalThresholds.includes(s.customMinutes) ? 'custom-time-toggle on' : 'custom-time-toggle'}
                   onClick={() => s.setGlobalThresholds(
@@ -453,30 +458,50 @@ export function Sidebar() {
                   )}
                   aria-pressed={s.globalThresholds.includes(s.customMinutes)}
                 >
-                  {s.globalThresholds.includes(s.customMinutes) ? '已使用此档' : '使用此档'}
+                  {s.globalThresholds.includes(s.customMinutes) ? `已加入 ${s.customMinutes} 分钟` : `加入 ${s.customMinutes} 分钟`}
                 </button>
-                <div className="slider-row">
-                  <MinuteSlider value={s.customMinutes} onCommit={s.setCustomMinutes} />
-                </div>
               </div>
             </details>
           </div>
         )}
 
         {s.bandMode === 'custom' && (
-          <p className="inline-guidance">展开地点卡，分别设置每个地点的时间。</p>
+          <p className="inline-guidance">点开上面的地点卡片，为每个人分别设置时间。</p>
         )}
 
-        {s.op === 'difference' && visibleIds.length >= 2 && (
-          <label className="editor-field difference-base">
-            <span>差集基准点</span>
-            <select value={s.baseOriginId ?? ''} onChange={(event) => s.setBaseOrigin(event.target.value || null)}>
-              <option value="">请选择</option>
-              {s.origins.map((origin, index) => (
-                <option key={origin.id} value={origin.id}>{originCode(index)} · {origin.label}</option>
-              ))}
-            </select>
-          </label>
+        {visibleIds.length >= 2 && (
+          <>
+            <div className="step-heading">
+              <span className="step-no" aria-hidden="true">3</span>
+              <h2>想看哪种结果</h2>
+            </div>
+            <div className="control-group">
+              <div className="chips segmented op-options" role="group" aria-label="结果类型">
+                {(Object.keys(OP_LABEL) as SetOp[]).map((op) => (
+                  <button
+                    key={op}
+                    className={s.op === op ? 'chip on' : 'chip'}
+                    onClick={() => s.setOp(op)}
+                    aria-pressed={s.op === op}
+                  >
+                    {OP_LABEL[op]}
+                  </button>
+                ))}
+              </div>
+              <p className="inline-guidance">{OP_HINT[s.op]}</p>
+            </div>
+            {s.op === 'difference' && (
+              <label className="editor-field difference-base">
+                <span>以谁为准</span>
+                <select value={s.baseOriginId ?? ''} onChange={(event) => s.setBaseOrigin(event.target.value || null)}>
+                  <option value="">请选择</option>
+                  {s.origins.map((origin, index) => (
+                    <option key={origin.id} value={origin.id}>{originCode(index)} · {origin.label}</option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </>
         )}
 
         <details className="map-help">

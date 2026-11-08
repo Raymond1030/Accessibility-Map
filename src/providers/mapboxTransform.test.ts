@@ -1,7 +1,30 @@
 import { describe, it, expect } from 'vitest'
 import {
-  pickContour, isochroneUrl, describeMapboxError, MAPBOX_PROFILE,
+  pickContour, isochroneUrl, describeMapboxError, mapboxGridCeiling, MAPBOX_PROFILE,
 } from './mapboxTransform'
+
+describe('mapboxGridCeiling', () => {
+  it('驾车每 15 分钟一格（0.001°），留 25% 余量', () => {
+    expect(mapboxGridCeiling('driving', 1)).toBeCloseTo(0.00125, 9)
+    expect(mapboxGridCeiling('driving', 15)).toBeCloseTo(0.00125, 9)
+    expect(mapboxGridCeiling('driving', 20)).toBeCloseTo(0.0025, 9)
+    expect(mapboxGridCeiling('driving-traffic', 30)).toBeCloseTo(0.0025, 9)
+    expect(mapboxGridCeiling('driving', 45)).toBeCloseTo(0.00375, 9)
+    expect(mapboxGridCeiling('driving', 60)).toBeCloseTo(0.005, 9)
+  })
+
+  it('实测格长都在上限之内：驾车 50 分钟 0.003°、60 分钟 0.004°', () => {
+    expect(mapboxGridCeiling('driving', 50)).toBeGreaterThan(0.003)
+    expect(mapboxGridCeiling('driving', 60)).toBeGreaterThan(0.004)
+  })
+
+  it('步行、骑行不论时长都是 0.001° 的网格', () => {
+    for (const minutes of [5, 30, 60]) {
+      expect(mapboxGridCeiling('walking', minutes)).toBeCloseTo(0.00125, 9)
+      expect(mapboxGridCeiling('cycling', minutes)).toBeCloseTo(0.00125, 9)
+    }
+  })
+})
 
 /** Mapbox Isochrone 的真实响应形状：标准 GeoJSON，contour 属性标明档位 */
 const response = {

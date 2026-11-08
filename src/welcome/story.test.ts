@@ -7,12 +7,12 @@ describe('intro playback clock', () => {
     expect(advanceStory({ scene: 0, elapsed: 4000 }, 600)).toEqual({ scene: 1, elapsed: 400 })
   })
   it('loops from the last scene into the first', () => {
-    expect(advanceStory({ scene: 3, elapsed: 6300 }, 400)).toEqual({ scene: 0, elapsed: 200 })
+    expect(advanceStory({ scene: 3, elapsed: SCENE_DURATIONS[3] - 200 }, 400)).toEqual({ scene: 0, elapsed: 200 })
   })
   it('preserves a paused playhead and can resume from that exact point', () => {
-    const paused = { scene: 1, elapsed: 5700 }
+    const paused = { scene: 1, elapsed: 2700 }
     expect(advanceStory(paused, 0)).toEqual(paused)
-    expect(advanceStory(paused, 100)).toEqual({ scene: 1, elapsed: 5800 })
+    expect(advanceStory(paused, 100)).toEqual({ scene: 1, elapsed: 2800 })
   })
   it('handles whole loops and invalid time without corrupting the scene', () => {
     const clock = { scene: 2, elapsed: 400 }

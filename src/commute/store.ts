@@ -3,6 +3,8 @@ import { fetchCommuteRoute } from './amap'
 import { COMMUTE_MODES, routeKey, type CommuteMode, type Home, type Place, type RouteCell } from './types'
 import { getProvider } from '../providers'
 import type { RangeMode, RangeResult } from './range'
+import { isLocalEngineEnabled } from '../providers/local'
+import { localQueryDateTime, localQueryNow } from '../providers/localTime'
 
 let generation = 0
 let rangeGeneration = 0
@@ -12,6 +14,10 @@ type State = {
   view: 'range' | 'compare' | 'move'
   rangeMode: RangeMode
   rangeMinutes: number
+  rangeDateTime: string
+  rangeDirection: 'depart' | 'arrive'
+  setRangeDateTime: (value: string) => void
+  setRangeDirection: (value: 'depart' | 'arrive') => void
   rangeResult: RangeResult
   setView: (view: State['view']) => void
   setRangeMode: (mode: RangeMode) => void
@@ -39,7 +45,10 @@ type State = {
 }
 export const useCommute = create<State>((set, get) => ({
   workplace: null, homes: [], city: '深圳', destinationCity: '深圳',
-  view: 'range', rangeMode: 'subway-walking', rangeMinutes: 30, rangeResult: { status: 'idle' },
+  view: 'range', rangeMode: isLocalEngineEnabled() ? 'walking' : 'subway-walking', rangeMinutes: 30, rangeResult: { status: 'idle' },
+  rangeDateTime: localQueryNow(), rangeDirection: 'arrive',
+  setRangeDateTime: rangeDateTime => { rangeGeneration++; rangeController?.abort(); set({ rangeDateTime, rangeResult: { status: 'idle' } }) },
+  setRangeDirection: rangeDirection => { rangeGeneration++; rangeController?.abort(); set({ rangeDirection, rangeResult: { status: 'idle' } }) },
   setView: view => set({ view, picking: null }),
   setRangeMode: rangeMode => { rangeGeneration++; rangeController?.abort(); set({ rangeMode, rangeResult: { status: 'idle' } }) },
   setRangeMinutes: minutes => {
@@ -48,7 +57,7 @@ export const useCommute = create<State>((set, get) => ({
     set({ rangeMinutes: Math.max(1, Math.min(60, Math.round(minutes) || 30)), rangeResult: { status: 'idle' } })
   },
   evaluateRange: async () => {
-    const { workplace, rangeMode, rangeMinutes, rangeResult } = get()
+    const { workplace, rangeMode, rangeMinutes, rangeResult, rangeDateTime, rangeDirection } = get()
     if (!workplace || rangeResult.status === 'loading') return
     const run = ++rangeGeneration
     rangeController?.abort()
@@ -56,6 +65,8 @@ export const useCommute = create<State>((set, get) => ({
     set({ rangeResult: { status: 'loading' } })
     try {
       const geometry = await getProvider(rangeMode).fetch({ lngLat: workplace.lngLat, mode: rangeMode, minutes: rangeMinutes,
+        ...(isLocalEngineEnabled() ? { direction: rangeDirection, signal: rangeController.signal,
+          ...(rangeMode === 'transit-walking' ? { dateTime: localQueryDateTime(rangeDateTime) } : {}) } : {}),
         ...(rangeMode === 'subway-walking' ? { direction: 'arrive' as const, signal: rangeController.signal,
           onProgress: (message: string) => {
             if (run === rangeGeneration && get().rangeResult.status === 'loading') set({ rangeResult: { status: 'loading', message } })

@@ -6,6 +6,8 @@ export type IsochroneRequest = {
   mode: Mode
   minutes: number
   direction?: 'depart' | 'arrive'
+  /** ISO 8601 with a timezone; required for timetable-based local transit. */
+  dateTime?: string
   signal?: AbortSignal
   onProgress?: (message: string) => void
 }
@@ -37,7 +39,7 @@ export function requestFingerprint(
     req.mode,
     req.minutes,
     req.direction ?? 'depart',
-  ].join('|') + bucket
+  ].join('|') + bucket + (req.dateTime ? `|at:${req.dateTime}` : '')
 }
 
 /**

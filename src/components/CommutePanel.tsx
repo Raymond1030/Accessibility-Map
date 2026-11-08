@@ -41,41 +41,41 @@ export function CommutePanel() {
   }
   return <aside className={`sidebar commute-panel${drawerOpen ? '' : ' collapsed'}`}>
     <button className="drawer-handle" onClick={toggleDrawer} aria-expanded={drawerOpen}>
-      <span className="grip" /><span className="summary">{s.view === 'range' ? `通勤圈 · ${RANGE_LABELS[s.rangeMode]} ${s.rangeMinutes} 分钟${s.rangeResult.status === 'loading' ? ' · 计算中' : s.rangeResult.status === 'ok' ? '' : ' · 尚未生成'}` : s.view === 'move' ? `搬家对比 · ${s.homes.length} 个候选住处` : `租房通勤 · ${passed} / ${s.homes.length} 处符合条件`}</span><span className="caret">{drawerOpen ? '⌄' : '⌃'}</span>
+      <span className="grip" /><span className="summary">{s.view === 'range' ? `通勤圈 · ${RANGE_LABELS[s.rangeMode]} ${s.rangeMinutes} 分钟${s.rangeResult.status === 'loading' ? ' · 计算中' : s.rangeResult.status === 'ok' ? '' : ' · 尚未生成'}` : s.view === 'move' ? `搬家对比 · ${s.homes.length} 个候选住处` : `租房通勤 · ${passed} / ${s.homes.length} 处符合条件`}</span><span className="caret" aria-hidden="true">{drawerOpen ? '▾' : '▴'}</span>
     </button>
     <div className="commute-scroll">
-      <header className="commute-intro"><span className="eyebrow">{s.view === 'range' ? 'WORK · REACHABILITY' : 'HOME → WORK'}</span><h1>{s.view === 'range' ? '从工作地，看看住哪里' : '把时间留给生活'}</h1><p>{s.view === 'range' ? '只选工作地和时间，先看周边通勤范围。' : '比较候选住处，找到租得起、通勤也轻松的家。'}</p></header>
+      <header className="commute-intro"><h1>{s.view === 'range' ? '从工作地，看看住哪里' : '把时间留给生活'}</h1><p>{s.view === 'range' ? '只选工作地和时间，先看周边通勤范围。' : '比较候选住处，找到租得起、通勤也轻松的家。'}</p></header>
       <div className="commute-view-tabs has-moving" aria-label="通勤查看方式">
         <button aria-pressed={s.view === 'range'} onClick={() => s.setView('range')}>看通勤圈</button>
         <button aria-pressed={s.view === 'compare'} onClick={() => s.setView('compare')}>比较住处</button>
         <button aria-pressed={s.view === 'move'} onClick={() => s.setView('move')}>搬家对比</button>
       </div>
       <section className="commute-section">
-        <h2><span>01</span> 公司在哪里</h2>
+        <h2><span className="step-no" aria-hidden="true">1</span>公司在哪里</h2>
         <div className="commute-fields">
           {s.view !== 'range' && <label>居住城市<input value={s.city} onChange={e => s.setCities(e.target.value, s.destinationCity)} placeholder="如：深圳" /></label>}
           <label>工作城市<input value={s.destinationCity} onChange={e => s.setCities(s.city, e.target.value)} placeholder="如：深圳" /></label>
         </div>
         <PlacePicker key={`work:${s.destinationCity}`} label="搜索公司或办公楼" city={s.destinationCity} onSelect={s.setWorkplace} />
         <button className="commute-text-button" onClick={() => pick('work')}>{s.picking === 'work' ? '取消选点' : '＋ 在地图上标记公司'}</button>
-        {s.workplace && <div className="workplace"><span>班</span><div><strong>{s.workplace.name}</strong><small>{s.view === 'range' ? (s.rangeMode === 'subway-walking' ? '通勤终点 · 计算到达这里的范围' : '等时圈中心 · 从这里出发') : '通勤终点 · 可重新搜索或选点替换'}</small></div></div>}
+        {s.workplace && <div className="workplace"><span>班</span><div><strong>{s.workplace.name}</strong><small>{s.view === 'range' ? (s.rangeMode === 'subway-walking' ? '通勤终点 · 看看从哪里能到这里' : '从这里出发，看看能到哪里') : '通勤终点 · 可重新搜索或选点替换'}</small></div></div>}
       </section>
       {s.view === 'range' ? <WorkplaceRange /> : s.view === 'move' ? <ComparisonPanel moving /> : <>
       <section className="commute-section">
-        <h2><span>02</span> 添加候选住处 <small>{s.homes.length} / 6</small></h2>
+        <h2><span className="step-no" aria-hidden="true">2</span>添加候选住处 <small>{s.homes.length} / 6</small></h2>
         <PlacePicker key={`home:${s.city}`} label="搜索小区或房源地址" city={s.city} onSelect={s.addHome} disabled={s.homes.length >= 6 || s.busy} />
         <button className="commute-text-button" disabled={s.homes.length >= 6 || s.busy} onClick={() => pick('home')}>{s.picking === 'home' ? '取消选点' : '＋ 在地图上标记住处'}</button>
         <p className="commute-note">手动添加你正在考虑的住处，租金由你填写。</p>
       </section>
       <section className="commute-section">
-        <h2><span>03</span> 你的通勤偏好</h2>
+        <h2><span className="step-no" aria-hidden="true">3</span>你的通勤偏好</h2>
         <div className="commute-fields">
           <label>单程上限（分钟）<input type="number" min="1" max="180" value={s.minutes} onChange={e => useCommute.setState({ minutes: Math.max(1, Math.min(180, Number(e.target.value) || 1)) })} /></label>
           <label>月租预算（元）<input type="number" min="0" step="100" value={s.budget ?? ''} placeholder="不限" onChange={e => useCommute.setState({ budget: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) })} /></label>
         </div>
         <div className="commute-mode-tabs" aria-label="用于筛选和排序的出行方式">{COMMUTE_MODES.map(mode => <button key={mode} aria-pressed={s.mode === mode} className={s.mode === mode ? 'active' : ''} onClick={() => useCommute.setState({ mode })}>{COMMUTE_LABELS[mode]}</button>)}</div>
-        <button className="commute-primary" disabled={!ready || s.busy} onClick={() => void s.evaluate()}>{s.busy ? '正在查询高德路线…' : Object.keys(s.cells).length ? '重新计算全部通勤' : '比较通勤路线'}</button>
-        <p className="commute-note">每个住处比较 4 种方式，最多 24 次查询。筛选、排序及切换方式无需重新查询。</p>
+        <button className="commute-primary" disabled={!ready || s.busy} onClick={() => void s.evaluate()}>{s.busy ? '正在寻找通勤路线…' : Object.keys(s.cells).length ? '重新计算全部通勤' : '比较通勤路线'}</button>
+        <p className="commute-note">可以切换出行方式，按通勤时间或租金比较住处。</p>
       </section>
       <section className="commute-section commute-results" aria-live="polite">
         <h2>候选住处 <small>{passed} 处符合条件</small></h2>
@@ -96,13 +96,13 @@ export function CommutePanel() {
             {route && <>
               <p className="route-facts">{distance(route.meters)}{route.transfers !== undefined && ` · 换乘 ${route.transfers} 次`}{route.walkingMeters !== undefined && ` · 步行 ${distance(route.walkingMeters)}`}{route.fare !== undefined && ` · 票价约 ¥${route.fare}`}</p>
               {!!route.transitLegs?.length && <TransitItinerary legs={route.transitLegs} onShowMap={() => { s.select(home.id); useStore.getState().setDrawerOpen(false) }} />}
-              <details><summary onClick={() => s.select(home.id)}>路线详情 · 查看地图</summary>{route.instructions.length ? <ol>{route.instructions.map((text, i) => <li key={i}>{text}</li>)}</ol> : <p>高德未返回逐段说明。</p>}{!route.paths.length && <p>高德未返回路线轨迹。</p>}<small>高德估算 · {new Date(route.fetchedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })} 查询</small></details>
+              <details><summary onClick={() => s.select(home.id)}>路线详情 · 查看地图</summary>{route.instructions.length ? <ol>{route.instructions.map((text, i) => <li key={i}>{text}</li>)}</ol> : <p>暂时没有详细路线说明。</p>}{!route.paths.length && <p>暂时无法显示路线。</p>}</details>
             </>}
           </article>
         })}
       </section>
       <ComparisonPanel />
-      <footer className="commute-note commute-footer">耗时为查询时的路线估算，不代表固定早高峰或到达时刻保证。公交包含步行接驳；驾车未额外计入找车位时间。当前候选列表仅保留在本次页面会话中。</footer>
+      <footer className="commute-note commute-footer">时间为预计耗时，高峰时段和停车请多留一点时间。刷新页面后，住处列表会清空。</footer>
       </>}
     </div>
   </aside>

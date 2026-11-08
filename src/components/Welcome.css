@@ -1,62 +1,197 @@
-/* Editorial layout; white paper and colored ink are intentional user preferences. */
-.welcome { min-height: 100%; background: #fff; color: var(--editorial-ink); padding: 0 clamp(24px, 5vw, 88px); font-family: var(--editorial-sans); }
-.welcome button, .welcome a { -webkit-tap-highlight-color: transparent; transition: color .3s ease, border-color .3s ease, background-color .3s ease; }
-.welcome button { font: 400 12px/1.6 var(--editorial-sans); letter-spacing: .08em; cursor: pointer; border-radius: 0; text-align: left; }
-.welcome-header { min-height: 104px; display: flex; justify-content: space-between; align-items: center; gap: 24px; border-bottom: 1px solid var(--editorial-line); }
-.welcome-brand { display: flex; flex-direction: column; gap: 7px; text-decoration: none; color: var(--editorial-blue); font: 400 26px/1.3 var(--editorial-serif); letter-spacing: .12em; }
-.brand-caption { font: 10px/1.6 var(--editorial-sans); letter-spacing: .15em; color: var(--editorial-muted); }
-.welcome-skip { border: 0; background: transparent; color: var(--editorial-blue); padding: 14px 0; }
-.welcome-skip span { margin-left: 20px; }
-.welcome-main { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 32px; align-items: center; padding: 96px 0; }
-.welcome-copy { grid-column: span 5; }
-.welcome-eyebrow { font-size: 11px; letter-spacing: .15em; color: var(--editorial-plum); margin: 0 0 32px; }
-.welcome h1 { font: 400 clamp(44px, 4.9vw, 80px)/1.25 var(--editorial-serif); letter-spacing: -.065em; margin: 0 0 28px; color: var(--editorial-blue); }
-.welcome h1 .title-second { color: var(--editorial-plum); }
-.welcome h1 em { font-style: normal; color: var(--editorial-rust); }
-.welcome-subtitle { font: italic 400 clamp(18px, 1.7vw, 25px)/1.6 Georgia, serif; color: var(--editorial-plum); margin: 0 0 26px; }
-.welcome-description { font-size: 14px; line-height: 2; margin: 0 0 36px; max-width: 30em; color: #514e57; }
-.welcome-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
-.welcome-primary, .welcome-secondary { position: relative; display: flex; justify-content: space-between; gap: 40px; padding: 14px 0; border: 0; border-bottom: 1px solid var(--editorial-line); background: transparent; color: var(--editorial-blue); min-width: 240px; }
-.welcome-secondary { color: var(--editorial-plum); }
-.welcome-primary::after, .welcome-secondary::after, .welcome-skip::after { position: absolute; content: ''; height: 1px; bottom: -1px; left: 0; right: 0; background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform .5s ease; }
-.welcome-skip { position: relative; }
-.welcome-primary:hover::after, .welcome-secondary:hover::after, .welcome-skip:hover::after { transform: scaleX(1); transform-origin: left; }
-.welcome button:hover, .welcome-brand:hover { color: var(--editorial-rust); }
-.welcome button:active { color: var(--editorial-ink); }
-.welcome-footnote { font-size: 11px; color: var(--editorial-muted); margin: 24px 0 0; letter-spacing: .04em; }
-.welcome-figure { grid-column: 7 / -1; min-width: 0; display: grid; }
-.figure-topline { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 11px; line-height: 1.7; color: var(--editorial-muted); padding: 16px 0; }
-.figure-topline { border-top: 1px solid var(--editorial-line); }
-.figure-topline > span:first-child { color: var(--editorial-blue); }
-.welcome-footer { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px; border-top: 1px solid var(--editorial-line); padding: 44px 0 56px; }
-.welcome-footer > div { display: flex; gap: 24px; align-items: flex-start; }
-.welcome-footer > div > span { font: italic 20px/1.5 var(--editorial-serif); color: var(--editorial-muted); }
-.welcome-footer p { margin: 0; display: flex; flex-direction: column; gap: 12px; }
-.welcome-footer strong { font: 400 24px/1.4 var(--editorial-serif); color: var(--editorial-blue); }
-.welcome-footer > div:nth-child(2) strong { color: var(--editorial-plum); }
-.welcome-footer > div:nth-child(3) strong { color: var(--editorial-rust); }
-.welcome-footer small { font-size: 12px; line-height: 1.8; color: var(--editorial-muted); }
-.welcome-colophon { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 0 32px; border-top: 1px solid var(--editorial-line); color: var(--editorial-muted); font-size: 10px; letter-spacing: .1em; }
-.welcome-colophon em { font: italic 16px/1.7 var(--editorial-serif); color: var(--editorial-plum); letter-spacing: 0; }
-@media (min-width: 1700px) { .welcome { padding-inline: max(88px, calc((100vw - 1450px) / 2)); } .welcome-main { padding-block: 128px; } }
-@media (max-width: 1000px) and (min-width: 701px) { .welcome h1 { font-size: 44px; } .welcome-copy { grid-column: span 6; } .welcome-main { column-gap: 24px; padding-block: 72px; } }
-@media (max-width: 700px) {
-  .welcome-header { min-height: 88px; gap: 16px; }
-  .welcome-brand { font-size: 21px; }
-  .brand-caption { font-size: 9px; letter-spacing: .07em; }
-  .welcome-skip { font-size: 11px !important; letter-spacing: 0; }
-  .welcome-skip span { margin-left: 4px; }
-  .welcome-main { grid-template-columns: 1fr; gap: 56px; padding: 56px 0; }
-  .welcome-copy, .welcome-figure { grid-column: 1; }
-  .welcome h1 { font-size: clamp(44px, 10.7vw, 68px); margin-bottom: 20px; }
-  .welcome-eyebrow { margin-bottom: 24px; }
-  .welcome-subtitle { font-size: 20px; }
-  .welcome-description { font-size: 13px; margin-bottom: 24px; }
-  .welcome-actions { align-items: stretch; }
-  .welcome-footer { grid-template-columns: 1fr; gap: 28px; padding: 32px 0 40px; }
-  .welcome-footer > div { gap: 24px; }
-  .welcome-footer p { gap: 6px; }
-  .welcome-footer strong { font-size: 23px; }
-  .welcome-colophon { align-items: flex-start; flex-direction: column; gap: 10px; }
+@import './WelcomeFonts.css';
+
+.welcome {
+  /* Local aliases of the global palette in App.css; rules below use the --c-* tokens directly. */
+  --paper: var(--c-paper);
+  --ink: var(--c-ink);
+  --muted: var(--c-muted);
+  --olive: var(--c-brand);
+  --clay: var(--c-brand);
+  --paper-line: var(--c-line);
+  --type-blue: var(--c-commute);
+  --type-accent: var(--c-explore);
+  --type-purple: var(--c-meet);
+  --landing-display: "Landing Serif", "Songti SC", "STSong", serif;
+  --landing-body: "Landing Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --welcome-ease: cubic-bezier(.2, .8, .2, 1);
+  position: relative;
+  min-height: 100%;
+  overflow: clip;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--editorial-sans);
+  isolation: isolate;
 }
-@media (prefers-reduced-motion: reduce) { .welcome *, .welcome *::after, .welcome { animation: none !important; transition: none !important; }  }
+.welcome-header, .welcome-copy, .welcome-discover, .welcome-colophon { font-family: var(--landing-body); font-synthesis: none; }
+.welcome button, .welcome a { -webkit-tap-highlight-color: transparent; transition: color .2s, background-color .2s, box-shadow .2s, transform .2s; }
+.welcome button { font: inherit; cursor: pointer; }
+.welcome :is(button, a):focus-visible { outline: 2px solid var(--c-focus); outline-offset: 5px; }
+.welcome-header { position: relative; z-index: 4; display: flex; align-items: center; justify-content: space-between; gap: 24px; max-width: 1440px; margin: 0 auto; padding: 26px 54px; }
+.welcome-brand { display: flex; align-items: center; gap: 12px; color: var(--c-brand-strong); text-decoration: none; font-size: 24px; font-family: var(--landing-display); font-weight: 500; letter-spacing: .08em; }
+.welcome-brand small { display: block; margin-top: 3px; color: var(--c-explore); font: italic 13px Georgia, serif; letter-spacing: .03em; }
+/* Brand mark (base rules in App.css): the two radii open a few degrees on hover/focus,
+   and the centre dot sends out a soft rose ping. */
+.welcome-brand .radius-symbol i { transition: transform .5s cubic-bezier(.34, 1.4, .5, 1); }
+.welcome-brand:is(:hover, :focus-visible) .radius-symbol i { transform: rotate(37deg); }
+.welcome-brand:is(:hover, :focus-visible) .radius-symbol i + i { transform: rotate(-37deg); }
+.welcome-brand .radius-symbol::after { animation: welcome-ping 2.8s ease-out infinite; }
+.welcome-nav { display: flex; align-items: center; gap: 34px; margin-right: 40px; }
+.welcome-nav button, .welcome-nav a { position: relative; color: var(--c-muted); border: 0; background: none; padding: 10px 0; font-size: 14px; text-decoration: none; }
+.welcome-nav :is(button, a):hover { color: var(--c-brand); }
+/* Underline that grows out from the centre of the word. */
+.welcome-nav :is(button, a)::after { content: ''; position: absolute; left: 0; right: 0; bottom: 6px; height: 2px; border-radius: 2px; background: currentColor; transform: scaleX(0); transition: transform .3s var(--welcome-ease); }
+.welcome-nav :is(button, a):is(:hover, :focus-visible)::after { transform: scaleX(1); }
+.welcome .welcome-skip { border: 1px solid transparent; border-radius: 30px; background: var(--c-brand-strong); color: #fff; min-height: 44px; padding: 11px 22px; font-size: 14px; }
+.welcome-skip .welcome-arrow { padding-left: 15px; }
+.welcome .welcome-skip:hover, .welcome .welcome-primary:hover { background: var(--c-brand-hover); transform: translateY(-2px); box-shadow: 0 6px 14px rgba(var(--c-shadow), .08); }
+.welcome .welcome-skip:active, .welcome .welcome-primary:active { transform: translateY(0); }
+/* CTA micro-interactions: a light sheen sweeps across once on hover, painted between the
+   button fill and its text (z-index -1 inside the isolated button), and the arrow nudges
+   toward where it points. The sheen peak keeps white text above 4.5:1. */
+.welcome :is(.welcome-skip, .welcome-primary) { position: relative; overflow: hidden; isolation: isolate; }
+.welcome :is(.welcome-skip, .welcome-primary)::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, .22) 50%, transparent 70%); transform: translateX(-101%); }
+.welcome :is(.welcome-skip, .welcome-primary):hover::before { animation: welcome-sheen .85s cubic-bezier(.4, 0, .2, 1); }
+.welcome-arrow { display: inline-block; transition: translate .3s var(--welcome-ease); }
+.welcome :is(.welcome-skip, .welcome-primary):is(:hover, :focus-visible) .welcome-arrow { translate: 3px -3px; }
+.welcome-hero { position: relative; isolation: isolate; }
+/* Aurora: three soft glows drifting behind the hero copy. It starts above the hero so the
+   glow also sits behind the transparent header (which paints above the hero), and it never
+   covers the opaque map figure's content (z-index -1 inside the isolated hero).
+   Peak alphas are deliberately low: with the glows overlapping at their worst, muted 12px
+   text still measures about 4.6:1, and the brand's rose small text about 4.7:1. */
+.welcome-aurora { position: absolute; z-index: -1; top: -200px; left: 0; right: 0; height: 1060px; overflow: hidden; pointer-events: none; }
+.welcome-aurora > span { position: absolute; width: var(--size); height: var(--size); margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2); }
+.welcome-aurora > :nth-child(1) { --size: clamp(320px, 48vw, 720px); left: 22%; top: 260px; background: radial-gradient(closest-side, rgba(106, 85, 176, .14), rgba(106, 85, 176, 0)); }
+.welcome-aurora > :nth-child(2) { --size: clamp(320px, 48vw, 720px); left: 80%; top: 350px; background: radial-gradient(closest-side, rgba(176, 71, 106, .12), rgba(176, 71, 106, 0)); }
+.welcome-aurora > :nth-child(3) { --size: clamp(340px, 52vw, 760px); left: 50%; top: 600px; background: radial-gradient(closest-side, rgba(45, 95, 146, .11), rgba(45, 95, 146, 0)); }
+.welcome-copy { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; padding: 35px 24px 0; text-align: center; pointer-events: none; }
+.welcome-copy > * { pointer-events: auto; }
+.welcome-eyebrow { display: flex; align-items: center; gap: 9px; margin: 0 0 23px; font-size: 12px; letter-spacing: .16em; color: var(--c-muted); }
+.welcome-eyebrow > span { width: 5px; height: 5px; border-radius: 50%; background: var(--c-explore); box-shadow: 0 0 0 4px var(--c-explore-tint); }
+.welcome h1 { margin: 0; font-size: clamp(38px, 4.4vw, 64px); font-family: var(--landing-display); font-weight: 500; line-height: 1.35; letter-spacing: .015em; color: var(--c-commute); }
+.welcome h1 span { white-space: nowrap; color: var(--c-meet); }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  /* Looping violet -> rose -> violet (both stops >= 5:1 on white) on a double-width
+     background that flows slowly back and forth across the words. */
+  .welcome h1 span { background-image: linear-gradient(100deg, #6a55b0 0%, #b0476a 50%, #6a55b0 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: welcome-headline-flow 8s ease-in-out infinite alternate; }
+  @media (forced-colors: active) { .welcome h1 span { -webkit-text-fill-color: currentColor; animation: none; } }
+}
+.welcome-description { margin: 20px 0 28px; color: var(--c-muted); font-size: 16px; line-height: 1.9; letter-spacing: .025em; }
+/* Translucent white lets the aurora glow through softly (there is no alpha surface token).
+   No backdrop blur: the backdrop is only soft gradients, and blurring the drifting aurora
+   would cost a filter pass every frame. The underglow takes the selected scene's colour. */
+.journey-card { --scene-color: var(--c-explore); --scene-tint: var(--c-explore-tint); width: min(680px, 100%); padding: 18px 24px 19px; text-align: left; border: 2px solid #ffffffed; border-radius: 30px; background: #ffffffa8; box-shadow: 0 6px 36px rgba(var(--c-shadow), .045), inset 0 0 0 1px #ffffff2e; transition: box-shadow .5s ease; }
+@supports (color: color-mix(in srgb, red 50%, transparent)) {
+  .journey-card { box-shadow: 0 20px 44px -30px color-mix(in srgb, var(--scene-color) 50%, transparent), 0 6px 36px rgba(var(--c-shadow), .045), inset 0 0 0 1px #ffffff2e; }
+}
+.journey-options { display: flex; flex-wrap: wrap; gap: 5px; }
+.journey-options button { display: flex; align-items: center; gap: 7px; padding: 9px 13px; min-height: 40px; border: 0; border-radius: 22px; background: transparent; font-size: 13px; white-space: nowrap; transition: color .3s ease, background-color .3s ease, box-shadow .3s ease; }
+.welcome [data-scene="commute"] { --scene-color: var(--c-commute); --scene-tint: var(--c-commute-tint); }
+.welcome [data-scene="isochrone"] { --scene-color: var(--c-meet); --scene-tint: var(--c-meet-tint); }
+.welcome [data-scene="explore"] { --scene-color: var(--c-explore); --scene-tint: var(--c-explore-tint); }
+.journey-options button { color: var(--scene-color); font-weight: 500; }
+.journey-options button[aria-pressed="true"] { background: var(--scene-tint); color: var(--scene-color); box-shadow: inset 0 0 0 1px currentColor; }
+.journey-options button:hover { background: var(--scene-tint); color: var(--scene-color); }
+/* One-shot pop of the icon each time a tab becomes selected. */
+.journey-options button[aria-pressed="true"] svg { animation: welcome-pop .5s ease-out; }
+.journey-copy { min-height: 88px; padding: 19px 4px 13px; }
+.journey-copy-inner { animation: welcome-swap .45s var(--welcome-ease) backwards; }
+.journey-copy p { margin: 0 0 8px; color: var(--scene-color); font-size: 19px; font-weight: 500; line-height: 1.8; }
+.journey-copy-inner > span { color: var(--c-muted); font-size: 14px; line-height: 1.6; }
+.journey-bottom { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-top: 8px; }
+.journey-hint { display: flex; align-items: center; gap: 8px; color: var(--c-muted); font-size: 12px; }
+.journey-hint > span { display: grid; place-items: center; flex: none; border: 1px solid var(--c-surface); border-radius: 50%; width: 32px; height: 32px; color: var(--c-brand); }
+.journey-hint svg { display: block; }
+.welcome .welcome-primary { display: flex; justify-content: space-between; align-items: center; gap: 27px; border: 0; border-radius: 30px; min-height: 47px; padding: 12px 21px; background: var(--c-brand-strong); color: #fff; font-size: 14px; }
+.welcome-primary > .welcome-arrow { font-size: 19px; line-height: 1; }
+/* The label is keyed by scene in Welcome.tsx, so the new wording fades up on every switch. */
+.welcome-primary-label { animation: welcome-label-swap .4s var(--welcome-ease) backwards; }
+.welcome-footnote { display: flex; gap: 10px; justify-content: center; margin: 17px 0 0; font-size: 12px; line-height: 1.8; color: var(--c-muted); letter-spacing: .04em; }
+.welcome-story-link { display: inline-flex; align-items: center; gap: 12px; padding: 12px 8px; margin-top: 4px; color: var(--c-brand-strong); font-size: 13px; font-weight: 500; text-decoration: none; }
+.welcome-story-link:hover { color: var(--c-brand-hover); }
+.welcome-story-arrow { animation: welcome-bob 1.8s ease-in-out infinite; }
+.welcome-colophon { width: min(1200px, calc(100% - 108px)); display: flex; justify-content: space-between; gap: 20px; margin: auto; padding: 23px 0 30px; border-top: 1px solid var(--c-line); color: var(--c-muted); font-size: 10px; letter-spacing: .09em; line-height: 1.6; }
+.welcome-colophon > span:first-child span { padding-inline: 10px; color: var(--c-line-strong); }
+.welcome-colophon > span:last-child span { margin-left: 25px; color: var(--c-brand); font-size: 16px; }
+
+/* Load entrance: the header drops in, then the hero copy rises line by line (70ms stagger).
+   Fill mode is backwards only, so hover and state styles own each element once it lands. */
+.welcome-header { animation: welcome-drop .6s var(--welcome-ease) backwards; }
+.welcome-copy > * { animation: welcome-rise .75s var(--welcome-ease) .14s backwards; }
+.welcome-copy > :nth-child(2) { animation-delay: .21s; }
+.welcome-copy > :nth-child(3) { animation-delay: .28s; }
+.welcome-copy > :nth-child(4) { animation-delay: .35s; }
+.welcome-copy > :nth-child(5) { animation-delay: .42s; }
+.welcome-copy > :nth-child(6) { animation-delay: .49s; }
+/* The aurora blooms in, then each glow drifts on its own slow cycle so they never sync. */
+.welcome-aurora { animation: welcome-fade 1.6s ease-out backwards; }
+.welcome-aurora > :nth-child(1) { animation: welcome-aurora-a 22s ease-in-out -5s infinite alternate; }
+.welcome-aurora > :nth-child(2) { animation: welcome-aurora-b 27s ease-in-out -11s infinite alternate; }
+.welcome-aurora > :nth-child(3) { animation: welcome-aurora-c 19s ease-in-out -2s infinite alternate; }
+
+@keyframes welcome-drop { from { opacity: 0; transform: translateY(-14px); } }
+@keyframes welcome-rise { from { opacity: 0; transform: translateY(18px); } }
+@keyframes welcome-fade { from { opacity: 0; } }
+@keyframes welcome-aurora-a { to { transform: translate(10%, 6%) scale(1.08); } }
+@keyframes welcome-aurora-b { to { transform: translate(-11%, 7%) scale(1.06); } }
+@keyframes welcome-aurora-c { to { transform: translate(6%, -7%) scale(1.1); } }
+@keyframes welcome-headline-flow { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+@keyframes welcome-ping { from { box-shadow: 0 0 0 0 rgba(168, 71, 106, .34); } 70%, to { box-shadow: 0 0 0 7px rgba(168, 71, 106, 0); } }
+@keyframes welcome-swap { from { opacity: 0; transform: translateY(8px); } }
+@keyframes welcome-label-swap { from { opacity: 0; transform: translateY(6px); } }
+@keyframes welcome-pop { 40% { transform: scale(1.22); } 70% { transform: scale(.95); } }
+@keyframes welcome-sheen { from { transform: translateX(-101%); } to { transform: translateX(101%); } }
+@keyframes welcome-bob { 50% { transform: translateY(3px); } }
+
+@media (min-width: 1500px) { .welcome-copy { padding-top: 48px; } }
+@media (max-width: 900px) {
+  .welcome-header { padding: 23px 30px; }
+  .welcome-nav { gap: 20px; margin-right: 0; }
+  .welcome-brand { font-size: 21px; }
+  .welcome h1 { font-size: clamp(38px, 5.6vw, 55px); }
+  .welcome-colophon { width: calc(100% - 60px); }
+}
+@media (max-width: 600px) {
+  .welcome-header { padding: 19px 20px; gap: 12px; }
+  .welcome-brand { font-size: 21px; gap: 9px; }
+  .welcome-brand small { font-size: 11px; }
+  .welcome .radius-symbol { transform: scale(.85); transform-origin: left center; width: 31px; }
+  .welcome-nav { display: none; }
+  .welcome .welcome-skip { min-height: 40px; font-size: 12px; padding: 10px 15px; }
+  .welcome-skip .welcome-arrow { padding-left: 8px; }
+  /* Glows clamp to their 320/340px minimum here; a shorter box still contains them while drifting. */
+  .welcome-aurora { height: 820px; }
+  .welcome-copy { padding: 32px 18px 0; }
+  .welcome-eyebrow { margin-bottom: 19px; font-size: 11px; letter-spacing: .12em; }
+  .welcome h1 { max-width: 100%; font-size: clamp(31px, 8vw, 44px); line-height: 1.45; letter-spacing: .015em; }
+  /* fit-content keeps the gradient on the words, not across the whole line */
+  .welcome h1 span { display: block; width: fit-content; margin-inline: auto; }
+  .welcome-description { font-size: 14px; margin: 16px 0 23px; line-height: 1.9; }
+  .journey-card { padding: 13px 14px 16px; border-radius: 25px; }
+  .journey-options { justify-content: space-between; flex-wrap: nowrap; gap: 2px; }
+  .journey-options button { gap: 5px; padding: 7px 7px; font-size: 11px; min-height: 38px; }
+  .journey-options svg { width: 16px; height: 16px; flex: none; }
+  .journey-copy { min-height: 113px; padding: 18px 3px 12px; }
+  .journey-copy p { font-size: 16px; line-height: 1.7; }
+  .journey-copy-inner > span { font-size: 13px; line-height: 1.7; }
+  .journey-bottom { gap: 8px; padding-top: 4px; }
+  .journey-hint { font-size: 10px; gap: 4px; }
+  .journey-hint > span { width: 25px; height: 25px; }
+  .journey-hint svg { width: 14px; height: 14px; }
+  .welcome .welcome-primary { gap: 12px; font-size: 12px; padding: 12px 14px; min-height: 44px; }
+  .welcome-footnote { font-size: 11px; flex-wrap: wrap; gap: 4px; letter-spacing: 0; }
+  .welcome-colophon { width: calc(100% - 40px); flex-direction: column; gap: 12px; padding-block: 20px; font-size: 9px; }
+}
+@media (max-width: 350px) {
+  .welcome-copy { padding-inline: 12px; }
+  .journey-options button { padding-inline: 5px; font-size: 10px; }
+  .journey-hint > span { display: none; }
+  .welcome-footnote { max-width: 270px; }
+}
+/* Sections scrolled out of view pause their loops and resume near the viewport (src/ui/usePauseOffscreen.ts). */
+.welcome [data-offscreen], .welcome [data-offscreen] *, .welcome [data-offscreen] *::before, .welcome [data-offscreen] *::after { animation-play-state: paused !important; }
+/* Reduced motion: every entrance, loop, hover transition and the aurora drift above lives
+   under .welcome, so this one rule stills them all; each element rests in its normal style. */
+@media (prefers-reduced-motion: reduce) { .welcome *, .welcome *::before, .welcome *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+/* High-contrast themes: drop the purely decorative glow and sheen layers. */
+@media (forced-colors: active) { .welcome-aurora, .welcome :is(.welcome-skip, .welcome-primary)::before { display: none; } }

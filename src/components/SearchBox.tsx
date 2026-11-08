@@ -32,7 +32,8 @@ export function SearchBox() {
     <div className="search-box">
       <input
         value={q}
-        placeholder="搜地点加点，如「深圳湾公园」"
+        placeholder="搜索地点，如 深圳湾公园"
+        aria-label="搜索出发地点"
         onChange={(e) => setQ(e.target.value)}
         onKeyDown={(e) => { if (e.key === 'Enter') void search() }}
       />

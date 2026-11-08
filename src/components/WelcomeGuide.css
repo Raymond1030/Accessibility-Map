@@ -1,0 +1,131 @@
+.welcome-discover { position: relative; width: min(1200px, calc(100% - 108px)); margin: 58px auto 0; padding: 55px 0 0; border-top: 1px solid var(--c-line); scroll-margin-top: 30px; }
+.guide-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 36px; }
+.guide-eyebrow { margin: 0 0 18px; color: var(--c-muted); font-size: 12px; letter-spacing: .13em; line-height: 1.8; }
+.guide-heading h2 { margin: 0; font-size: clamp(28px, 2.5vw, 37px); font-family: var(--landing-display); font-weight: 500; letter-spacing: .01em; color: var(--c-commute); line-height: 1.5; }
+.guide-heading h2 > span { color: var(--c-meet); }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .guide-heading h2 > span { background-image: var(--c-headline); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  @media (forced-colors: active) { .guide-heading h2 > span { -webkit-text-fill-color: currentColor; } }
+}
+.guide-heading > p { max-width: 400px; margin: 0 0 4px; font-size: 15px; color: var(--c-muted); line-height: 2; }
+/* A white panel on the white page: a soft blue-tinted shadow separates it instead of a grey fill. */
+.guide-process { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; padding: 32px; margin: 36px 0 64px; list-style: none; border: 1px solid var(--c-line); border-radius: 20px; background: var(--c-surface); box-shadow: 0 18px 40px -30px rgba(45, 95, 146, .35); }
+.guide-process li { --step-color: var(--c-brand); position: relative; display: flex; align-items: flex-start; gap: 17px; min-width: 0; }
+.guide-icon { flex: none; display: grid; place-items: center; width: 43px; height: 43px; border: 1px solid var(--c-line); border-radius: 13px; color: var(--step-color); background: var(--c-brand-tint); transition: translate .35s cubic-bezier(.2, .8, .2, 1), scale .35s cubic-bezier(.2, .8, .2, 1), border-color .35s ease, box-shadow .35s ease; }
+.guide-step-label { font-size: 12px; font-weight: 500; letter-spacing: .08em; color: var(--step-color); }
+.guide-process h3 { font-size: 15px; font-weight: 500; line-height: 1.7; margin: 9px 0; color: var(--c-heading); }
+.guide-process p { margin: 0; color: var(--c-muted); font-size: 13px; line-height: 1.9; }
+/* The arrows between steps drift forward and back; the second one trails slightly behind the first. */
+.guide-step-arrow { position: absolute; top: 13px; right: -14px; color: var(--c-brand-line); font-size: 17px; animation: guide-arrow-drift 2.4s ease-in-out infinite; }
+.guide-process li:nth-child(2) .guide-step-arrow { animation-delay: -2s; }
+.use-cases-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.use-cases-heading h2 { margin: 0; font-size: 24px; font-family: var(--landing-display); font-weight: 500; letter-spacing: .01em; color: var(--c-commute); }
+.use-cases-heading > span { color: var(--c-muted); font-size: 11px; }
+.use-cases { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+/* --case-rgb repeats --case-color as an "r, g, b" triplet for the card-tinted shadows and borders.
+   The lift uses the independent translate property so it never fights the transform-based scroll reveal. */
+.use-case { --case-color: var(--c-commute); --case-tint: var(--c-commute-tint); --case-rgb: 45, 95, 146; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--c-line); border-radius: 19px; background: var(--c-surface); box-shadow: 0 1px 2px rgba(var(--case-rgb), .05), 0 16px 36px -28px rgba(var(--case-rgb), .38); transition: translate .35s cubic-bezier(.2, .8, .2, 1), box-shadow .35s cubic-bezier(.2, .8, .2, 1), border-color .35s ease; }
+.use-case:focus-within { translate: 0 -6px; border-color: rgba(var(--case-rgb), .32); box-shadow: 0 2px 6px rgba(var(--case-rgb), .07), 0 32px 56px -34px rgba(var(--case-rgb), .55); }
+.case-diagram { position: relative; height: 260px; overflow: hidden; background: var(--c-surface-sunk); isolation: isolate; }
+/* Always one row tall (status, details or error) so the three cards' copy blocks line up. */
+.case-query-details { min-height: 40px; padding: 9px 14px; border-bottom: 1px solid var(--c-line); color: var(--c-muted); font: 12px/1.7 system-ui, sans-serif; }
+.case-query-details details { margin: 0; }
+.case-query-details summary { cursor: pointer; color: var(--case-color); }
+.case-query-details ul { padding-left: 18px; margin: 6px 0; }
+.welcome .use-case .case-query-retry { width: auto; min-height: 36px; padding: 4px 8px; margin-top: 6px; border: 1px solid var(--c-line-strong); border-radius: 5px; font-size: 12px; transition: color .2s, background-color .2s, border-color .2s; }
+/* Chips drawn over the map keep a near-opaque white so the basemap does not lower text contrast. */
+.case-map-example { position: absolute; top: 14px; right: 12px; padding: 4px 7px; border-radius: 4px; background: #fffffff0; color: var(--c-muted); font: 10px/1.5 system-ui, sans-serif; pointer-events: none; animation: case-rise .45s cubic-bezier(.2, .8, .2, 1) backwards; }
+.case-map-readout { position: absolute; bottom: 29px; left: 10px; right: 10px; display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 14px; padding: 8px; border: 1px solid var(--c-line); border-radius: 7px; background: #fffffff5; color: var(--c-heading); font: 11px/1.5 system-ui, sans-serif; pointer-events: none; animation: case-rise .55s cubic-bezier(.2, .8, .2, 1) .25s backwards; }
+.case-map-readout > span { display: inline-flex; align-items: center; gap: 5px; animation: case-rise .45s cubic-bezier(.2, .8, .2, 1) backwards; }
+.case-map-readout > span:nth-child(2) { animation-delay: .07s; }
+.case-map-readout > span:nth-child(n + 3) { animation-delay: .14s; }
+.case-map-readout i { width: 8px; height: 8px; border-radius: 50%; }
+.case-map { position: absolute; inset: 0; }
+.case-map-location { position: absolute; top: 12px; left: 12px; padding: 6px 10px; border: 1px solid var(--c-line); border-radius: 6px; background: #fffffff0; color: var(--c-heading); font: 11px/1.5 system-ui, sans-serif; pointer-events: none; }
+.case-map-status { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: var(--c-surface-sunk); color: var(--c-muted); font-size: 12px; }
+/* Outranks `.welcome .use-case button` (the full-width card CTA), so the map's reload button stays compact and bordered. */
+.welcome .use-case .case-map-status button { width: auto; min-height: 36px; justify-content: center; padding: 6px 14px; border: 1px solid rgba(var(--case-rgb), .38); border-radius: 6px; background: var(--c-surface); font-size: 13px; transition: color .2s, background-color .2s, border-color .2s; }
+.use-case-copy { display: flex; flex: 1; flex-direction: column; padding: 24px; }
+.use-case-tag { color: var(--case-color); font-size: 12px; font-weight: 500; letter-spacing: .08em; }
+.use-case-commute { --case-color: var(--c-commute); --case-tint: var(--c-commute-tint); --case-rgb: 45, 95, 146; }
+.use-case-isochrone { --case-color: var(--c-meet); --case-tint: var(--c-meet-tint); --case-rgb: 95, 83, 166; }
+.use-case-explore { --case-color: var(--c-explore); --case-tint: var(--c-explore-tint); --case-rgb: 168, 71, 106; }
+.use-case h3 { margin: 13px 0 14px; max-width: 14em; color: var(--case-color); font-family: var(--landing-display); font-size: 22px; line-height: 1.6; font-weight: 500; letter-spacing: .01em; }
+.use-case p { flex: 1; margin: 0; color: var(--c-muted); font-size: 14px; line-height: 1.95; }
+.use-case blockquote { margin: 19px 0 24px; padding: 12px 0 0; border-top: 1px solid var(--c-line); color: var(--case-color); font-size: 13px; line-height: 1.8; }
+.welcome .use-case button { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 44px; padding: 9px 0; border: 0; background: transparent; color: var(--case-color); text-align: left; font-size: 14px; font-weight: 500; }
+.use-case button > span { display: grid; place-items: center; width: 29px; height: 29px; border: 1px solid var(--c-line); border-radius: 50%; font-size: 17px; transition: transform .2s, background-color .2s, border-color .2s; }
+.use-case button:is(:hover, :focus-visible) > span { transform: translate(2px, -2px); background: var(--case-tint); border-color: rgba(var(--case-rgb), .35); }
+.guide-questions { display: grid; grid-template-columns: 1fr 2fr; gap: 60px; padding: 58px 0; margin-top: 58px; border-top: 1px solid var(--c-line); }
+.guide-questions h2 { font-size: 24px; font-family: var(--landing-display); font-weight: 500; margin: 0; letter-spacing: .01em; color: var(--c-commute); }
+.guide-answers details { padding: 0 0 17px; border-bottom: 1px solid var(--c-line); margin-bottom: 17px; transition: border-color .3s ease; }
+.guide-answers details[open] { border-bottom-color: var(--c-brand-line); }
+.guide-answers details:last-child { margin: 0; }
+.guide-answers summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; cursor: pointer; list-style: none; font-size: 15px; font-weight: 500; color: var(--c-heading); min-height: 30px; transition: color .25s ease; }
+.guide-answers summary:focus-visible { color: var(--c-brand); }
+.guide-answers summary::-webkit-details-marker { display: none; }
+.guide-answers summary > span { font-size: 20px; color: var(--c-brand); font-weight: 300; transition: transform .35s cubic-bezier(.2, .8, .2, 1), scale .25s ease; }
+.guide-answers details[open] summary > span { transform: rotate(45deg); }
+.guide-answers p { margin: 14px 22px 2px 0; color: var(--c-muted); font-size: 14px; line-height: 1.95; }
+
+/* Motion. Entrances fill backwards only, so they never override hover or state styles once finished.
+   Everything here is switched off for reduced motion (Welcome.css, and the guard at the end of this file). */
+@keyframes guide-arrow-drift { 50% { transform: translateX(4px); } }
+@keyframes guide-icon-pop { from { opacity: 0; transform: scale(.72) rotate(-8deg); } }
+@keyframes guide-label-in { from { opacity: 0; } }
+@keyframes guide-answer-in { from { opacity: 0; transform: translateY(-6px); } }
+@keyframes case-rise { from { opacity: 0; transform: translateY(8px); } }
+@keyframes case-map-in { from { opacity: 0; } }
+@keyframes case-breathe { 50% { opacity: .78; } }
+@keyframes case-ping { from { box-shadow: 0 0 0 0 rgba(var(--case-rgb), .45); } to { box-shadow: 0 0 0 14px rgba(var(--case-rgb), 0); } }
+/* Once a step has scrolled in (useReveal), its icon pops in and its number label follows a beat later. */
+.reveal-ready .guide-process li[data-revealed] .guide-icon { animation: guide-icon-pop .7s cubic-bezier(.2, .8, .2, 1) calc(var(--reveal-delay, 0s) + .2s) backwards; }
+.reveal-ready .guide-process li[data-revealed] .guide-step-label { animation: guide-label-in .6s ease calc(var(--reveal-delay, 0s) + .35s) backwards; }
+/* Example maps: the loaded map fades in over the placeholder and its chips rise into place. */
+.case-preview[data-status="ready"] .case-map { animation: case-map-in .7s ease-out backwards; }
+.case-preview[data-status="ready"] .case-map-location { animation: case-rise .55s cubic-bezier(.2, .8, .2, 1) .15s backwards; }
+/* Loading text breathes between 100% and 78% opacity. Its colour is raised to --c-heading so the faintest
+   frame (about 5.2:1 on --c-surface-sunk, 5.5:1 on white) still matches the original muted text's contrast. */
+.case-map-loading { color: var(--c-heading); animation: case-breathe 2s ease-in-out infinite; }
+.case-preview[data-status="loading"] .case-map-status::before { content: ''; width: 8px; height: 8px; margin-bottom: 4px; border-radius: 50%; background: var(--case-color); animation: case-ping 2s ease-out infinite; }
+.case-preview:not([data-status="error"]) .case-query-status { color: var(--c-heading); animation: case-breathe 2s ease-in-out infinite; }
+.case-query-details > :not(.case-query-status) { animation: case-rise .4s cubic-bezier(.2, .8, .2, 1) backwards; }
+.case-query-details details[open] > :not(summary), .guide-answers details[open] > p { animation: guide-answer-in .35s cubic-bezier(.2, .8, .2, 1) backwards; }
+@media (hover: hover) {
+  .guide-process li:hover .guide-icon { translate: 0 -3px; scale: 1.06; border-color: var(--c-brand-line); box-shadow: 0 10px 18px -12px rgba(45, 95, 146, .55); }
+  .use-case:hover { translate: 0 -6px; border-color: rgba(var(--case-rgb), .32); box-shadow: 0 2px 6px rgba(var(--case-rgb), .07), 0 32px 56px -34px rgba(var(--case-rgb), .55); }
+  .welcome .use-case :is(.case-map-status button, .case-query-retry):hover { background: var(--case-tint); border-color: rgba(var(--case-rgb), .55); }
+  .guide-answers summary:hover { color: var(--c-brand); }
+  .guide-answers summary:hover > span { scale: 1.15; }
+}
+
+@media (max-width: 1000px) {
+  .welcome-discover { width: calc(100% - 60px); }
+  .guide-process { padding: 24px; gap: 24px; }
+  .guide-process li { flex-direction: column; gap: 13px; }
+  .guide-step-arrow { right: 0; }
+  .use-cases { gap: 15px; }.use-case-copy { padding: 19px; }.use-case h3 { font-size: 20px; }
+}
+@media (max-width: 700px) {
+  .welcome-discover { width: calc(100% - 40px); margin-top: 35px; padding-top: 34px; }
+  .guide-heading { display: block; }
+  .guide-eyebrow { font-size: 11px; margin-bottom: 15px; letter-spacing: .08em; }
+  .guide-heading h2 { font-size: 29px; }
+  .guide-heading > p { margin: 20px 0 0; font-size: 14px; line-height: 1.95; }
+  .desktop-break { display: none; }
+  .guide-process { grid-template-columns: 1fr; gap: 0; margin: 26px 0 40px; padding: 7px 22px; border-radius: 18px; }
+  .guide-process li { flex-direction: row; gap: 16px; padding: 21px 0; border-bottom: 1px solid var(--c-line); }
+  .guide-process li:last-child { border: 0; }
+  .guide-icon { margin-top: 2px; width: 40px; height: 40px; }
+  .guide-process h3 { font-size: 14px; }
+  .guide-process p { font-size: 13px; }.guide-step-arrow { display: none; }
+  .use-cases-heading { display: block; margin-bottom: 20px; }.use-cases-heading h2 { font-size: 21px; }.use-cases-heading > span { display: block; margin-top: 10px; font-size: 10px; }
+  .use-cases { grid-template-columns: 1fr; gap: 20px; }
+  .case-diagram { height: 260px; }.use-case-copy { padding: 23px; }.use-case h3 { max-width: none; margin-block: 11px; font-size: 21px; }.use-case p { font-size: 14px; }.use-case blockquote { margin-bottom: 14px; }
+  .guide-questions { grid-template-columns: 1fr; gap: 25px; margin-top: 38px; padding: 32px 0 36px; }
+  .guide-questions h2 { font-size: 22px; }.guide-answers summary { font-size: 14px; min-height: 36px; }.guide-answers p { font-size: 13px; }
+}
+/* Local guard (Welcome.css also disables motion for every .welcome descendant). */
+@media (prefers-reduced-motion: reduce) {
+  .welcome-discover *, .welcome-discover *::before, .welcome-discover *::after { animation: none !important; transition: none !important; }
+}

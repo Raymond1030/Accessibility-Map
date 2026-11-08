@@ -103,13 +103,28 @@
 
 ## 📋 使用前须知
 
-- 🚌 **租房通勤支持公交 / 地铁**，使用高德路线规划；地铁等时圈改用本地深圳线网计算，公交等时圈暂不提供
+- 🚌 **租房通勤支持公交 / 地铁**，具体路线使用高德；深圳地铁圈使用静态线网估算，开启下述本地引擎后可计算已导入 GTFS 的公交圈
 - 🐢 **国内首次打开要等几秒**（数据来自境外服务），之后就快了；个别地名可能显示英文
 - 🗂️ **导出的 GeoJSON 是标准 WGS-84 坐标**，QGIS 等工具直接打开就能用
 
 ---
 
 ## 🛠️ 开发者
+
+### 本地粤港澳计算引擎
+
+新增可选的 **GraphHopper 本地引擎**：用 OSM 计算广东、香港、澳门的步行、骑行和静态驾车等时圈；导入香港运输署 GTFS 后可计算其覆盖的公共交通等时圈，支持指定出发／到达时刻。香港 feed 不含港铁重铁，深圳地铁仍单独标为静态估算。
+
+```powershell
+npm run engine:prepare -- --region guangdong
+npm run engine:start -- --region guangdong
+# 另开终端
+npm run dev:local
+```
+
+需要 JDK 17+、Python 3.8+ 和 Node 18+。本地路由无需在线路由 Key；底图、搜索和既有点到点路线比较沿用原配置。普通启动及线上页面保持原数据源。
+
+[方法与数据来源](docs/LOCAL_ENGINE_METHOD.md) · [运行、更新与导入说明](docs/LOCAL_ENGINE_RUNBOOK.md) · [真实验收记录](docs/LOCAL_ENGINE_VALIDATION.md) · [计算流程图](docs/assets/local-engine-flow.png)
 
 想本地运行、了解架构设计或参与开发？请看 [开发文档](docs/DEVELOPMENT.md)。
 

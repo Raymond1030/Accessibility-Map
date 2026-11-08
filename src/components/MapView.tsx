@@ -9,13 +9,17 @@ import { shouldAddOnMapClick, useIsMobile } from '../ui/responsive'
 import { locateCurrentPosition } from '../geo/locate'
 import { ResultsPanel, type ResultItem } from './ResultsPanel'
 import {
+  RANGE_DASH,
+  RESULT_CASING_EXTRA,
   RESULT_COLOR,
+  RESULT_LINE_WIDTH,
   originCode,
   originBandLineOpacity,
   originBandLineWidth,
   originBandOpacity,
   resultBandLineWidth,
   resultBandOpacity,
+  resultCasingDash,
 } from '../ui/mapStyle'
 import {
   MARKER_ICON_OPTIONS,
@@ -31,6 +35,7 @@ import { useNavigation } from '../state/navigation'
 import { useExplore } from '../explore/store'
 import { useLifeMap } from '../explore/useLifeMap'
 import { RANGE_LABELS } from '../commute/range'
+import { overlayInsets } from '../ui/mapInsets'
 
 const EMPTY_FC: FeatureCollection = { type: 'FeatureCollection', features: [] }
 const ORIGIN_POINTS_SOURCE = 'origin-points'
@@ -281,6 +286,7 @@ export function MapView() {
 
       // 每个 feature 自带与侧栏图例一致的透明度和线宽：近时段更浓，
       // 远时段更淡。不要在这里另写常量，否则图例会和地图失配。
+      // 范围边界一律画虚线（RANGE_DASH，与首页案例卡片相同）。
       map.addLayer({
         id: 'origins-fill',
         type: 'fill',
@@ -298,10 +304,14 @@ export function MapView() {
           'line-color': ['get', 'color'],
           'line-opacity': ['coalesce', ['get', 'lineOpacity'], 0.8],
           'line-width': ['coalesce', ['get', 'lineWidth'], 1.8],
+          'line-dasharray': RANGE_DASH,
         },
       })
       // 紫色只表示「多个点的集合运算结果」。单点不画这一层，保留点本身
-      // 的识别色。白色 casing 让结果边界在道路、水面和绿地上都能读清。
+      // 的识别色。白色 casing 让结果边界在道路、水面和绿地上都能读清；
+      // 它跟着紫色虚线一段段断开（casingDash），空隙里照样露出底图。
+      // 两层的线宽都要保持按要素取值、且不随缩放变化：Mapbox 对常量线宽另有缩放处理，
+      // 只改一层就会在缩放过渡时错开。
       map.addLayer({
         id: 'result-fill',
         type: 'fill',
@@ -317,8 +327,9 @@ export function MapView() {
         source: 'result-iso',
         paint: {
           'line-color': '#ffffff',
-          'line-width': ['+', ['coalesce', ['get', 'lineWidth'], 2.8], 3.4],
+          'line-width': ['+', ['coalesce', ['get', 'lineWidth'], RESULT_LINE_WIDTH], RESULT_CASING_EXTRA],
           'line-opacity': 0.94,
+          'line-dasharray': ['array', 'number', 2, ['coalesce', ['get', 'casingDash'], ['literal', resultCasingDash(RESULT_LINE_WIDTH)]]],
         },
       })
       map.addLayer({
@@ -327,8 +338,9 @@ export function MapView() {
         source: 'result-iso',
         paint: {
           'line-color': RESULT_COLOR,
-          'line-width': ['coalesce', ['get', 'lineWidth'], 2.8],
+          'line-width': ['coalesce', ['get', 'lineWidth'], RESULT_LINE_WIDTH],
           'line-opacity': 0.98,
+          'line-dasharray': RANGE_DASH,
         },
       })
 
@@ -429,6 +441,16 @@ export function MapView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // 地图铺满窗口，左侧面板和顶部场景栏悬浮在上面：设置地图留白，让居中和缩放都落在没被遮住的区域。
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !mapReady) return
+    const applyInsets = () => map.setPadding(overlayInsets())
+    applyInsets()
+    window.addEventListener('resize', applyInsets)
+    return () => window.removeEventListener('resize', applyInsets)
+  }, [mapReady])
+
   // 新增起点时把视野移过去；只在数量增加时移动，手动平移后不被拉回
   const prevOriginCountRef = useRef(0)
   useEffect(() => {
@@ -488,13 +510,15 @@ export function MapView() {
     if (visibleIds.length >= 2) {
       for (const { minutes, result: r } of [...resultItems].sort((a, b) => b.minutes - a.minutes)) {
         if (r.kind === 'ok') {
+          const lineWidth = resultBandLineWidth(resultBands, minutes)
           features.push({
             ...r.geometry,
             properties: {
               ...r.geometry.properties,
               minutes,
               fillOpacity: resultBandOpacity(resultBands, minutes),
-              lineWidth: resultBandLineWidth(resultBands, minutes),
+              lineWidth,
+              casingDash: resultCasingDash(lineWidth),
             },
           })
         }
@@ -520,7 +544,7 @@ export function MapView() {
       <div className="map-view" ref={containerRef} />
       {scene === 'explore' && explorePicking && <div className="picking-hint">点击地图标记探索起点<button onClick={() => useExplore.setState({ picking: false })}>取消</button></div>}
       {scene === 'commute' && commuteView === 'range' && rangeStatus === 'ok' && !commutePicking && <div className="range-map-caption">
-        <strong>{RANGE_LABELS[rangeMode]} · {rangeMinutes} 分钟圈</strong><span>{rangeMode === 'subway-walking' ? '到达工作地 · 本地地铁估算' : '从工作地出发 · 通勤参考'}</span>
+        <strong>{RANGE_LABELS[rangeMode]} · {rangeMinutes} 分钟圈</strong><span>{rangeMode === 'subway-walking' ? '到达工作地 · 地铁＋步行' : '从工作地出发 · 通勤参考'}</span>
       </div>}
 
       {scene === 'commute' && commutePicking && <div className="picking-hint">

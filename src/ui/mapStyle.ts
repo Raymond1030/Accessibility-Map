@@ -2,12 +2,14 @@
  * 地图视觉编码的唯一来源：侧栏图例、点标记和 Mapbox 图层都从这里取值，
  * 避免界面上展示的透明度和地图实际画出来的不一致。
  */
+// 底图使用 Mapbox Streets 原色（绿地、黄色干道），所以范围色避开绿色和黄色，以免与绿地、道路混在一起；
+// 紫色留给多点运算结果（RESULT_COLOR）。按添加顺序取色：最常见的 2–3 人场景里，相邻颜色色差最大。
 export const ORIGIN_PALETTE = [
   '#1769D2', // blue
   '#DE4D2A', // vermilion
-  '#008B72', // teal
   '#B83B91', // magenta
-  '#B87500', // amber
+  '#8E5B3A', // umber
+  '#006F84', // deep cyan
 ] as const
 
 export const RESULT_COLOR = '#5138C9'
@@ -48,6 +50,34 @@ export function resultBandOpacity(thresholds: number[], minutes: number): number
 export function resultBandLineWidth(thresholds: number[], minutes: number): number {
   const position = bandPosition(thresholds, minutes)
   return rounded(3.6 - position * 1.2)
+}
+
+/**
+ * 可达范围的边界画成虚线，与首页案例卡片一致：等时圈本来就是近似的边界，
+ * 虚线也和实线的道路、路线区分得开。单位是线宽（Mapbox 按各自线宽缩放）：画 3、空 2。
+ */
+export const RANGE_DASH: [number, number] = [3, 2]
+
+/** 合成结果轮廓的默认线宽（要素没带 lineWidth 时）；衬线宽度与衬线虚线都从同一个线宽推出 */
+export const RESULT_LINE_WIDTH = 2.8
+
+/** 合成结果轮廓下面的白色衬线，比轮廓本身宽这么多像素 */
+export const RESULT_CASING_EXTRA = 3.4
+
+/**
+ * 彩色虚线下面那条白色衬线的虚线参数：每一段衬线正好垫在一段彩色虚线下面，空隙里露出底图。
+ * 两层线宽不同，而虚线长度按各自线宽缩放，所以按宽度比例换算。
+ * 不能取整：周期差一点点，沿着几百公里长的轮廓就会越错越开。
+ * 两层的线宽要么都是常量、要么都按要素取值：Mapbox 对常量线宽的虚线另有缩放，混用会在缩放时错开。
+ */
+export function casingDash(lineWidth: number, casingWidth: number): [number, number] {
+  const k = lineWidth / casingWidth
+  return [RANGE_DASH[0] * k, RANGE_DASH[1] * k]
+}
+
+/** 合成结果轮廓的白色衬线（比轮廓宽 RESULT_CASING_EXTRA 像素）用的虚线参数 */
+export function resultCasingDash(lineWidth: number): [number, number] {
+  return casingDash(lineWidth, lineWidth + RESULT_CASING_EXTRA)
 }
 
 export function colorWithAlpha(hex: string, alpha: number): string {

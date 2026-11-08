@@ -2,60 +2,104 @@
 .welcome-map-frame { position: relative; height: clamp(430px, 42vw, 580px); overflow: hidden; background: #10171e; isolation: isolate; }
 .welcome-real-map { position: absolute; inset: 0; }
 .welcome-cinematic-caption { position: absolute; top: 25px; left: 25px; right: 20px; pointer-events: none; z-index: 1; }
-.welcome-scene-kicker { display: flex; align-items: center; gap: 8px; color: #bdc6cf; font-size: 10px; line-height: 1.5; letter-spacing: .1em; }
-.welcome-status-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #64e0bc; }
-.welcome-cinematic-legend { display: flex; gap: 16px; margin-top: 16px; color: #c4cbd1; font-size: 10px; }
+.welcome-scene-kicker { display: flex; align-items: center; gap: 8px; color: #bdc6cf; font-size: 16px; line-height: 1.5; letter-spacing: .1em; }
+/* Light blue status dot (no green); while the story plays it sends out a soft ring. */
+.welcome-status-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #9cc3ff; }
+.welcome-map-frame[data-playing="true"] .welcome-status-dot { animation: story-dot-ring 1.8s ease-out infinite; }
+@keyframes story-dot-ring { from { box-shadow: 0 0 0 0 rgba(156, 195, 255, .6); } to { box-shadow: 0 0 0 6px rgba(156, 195, 255, 0); } }
+.welcome-cinematic-legend { display: flex; flex-wrap: wrap; gap: 16px; line-height: 1.6; margin-top: 16px; color: #c4cbd1; font-size: 16px; }
 .welcome-cinematic-legend span { display: flex; gap: 5px; align-items: center; }
 .welcome-cinematic-legend span::before { content: ''; width: 6px; height: 6px; background: #80b5ff; }
-.welcome-cinematic-legend span:nth-child(2)::before { background: #64e0bc; }
+.welcome-cinematic-legend span:nth-child(2)::before { background: #ffc78b; }
 .welcome-cinematic-legend span:nth-child(3)::before { background: #c6a1ff; }
 .welcome-cinematic-copy { margin-top: 14px; color: #f1f4f7; font: 400 clamp(19px, 1.9vw, 28px)/1.85 var(--editorial-sans); letter-spacing: .01em; }
 .welcome-cinematic-copy mark { padding: 1px 5px 3px; border: 1px solid; border-radius: 3px; white-space: nowrap; }
 .welcome-cinematic-copy .ink-place { color: #b3d1ff; background: #203249; border-color: #416496; }
-.welcome-cinematic-copy .ink-route { color: #95eed5; background: #173d34; border-color: #3f826f; }
+.welcome-cinematic-copy .ink-route { color: #dbe4ec; background: #243240; border-color: #4d6070; } /* neutral slate: no green text */
 .welcome-cinematic-copy .ink-destination { color: #ffd7a7; background: #423526; border-color: #89704d; }
 .welcome-cinematic-copy .ink-area { color: #ddc7ff; background: #382b47; border-color: #80629f; }
 .welcome-cinematic-copy > span { transition: opacity .6s ease; }
 .welcome-cinematic-copy .phrase-hidden { opacity: 0; }
 .welcome-cinematic-copy .phrase-visible { opacity: 1; }
 .welcome-map-readout { position: absolute; bottom: 42px; left: 25px; color: #edf4fc; pointer-events: none; z-index: 1; }
-.welcome-map-readout > span { display: block; font-size: 10px; color: #bfcbd4; margin-bottom: 8px; }
+.welcome-map-readout > span { display: block; font-size: 16px; color: #bfcbd4; margin-bottom: 8px; }
 .welcome-map-readout strong { font: 400 27px/1.4 var(--editorial-serif); }
-.welcome-map-readout small { font: 11px/1.5 var(--editorial-sans); margin-left: 12px; color: #bfcbd4; }
+.welcome-map-readout small { font: 16px/1.5 var(--editorial-sans); margin-left: 12px; color: #bfcbd4; }
 .welcome-scene-number { position: absolute; right: 25px; bottom: 46px; color: #fff; font: 400 22px/1 var(--editorial-serif); z-index: 1; }
 .welcome-scene-number span { color: #a4b1bd; font-size: 13px; }
-.welcome-place { display: grid; place-items: center; width: 24px; height: 24px; pointer-events: none; }
-.welcome-place > span { display: grid; place-items: center; width: 24px; height: 24px; border: 2px solid #e1ecf5; border-radius: 50%; background: var(--place-color); color: #10171e; font: 700 10px var(--editorial-sans); }
-.welcome-place > strong { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); white-space: nowrap; color: var(--place-color); background: #131c27; font: 500 11px/1.5 var(--editorial-sans); padding: 5px 8px; border: 1px solid #324253; }
-.welcome-map-scene-1 .welcome-place-0 > strong { bottom: auto; top: calc(100% + 8px); }
-.welcome-map-scene-0 .welcome-place-1, .welcome-map-scene-2 .welcome-place-1 { opacity: 0; }
+.welcome-place { display: grid; place-items: center; width: 30px; height: 30px; pointer-events: none; }
+.welcome-place > span { display: grid; place-items: center; width: 30px; height: 30px; border: 2px solid #e1ecf5; border-radius: 50%; background: var(--place-color); color: #10171e; font: 700 12px var(--editorial-sans); }
+.welcome-place > strong { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); white-space: nowrap; color: var(--place-color); background: #131c27; font: 500 16px/1.5 var(--editorial-sans); padding: 5px 8px; border: 1px solid #324253; }
+.welcome-map-scene-1 .welcome-place-1 > strong { bottom: auto; top: calc(100% + 8px); }
+.welcome-map-scene-0 .welcome-place-1, .welcome-map-scene-1 .welcome-place-0 { visibility: hidden; }
+.welcome-map-scene-3 .welcome-place > strong { visibility: hidden; }
 .welcome-map-status { position: absolute; inset: 0; z-index: 3; display: flex; justify-content: center; flex-direction: column; align-items: flex-start; padding: 32px; background: #10171e; }
 .welcome-map-status strong { color: #b3d1ff; font: 400 25px/1.5 var(--editorial-serif); }
-.welcome-map-status p { font-size: 13px; line-height: 1.8; color: #bfcbd4; }
-.welcome-map-status button, .welcome-map-note button { background: transparent; border: 0; border-bottom: 1px solid currentColor; color: #b3d1ff; padding: 8px 0; }
+.welcome-map-status p { font-size: 16px; line-height: 1.8; color: #bfcbd4; }
+.welcome-map-status button, .welcome .welcome-map-note button { background: transparent; border: 0; border-bottom: 1px solid currentColor; color: #b3d1ff; padding: 8px 0; }
+/* 深色地图框里的焦点框用浅蓝，全局的雾蓝焦点框在 #10171e 上对比度不足 3:1 */
+.welcome .welcome-map-frame :is(button, a):focus-visible { outline-color: #b3d1ff; }
+/* Everything below the dark frame sits on the light page and uses the global palette. */
 .welcome-map-steps { display: flex; align-items: center; gap: 16px; padding-top: 18px; }
-.welcome-map-steps button { position: relative; min-height: 44px; padding: 8px 0; border: 0; background: transparent; color: var(--editorial-muted); letter-spacing: 0; font-size: 11px; }
-.welcome-map-steps button > span { font-size: 10px; margin-right: 5px; }
-.welcome-map-steps .welcome-step { flex: 1; border-bottom: 1px solid var(--editorial-line); white-space: nowrap; }
-.welcome-map-steps .welcome-step i { position: absolute; height: 2px; bottom: -1px; left: 0; right: 0; background: var(--editorial-blue); transform-origin: left; }
-.welcome-map-steps button[aria-pressed="true"] { color: var(--editorial-blue); }
-.welcome-map-steps .welcome-map-play { margin-left: 8px; color: var(--editorial-plum); white-space: nowrap; }
-.welcome-map-steps .welcome-map-replay { color: var(--editorial-plum); white-space: nowrap; }
+.welcome .welcome-map-steps button { position: relative; min-height: 44px; padding: 8px 0; border: 0; background: transparent; color: var(--c-muted); letter-spacing: 0; font-size: 16px; transition: color .4s cubic-bezier(.2, .8, .2, 1), border-color .4s ease, opacity .2s ease; }
+.welcome-map-steps button > span { font-size: 12px; margin-right: 5px; }
+/* Outranks the `border: 0` in the rule above (one more class), so the light progress track under each step shows. */
+.welcome .welcome-map-steps .welcome-step { flex: 1; min-width: 0; border-bottom: 1px solid var(--c-line); white-space: nowrap; }
+/* The bar follows the story clock (inline scaleX); the short transition smooths jumps when a step is picked or the story loops. */
+.welcome-map-steps .welcome-step i { position: absolute; height: 2px; bottom: -1px; left: 0; right: 0; background: var(--c-brand); transform-origin: left; transition: transform .3s cubic-bezier(.2, .8, .2, 1); }
+.welcome .welcome-map-steps button[aria-pressed="true"] { color: var(--c-brand-strong); }
+.welcome .welcome-map-steps :is(.welcome-map-play, .welcome-map-replay) { color: var(--c-brand); white-space: nowrap; }
+.welcome-map-steps .welcome-map-play { margin-left: 8px; }
 .welcome-map-steps button:disabled { opacity: .5; cursor: default; }
-.welcome-map-note { font-size: 10px; line-height: 1.8; margin: 16px 0 0; color: var(--editorial-muted); }
-.welcome-map-note button { margin-left: 8px; font-size: 10px; color: var(--editorial-blue); }
-.welcome-real-map .mapboxgl-ctrl-attrib { font: 10px/1.5 var(--editorial-sans); }
+.welcome-map-note { font-size: 16px; line-height: 1.8; margin: 16px 0 0; color: var(--c-muted); }
+.welcome .welcome-map-note button { margin-left: 8px; font-size: 16px; color: var(--c-brand); }
+@media (hover: hover) {
+  .welcome .welcome-map-steps .welcome-step:hover:not([aria-pressed="true"]) { color: var(--c-heading); border-bottom-color: var(--c-brand-line); }
+  .welcome .welcome-map-steps :is(.welcome-map-play, .welcome-map-replay):hover:not(:disabled), .welcome .welcome-map-note button:hover { color: var(--c-brand-hover); }
+}
+.welcome-real-map .mapboxgl-ctrl-attrib { font: 12px/1.5 var(--editorial-sans); }
 .welcome-real-figure .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-@media (max-width: 1000px) { .welcome-map-steps { gap: 9px; } .welcome-map-steps button > span { display: none; } }
+@media (max-width: 1300px) {
+  /* Four steps share the free width; pause and replay keep their own size on the same row. */
+  .welcome-map-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto auto; gap: 8px 10px; }
+  .welcome-map-steps button > span { display: none; }
+  .welcome-map-steps .welcome-map-play { margin-left: 0; }
+}
 @media (max-width: 700px) {
   .welcome-map-frame { height: 470px; }
   .welcome-cinematic-caption { top: 22px; left: 20px; right: 16px; }
   .welcome-cinematic-copy { font-size: 21px; }
-  .welcome-map-readout { left: 20px; }
+  .welcome-map-readout { left: 20px; max-width: calc(100% - 100px); }
   .welcome-map-readout strong { font-size: 24px; }
-  .welcome-map-readout small { font-size: 10px; margin-left: 8px; }
+  .welcome-map-readout small { display: block; font-size: 16px; margin: 4px 0 0; }
   .welcome-scene-number { right: 20px; }
-  .welcome-map-steps { gap: 10px; flex-wrap: wrap; }
+  .welcome-map-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .welcome-map-steps .welcome-map-play { margin-left: 0; }
 }
-@media (prefers-reduced-motion: reduce) { .welcome-cinematic-copy > span { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  /* Local guard; Welcome.css also disables motion for every .welcome descendant. */
+  .welcome-cinematic-copy > span, .welcome-status-dot, .welcome-map-steps button, .welcome-map-steps .welcome-step i { animation: none !important; transition: none !important; }
+}
+
+/* Keep the original Mapbox story as a clear foreground presentation. */
+.welcome-real-figure { display: block; width: min(1200px, calc(100% - 80px)); margin: 30px auto 0; scroll-margin-top: 20px; }
+.figure-topline { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 2px; color: var(--c-muted); font-size: 13px; }
+/* Soft, slightly blue-tinted drop shadow so the dark frame sits gently on the white page. */
+.welcome-map-frame { height: clamp(480px, 42vw, 580px); border-radius: 20px; border: 1px solid #253847; box-shadow: 0 1px 3px rgba(45, 95, 146, .08), 0 28px 56px -30px rgba(45, 95, 146, .42); }
+.welcome-real-map .mapboxgl-canvas { filter: none; }
+.welcome-cinematic-caption { padding: 16px 20px; top: 16px; left: 16px; right: auto; max-width: calc(100% - 32px); border-radius: 14px; background: #10171edb; }
+.welcome-map-readout { padding: 10px 14px; left: 24px; bottom: 40px; border-radius: 10px; background: #10171edb; }
+.welcome-map-note { font-size: 13px; }
+@media (max-width: 700px) {
+  .welcome-real-figure { width: calc(100% - 32px); margin-top: 22px; }
+  .figure-topline { font-size: 11px; flex-wrap: wrap; gap: 6px; }
+  .welcome-map-frame { height: 500px; border-radius: 16px; }
+  .welcome-cinematic-caption { top: 12px; left: 12px; max-width: calc(100% - 24px); padding: 13px; }
+  .welcome-cinematic-copy { font-size: 18px; }
+  .welcome-scene-kicker, .welcome-cinematic-legend { font-size: 11px; letter-spacing: 0; }
+  .welcome-cinematic-legend { gap: 10px; }
+  .welcome-map-readout { left: 16px; padding: 8px 10px; }
+  .welcome-map-readout > span, .welcome-map-readout small { font-size: 12px; }
+  .welcome .welcome-map-steps button { font-size: 13px; }
+  .welcome-map-note { font-size: 11px; }
+}

@@ -72,4 +72,17 @@ describe('本地地铁等时圈', () => {
     } })).rejects.toThrow()
     expect(fetch.mock.calls.every(([r]) => r.lngLat[0] === 114)).toBe(true)
   })
+  it('取消会中断正在进行的步行接驳请求', async () => {
+    const controller = new AbortController()
+    let started!: () => void
+    const transportStarted = new Promise<void>(resolve => { started = resolve })
+    const leg: IsochroneProvider = { id: 'abortable', supportedModes: ['walking'], fetch: request => new Promise((_resolve, reject) => {
+      request.signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true })
+      started()
+    }) }
+    const result = createMetroWalkingProvider({ leg, network }).fetch({ ...req, signal: controller.signal }).then(() => 'resolved', error => error.name)
+    await transportStarted
+    controller.abort()
+    expect(await Promise.race([result, new Promise(resolve => setTimeout(() => resolve('still running'), 100))])).toBe('AbortError')
+  })
 })

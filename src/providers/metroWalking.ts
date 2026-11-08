@@ -53,7 +53,7 @@ export function createMetroWalkingProvider({ leg, network }: {
       const contours: Array<{ minutes: number; feature: PolyFeature | null }> = []
       for (const minutes of buckets) {
         check()
-        contours.push({ minutes, feature: await leg.fetch({ lngLat: req.lngLat, mode: 'walking', minutes }) })
+        contours.push({ minutes, feature: await leg.fetch({ lngLat: req.lngLat, mode: 'walking', minutes, signal: req.signal }) })
       }
       check()
       const direct = contours.find(c => c.minutes === req.minutes)!.feature
@@ -87,7 +87,7 @@ export function createMetroWalkingProvider({ leg, network }: {
           const task = tasks.shift()
           if (!task) return
           try {
-            const feature = await leg.fetch({ ...task, mode: 'walking' })
+            const feature = await leg.fetch({ ...task, mode: 'walking', signal: req.signal })
             check()
             // null 不等于无地铁可达：车站步行数据缺失时不能默默给出残缺成功结果。
             if (!feature) throw new Error('部分车站缺少步行路网，无法生成完整地铁通勤圈。请重试或更换工作地。')

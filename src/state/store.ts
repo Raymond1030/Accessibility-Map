@@ -6,6 +6,11 @@ import { getProvider } from '../providers'
 import { isConfigError } from '../amap/errors'
 import { applyCustomThreshold, normalizeCustomThresholds, planRequests } from './compute'
 import { ORIGIN_PALETTE } from '../ui/mapStyle'
+import { isLocalEngineEnabled } from '../providers/local'
+import { localQueryDateTime, localQueryNow } from '../providers/localTime'
+
+let refreshGeneration = 0
+let localController: AbortController | null = null
 
 type State = {
   origins: Origin[]
@@ -20,6 +25,9 @@ type State = {
   fatalError: string | null
   drawerOpen: boolean
   pickingMode: boolean
+  localDateTime: string
+  localDirection: 'depart' | 'arrive'
+  setLocalQuery: (patch: Partial<Pick<State, 'localDateTime' | 'localDirection'>>) => void
 
   addOrigin: (lngLat: [number, number], label: string) => void
   removeOrigin: (id: string) => void
@@ -41,7 +49,8 @@ type State = {
 export const useStore = create<State>((set, get) => ({
   origins: [],
   bandMode: 'paired',
-  globalThresholds: [15, 30, 45],
+  // 默认只开 15 分钟一档；需要分层对比时再在侧栏多选其他时长
+  globalThresholds: [15],
   customMinutes: 20,
   op: 'intersect',
   baseOriginId: null,
@@ -52,6 +61,12 @@ export const useStore = create<State>((set, get) => ({
   // 初始折叠：移动端首屏应该先看到地图。桌面端 CSS 不读这个值
   drawerOpen: false,
   pickingMode: false,
+  localDateTime: localQueryNow(),
+  localDirection: 'depart',
+  setLocalQuery: patch => {
+    set({ ...patch, geoms: new Map(), cells: new Map(), errors: new Map() })
+    void get().refresh()
+  },
 
   addOrigin: (lngLat, label) => {
     const origins = get().origins
@@ -139,7 +154,12 @@ export const useStore = create<State>((set, get) => ({
     set(pickingMode ? { pickingMode, drawerOpen: false } : { pickingMode }),
 
   refresh: async () => {
-    const { origins, bandMode, globalThresholds } = get()
+    const run = ++refreshGeneration
+    localController?.abort()
+    const local = isLocalEngineEnabled()
+    localController = local ? new AbortController() : null
+    const signal = localController?.signal
+    const { origins, bandMode, globalThresholds, localDateTime, localDirection } = get()
     const plan = planRequests(origins, bandMode, globalThresholds)
 
     const cells = new Map(get().cells)
@@ -147,7 +167,8 @@ export const useStore = create<State>((set, get) => ({
       const key = cellKey(p.originId, p.minutes)
       if (!get().geoms.has(key)) cells.set(key, 'loading')
     }
-    set({ cells })
+    if (local) set({ cells: new Map(plan.map(p => [cellKey(p.originId, p.minutes), 'loading'])), geoms: new Map(), errors: new Map() })
+    else set({ cells })
 
     await Promise.all(plan.map(async (p) => {
       const key = cellKey(p.originId, p.minutes)
@@ -155,13 +176,17 @@ export const useStore = create<State>((set, get) => ({
         // 数据源按出行方式分发：不同起点可能各用各的 provider
         const geom = await getProvider(p.mode).fetch({
           lngLat: p.lngLat, mode: p.mode, minutes: p.minutes,
+          ...(local ? { direction: localDirection, signal,
+            ...(p.mode === 'transit-walking' ? { dateTime: localQueryDateTime(localDateTime) } : {}) } : {}),
         })
+        if (run !== refreshGeneration) return
         set((s) => ({
           geoms: new Map(s.geoms).set(key, geom),
           cells: new Map(s.cells).set(key, geom ? 'ok' : 'empty'),
           errors: (() => { const e = new Map(s.errors); e.delete(key); return e })(),
         }))
       } catch (err) {
+        if (run !== refreshGeneration) return
         const msg = err instanceof Error ? err.message : String(err)
         // token 无效/额度用尽/高德配置错误是配置问题，重试无意义，升为全局提示
         if (/token|额度/i.test(msg) || isConfigError(msg)) set({ fatalError: msg })
@@ -174,6 +199,8 @@ export const useStore = create<State>((set, get) => ({
   },
 
   retryCell: async (originId, minutes) => {
+    const run = refreshGeneration
+    const { localDateTime, localDirection } = get()
     const origin = get().origins.find((o) => o.id === originId)
     if (!origin) return
     const key = cellKey(originId, minutes)
@@ -181,13 +208,17 @@ export const useStore = create<State>((set, get) => ({
     try {
       const geom = await getProvider(origin.mode).fetch({
         lngLat: origin.lngLat, mode: origin.mode, minutes,
+        ...(isLocalEngineEnabled() ? { direction: localDirection, signal: localController?.signal,
+          ...(origin.mode === 'transit-walking' ? { dateTime: localQueryDateTime(localDateTime) } : {}) } : {}),
       })
+      if (run !== refreshGeneration) return
       set((s) => ({
         geoms: new Map(s.geoms).set(key, geom),
         cells: new Map(s.cells).set(key, geom ? 'ok' : 'empty'),
         errors: (() => { const e = new Map(s.errors); e.delete(key); return e })(),
       }))
     } catch (err) {
+      if (run !== refreshGeneration) return
       const msg = err instanceof Error ? err.message : String(err)
       if (/token|额度/i.test(msg) || isConfigError(msg)) set({ fatalError: msg })
       set((s) => ({

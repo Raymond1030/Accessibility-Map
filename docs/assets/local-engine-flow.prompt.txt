@@ -1,0 +1,38 @@
+Use case: infographic-diagram.
+Asset type: Chinese technical methodology flowchart for a local accessibility routing engine, to be archived in a software repository.
+Create a polished, precise, highly legible landscape 16:9 systems flowchart on warm off-white paper. Flat vector-like graphic style, restrained ink navy text, muted teal for data and road routing, blue for public transit, amber for data gaps. Generous whitespace, no decorative clutter, no logo, no watermark, no pseudo-code, no inaccurate maps.
+Title at top, exact Chinese: "粤港澳本地可达性计算"
+Subtitle exact: "OSM + GTFS → GraphHopper → 等时圈"
+Use crisp Chinese sans-serif typography with large readable labels. Diagram must follow this exact logical structure using short labels and unambiguous arrowheads:
+Top horizontal input lane with three cards:
+1 "OSM 路网" with small second line "广东包已含香港、澳门"
+2 "香港 GTFS" with small second line "巴士／电车／渡轮／缆车"
+3 amber outlined "粤澳公交与轨道目录" with small second line "缺班次先登记"
+The first two cards have solid arrows converging into one box beneath them: "数据校验与版本留档" and second line "坐标 · 日期 · 许可 · 哈希".
+The third input has only a dashed arrow to that verification box labeled "补齐后导入".
+Verification box points down into "GraphHopper 本地建图" and then down into a wide central processing box "本地 API · 参数与覆盖检查".
+A smaller side card "地图输入" with second line "位置 · 方式 · 时长 · 时刻 · 方向" points horizontally into the central API box.
+Below API box branch into three evenly spaced cards:
+Left teal "道路等时圈" second line "步行／骑行／驾车"
+Middle blue "公交等时圈" second line "日历／候车／乘车／换乘"
+Right neutral "深圳地铁估算" second line "静态线网＋本地步行"
+All three arrows converge into a single bottom output row containing, in reading order, "GeoJSON 等时圈" arrow to "交集 · 并集 · 差集" arrow to "地图展示与导出".
+At far right add a clearly subordinate amber note panel titled "覆盖边界", with these exact short lines:
+"香港 GTFS 不含港铁重铁"
+"粤澳班次缺口明确提示"
+"跨境通关时间未建模"
+A small unobtrusive footer: "方法基线 2026-11-07".
+Correctness constraints: no claim of complete Guangdong or Macau transit schedules; no rail symbol in the Hong Kong GTFS input; no arrow directly from raw unverified data to results; do not label static metro estimates as official timetable data. Keep arrows from colliding with text. Prioritize readable flow and exact Chinese labels over artwork.
+
+Generation mode: built-in image_gen.
+First attempt: network request failed; no image returned.
+
+Successful retry prompt (built-in image_gen):
+Create a clear professional Chinese technical flowchart, landscape 16:9, warm white background, navy text, teal and blue boxes, thin directional arrows, ample whitespace, large readable Chinese typography. No decorative photos. Title: “粤港澳本地可达性计算”. Subtitle: “方法基线 2026-11-07”.
+Top row two input cards: “OSM 路网” with note “广东包已含香港、澳门”; “香港 GTFS” with note “巴士、电车、渡轮、缆车”. Both connect to “数据校验与版本留档”, which connects to “GraphHopper 本地建图”, then to “本地 API”.
+An input at the left “位置／方式／时长／时刻／方向” points into “本地 API”.
+Below the API, three branches: “道路等时圈”, “公交等时圈”, “深圳地铁估算”. Merge these into “GeoJSON 等时圈”, then “交集／并集／差集”, then “地图与导出”.
+On the right, an amber note panel “数据边界” with three lines: “香港 GTFS 不含港铁重铁”; “粤澳班次缺口需补齐”; “跨境通关时间未建模”.
+Precise clear arrows, large text, all labels verbatim. A restrained technical infographic for a software methodology document.
+
+Final asset: docs/assets/local-engine-flow.png
