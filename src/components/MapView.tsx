@@ -22,10 +22,12 @@ import {
   resultCasingDash,
 } from '../ui/mapStyle'
 import {
-  MARKER_ICON_OPTIONS,
-  createMarkerIconImage,
-  markerIconImageId,
-} from '../ui/markerIcons'
+  ORIGIN_MARKER_HIT_RADIUS,
+  createOriginMarkerImage,
+  originMarkerImageId,
+  parseOriginMarkerImageId,
+} from '../ui/originMarker'
+import { loadMarkerIconImages } from '../ui/markerIcons'
 import type { PolyFeature } from '../geometry/ops'
 import type { FeatureCollection, Point } from 'geojson'
 import './MapView.css'
@@ -41,6 +43,8 @@ const EMPTY_FC: FeatureCollection = { type: 'FeatureCollection', features: [] }
 const ORIGIN_POINTS_SOURCE = 'origin-points'
 const ORIGIN_POINT_HIT_LAYER = 'origin-point-hit'
 const ORIGIN_SYMBOL_LAYER = 'origin-symbols'
+// 出发地标记按设备像素比绘制（至少 2 倍、至多 3 倍），高分屏上边缘和字母也清晰
+const MARKER_PIXEL_RATIO = Math.min(3, Math.max(2, Math.ceil(window.devicePixelRatio || 1)))
 
 type OriginPointProperties = {
   originId: string
@@ -60,7 +64,7 @@ function buildOriginPointCollection(origins: Origin[]): OriginPointCollection {
       id: origin.id,
       properties: {
         originId: origin.id,
-        iconImage: markerIconImageId(origin.markerIcon),
+        iconImage: originMarkerImageId(origin.color, origin.markerIcon, originCode(index)),
         code: originCode(index),
         color: origin.color,
         visible: origin.visible,
@@ -68,6 +72,17 @@ function buildOriginPointCollection(origins: Origin[]): OriginPointCollection {
       geometry: { type: 'Point', coordinates: origin.lngLat },
     })),
   }
+}
+
+/** 「定位到我的位置」：准星圆环＋中心实心点，地图应用通用的定位图标；定位中中心点会呼吸闪烁 */
+function LocateIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="6.5" />
+      <circle className="locate-dot" cx="12" cy="12" r="2.4" fill="currentColor" stroke="none" />
+      <path d="M12 2.8v2.7M12 18.5v2.7M2.8 12h2.7M18.5 12h2.7" />
+    </svg>
+  )
 }
 
 /** Mapbox streets 在中国区默认英文/拼音标注，逐层改成优先取中文 */
@@ -120,6 +135,8 @@ export function MapView() {
     originId: string
     data: OriginPointCollection
     lngLat: [number, number]
+    /** 按下时光标／手指相对坐标点的屏幕偏移。拖动中保持不变，标记不会一下跳到手指底下 */
+    grab: [number, number]
     moved: boolean
   } | null>(null)
   const suppressMapClickUntilRef = useRef(0)
@@ -212,12 +229,34 @@ export function MapView() {
 
     map.on('style.load', () => applyChineseLabels(map))
 
+    // 出发地标记图片按「颜色:图标:代号」现用现画：symbol 图层第一次引用某个 id 时 Mapbox 发出
+    // styleimagemissing，在回调里同步 addImage 就能赶上这一帧，不必预先注册所有组合。
+    const markerImageIds = new Set<string>()
+    map.on('styleimagemissing', ({ id }) => {
+      const spec = parseOriginMarkerImageId(id)
+      if (!spec || map.hasImage(id)) return
+      map.addImage(id, createOriginMarkerImage(spec, MARKER_PIXEL_RATIO), { pixelRatio: MARKER_PIXEL_RATIO })
+      markerImageIds.add(id)
+    })
+    // 彩色图标解码完之前画出的标记还没有图标：解码完把这些标记图片重画一遍（尺寸不变，可直接 updateImage）。
+    // 只遍历自己注册过的 id——它们都是样式加载完后才加上的；图标常常比底图样式先就绪，
+    // 这时调 map.listImages() 会抛「Style is not done loading」。
+    let disposed = false
+    void loadMarkerIconImages().then(() => {
+      if (disposed) return
+      for (const id of markerImageIds) {
+        const spec = parseOriginMarkerImageId(id)
+        if (spec && map.hasImage(id)) map.updateImage(id, createOriginMarkerImage(spec, MARKER_PIXEL_RATIO))
+      }
+    })
+
     const canvas = map.getCanvasContainer()
 
     const moveDraggedPoint = (event: mapboxgl.MapLayerMouseEvent | mapboxgl.MapLayerTouchEvent) => {
       const dragging = draggingRef.current
       if (!dragging) return
-      const lngLat: [number, number] = [event.lngLat.lng, event.lngLat.lat]
+      const { lng, lat } = map.unproject([event.point.x - dragging.grab[0], event.point.y - dragging.grab[1]])
+      const lngLat: [number, number] = [lng, lat]
       const feature = dragging.data.features.find(
         (candidate) => candidate.properties.originId === dragging.originId,
       )
@@ -247,10 +286,12 @@ export function MapView() {
       const origin = originsRef.current.find((candidate) => candidate.id === originId)
       if (!origin) return false
       event.preventDefault()
+      const anchor = map.project(origin.lngLat)
       draggingRef.current = {
         originId,
         data: buildOriginPointCollection(originsRef.current),
         lngLat: [...origin.lngLat],
+        grab: [event.point.x - anchor.x, event.point.y - anchor.y],
         moved: false,
       }
       canvas.style.cursor = 'grab'
@@ -274,15 +315,6 @@ export function MapView() {
       map.addSource('origins-iso', { type: 'geojson', data: EMPTY_FC })
       map.addSource('result-iso', { type: 'geojson', data: EMPTY_FC })
       map.addSource(ORIGIN_POINTS_SOURCE, { type: 'geojson', data: EMPTY_FC })
-
-      // Mapbox symbol layer 只引用 style image。预设 SVG 路径先绘制为高 DPI
-      // ImageData，再按官方 addImage 流程注册，不再创建 DOM Marker。
-      for (const option of MARKER_ICON_OPTIONS) {
-        const imageId = markerIconImageId(option.id)
-        if (!map.hasImage(imageId)) {
-          map.addImage(imageId, createMarkerIconImage(option.id), { pixelRatio: 2 })
-        }
-      }
 
       // 每个 feature 自带与侧栏图例一致的透明度和线宽：近时段更浓，
       // 远时段更淡。不要在这里另写常量，否则图例会和地图失配。
@@ -344,19 +376,16 @@ export function MapView() {
         },
       })
 
-      // circle 提供每个地点的数据驱动颜色和更宽的拖拽命中区；真正的图标
-      // 由上方 symbol layer 的 icon-image 表达式绘制。
+      // 出发地标记整张由 symbol 图层画出（识别色、图标、代号都在图里，见 ui/originMarker），
+      // 方块中心就是坐标点。这一层透明的圆只当拖拽和点击的命中区。
       map.addLayer({
         id: ORIGIN_POINT_HIT_LAYER,
         type: 'circle',
         source: ORIGIN_POINTS_SOURCE,
         paint: {
-          'circle-radius': 19,
-          'circle-color': ['get', 'color'],
-          'circle-stroke-color': '#ffffff',
-          'circle-stroke-width': 3,
-          'circle-opacity': ['case', ['get', 'visible'], 0.96, 0.46],
-          'circle-stroke-opacity': ['case', ['get', 'visible'], 1, 0.58],
+          'circle-radius': ORIGIN_MARKER_HIT_RADIUS,
+          'circle-color': '#ffffff',
+          'circle-opacity': 0,
         },
       })
       map.addLayer({
@@ -365,21 +394,11 @@ export function MapView() {
         source: ORIGIN_POINTS_SOURCE,
         layout: {
           'icon-image': ['get', 'iconImage'],
-          'icon-size': 0.92,
           'icon-allow-overlap': true,
           'icon-ignore-placement': true,
-          'text-field': ['get', 'code'],
-          'text-size': 10,
-          'text-offset': [1.55, -1.55],
-          'text-allow-overlap': true,
-          'text-ignore-placement': true,
         },
         paint: {
           'icon-opacity': ['case', ['get', 'visible'], 1, 0.5],
-          'text-color': ['get', 'color'],
-          'text-halo-color': '#ffffff',
-          'text-halo-width': 2.5,
-          'text-opacity': ['case', ['get', 'visible'], 1, 0.58],
         },
       })
 
@@ -433,6 +452,7 @@ export function MapView() {
     const resizeObserver = new ResizeObserver(() => map.resize())
     resizeObserver.observe(containerRef.current)
     return () => {
+      disposed = true
       resizeObserver.disconnect()
       map.remove()
       mapRef.current = null
@@ -442,13 +462,31 @@ export function MapView() {
   }, [])
 
   // 地图铺满窗口，左侧面板和顶部场景栏悬浮在上面：设置地图留白，让居中和缩放都落在没被遮住的区域。
+  // 收起或展开面板（App 发出 workspace-layout）时：镜头空闲就把画面中心平滑移到新的可见区域中央；
+  // 镜头正在移动（例如切换场景触发的取景，它已按新的留白计算）就不打断，等停下后只换留白、画面不动。
   useEffect(() => {
     const map = mapRef.current
     if (!map || !mapReady) return
     const applyInsets = () => map.setPadding(overlayInsets())
+    const keepView = () => {
+      const next = overlayInsets()
+      const { clientWidth: w, clientHeight: h } = map.getContainer()
+      const center = map.unproject([next.left + (w - next.left - next.right) / 2, next.top + (h - next.top - next.bottom) / 2])
+      map.jumpTo({ center, padding: next })
+    }
+    const relayout = () => {
+      map.off('moveend', keepView)
+      if (map.isMoving()) map.once('moveend', keepView)
+      else map.easeTo({ padding: overlayInsets(), duration: 450 })
+    }
     applyInsets()
     window.addEventListener('resize', applyInsets)
-    return () => window.removeEventListener('resize', applyInsets)
+    window.addEventListener('workspace-layout', relayout)
+    return () => {
+      window.removeEventListener('resize', applyInsets)
+      window.removeEventListener('workspace-layout', relayout)
+      map.off('moveend', keepView)
+    }
   }, [mapReady])
 
   // 新增起点时把视野移过去；只在数量增加时移动，手动平移后不被拉回
@@ -573,13 +611,14 @@ export function MapView() {
       )}
 
       <button
-        className="locate-btn"
+        className={locating ? 'locate-btn is-locating' : 'locate-btn'}
         onClick={() => void handleLocate()}
         disabled={locating}
-        title="定位到我的位置"
-        aria-label="定位到我的位置"
+        aria-busy={locating}
+        title={locating ? '正在定位…' : '定位到我的位置'}
+        aria-label={locating ? '正在定位' : '定位到我的位置'}
       >
-        {locating ? '···' : '◎'}
+        <LocateIcon />
       </button>
 
       {locateMsg && (

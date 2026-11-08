@@ -9,7 +9,8 @@ import { routeKey } from './types'
 import { routeFeatures, stationFeatures } from './transit'
 import { bbox } from '@turf/turf'
 import { RANGE_COLORS } from './range'
-import { markerIconMarkup } from '../ui/markerIcons'
+import { markerIconSrc } from '../ui/markerIcons'
+import { createPlaceMarkerElement } from '../ui/placeMarker'
 import { withOverlayInsets } from '../ui/mapInsets'
 import { RANGE_DASH, casingDash } from '../ui/mapStyle'
 import { useNavigation } from '../state/navigation'
@@ -98,20 +99,21 @@ export function useCommuteMap(mapRef: RefObject<mapboxgl.Map | null>, ready: boo
       ...(workplace ? [{ ...workplace, id: 'work', text: '' }] : []),
       ...(view === 'compare' ? homes.map((home, i) => ({ ...home, text: String(i + 1) })) : []),
     ]
+    // 公司：公事包，大一号；候选住处：房子＋编号圆牌，选中的变结果紫并带呼吸光环（样式见 ui/placeMarker）
     for (const place of points) {
-      const el = document.createElement('button')
-      el.className = `commute-marker${place.id !== 'work' ? ' home' : ''}${place.id === selectedId ? ' selected' : ''}`
       const isWorkplace = place.id === 'work'
-      el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${markerIconMarkup(isWorkplace ? 'work' : 'home')}</svg>`
-      if (!isWorkplace) {
-        const number = document.createElement('span')
-        number.className = 'commute-marker-number'
-        number.textContent = place.text
-        el.appendChild(number)
-      }
-      el.title = place.name
-      el.setAttribute('aria-label', `${isWorkplace ? '公司' : `候选住处 ${place.text}`}：${place.name}`)
-      el.onclick = event => { event.stopPropagation(); if (place.id !== 'work') useCommute.getState().select(place.id) }
+      const selected = place.id === selectedId
+      const el = createPlaceMarkerElement(isWorkplace
+        ? { icon: markerIconSrc('work'), tone: 'brand', large: true, title: place.name, label: `公司：${place.name}` }
+        : {
+            icon: markerIconSrc('home'),
+            chip: place.text,
+            tone: selected ? 'result' : 'explore',
+            selected,
+            title: place.name,
+            label: `候选住处 ${place.text}：${place.name}`,
+            onClick: () => useCommute.getState().select(place.id),
+          })
       markers.push(new mapboxgl.Marker({ element: el }).setLngLat(place.lngLat).addTo(map))
     }
     if (points.length) {

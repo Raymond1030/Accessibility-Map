@@ -2,8 +2,8 @@ import { distance } from '@turf/turf'
 import type { Feature, LineString, Point } from 'geojson'
 
 export const PLACES = [
-  { name: '前海湾站', district: '南山', code: 'A', color: '#80b5ff', lngLat: [113.893153, 22.540358] as [number, number] },
-  { name: '后海站', district: '南山', code: 'B', color: '#ffc78b', lngLat: [113.938221, 22.521351] as [number, number] },
+  { name: '前海湾站', district: '南山', code: 'A', color: '#1668e3', lngLat: [113.893153, 22.540358] as [number, number] },
+  { name: '后海站', district: '南山', code: 'B', color: '#c8452a', lngLat: [113.938221, 22.521351] as [number, number] },
 ]
 export const SCENE_DURATIONS = [4200, 5000, 6500, 8000] as const
 export type StoryClock = { scene: number; elapsed: number }

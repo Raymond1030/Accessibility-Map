@@ -77,7 +77,7 @@ export function WelcomeMap() {
       map = new mapboxgl.Map({
         container: container.current,
         accessToken: getMapboxToken(),
-        style: 'mapbox://styles/mapbox/dark-v11',
+        style: 'mapbox://styles/mapbox/streets-v12',
         center: PLACES[0].lngLat, zoom: 11.4, pitch: 28, bearing: -12,
         interactive: false, attributionControl: false,
       })
@@ -102,7 +102,7 @@ export function WelcomeMap() {
       map.addSource('welcome-meeting', { type: 'geojson', data: EMPTY })
       map.addLayer({ id: 'welcome-meeting-label', type: 'symbol', source: 'welcome-meeting', layout: {
         'text-field': '在这一带见面', 'text-size': 18, 'text-allow-overlap': true,
-      }, paint: { 'text-color': '#f2e6ff', 'text-halo-color': '#382b47', 'text-halo-width': 3 } })
+      }, paint: { 'text-color': '#4b32b3', 'text-halo-color': '#ffffff', 'text-halo-width': 3 } })
       PLACES.forEach((place, i) => {
         const element = document.createElement('div')
         element.className = `welcome-place welcome-place-${i}`
@@ -169,9 +169,9 @@ export function WelcomeMap() {
     const sceneKey = `${scene}:${revision}:${sizeRevision}:${ranges.length}:${reducedMotion}`
     if (cameraRef.current?.key !== sceneKey) {
       const features: PolyFeature[] = scene < 2 ? [] : ranges.map((range, i) => ({
-        ...range, properties: { color: PLACES[i].color, opacity: scene === 3 ? .09 : .2 },
+        ...range, properties: { color: PLACES[i].color, opacity: scene === 3 ? .08 : .16 },
       }))
-      if (scene === 3 && commonRange) features.push({ ...commonRange, properties: { color: '#c6a1ff', opacity: .48 } })
+      if (scene === 3 && commonRange) features.push({ ...commonRange, properties: { color: '#6e56cf', opacity: .38 } })
       rangeSource.setData({ type: 'FeatureCollection', features })
       meetingSource.setData(
         scene === 3 && commonRange ? pointOnFeature(commonRange) : EMPTY,
@@ -214,8 +214,7 @@ export function WelcomeMap() {
   }
 
   return (
-    <section id="map-story" className="welcome-figure welcome-real-figure" data-reveal aria-label="两个人的生活圈，相约见面的动态地图介绍">
-      <div className="figure-topline"><span>你的生活圈，和 TA 的相遇</span><span>深圳 / SHENZHEN</span></div>
+    <figure id="map-story" className="welcome-figure welcome-real-figure" data-reveal aria-label="两个人的生活圈，相约见面的动态地图介绍">
       <div ref={frame} className={`welcome-map-frame welcome-map-scene-${scene}`} data-playing={playing && !waiting}>
         <div className="welcome-real-map" ref={container} />
         {mapState !== 'ready' ? <div className="welcome-map-status" role="status">
@@ -235,21 +234,21 @@ export function WelcomeMap() {
             </div>
           </div>
           <div className="welcome-map-readout" aria-live="polite">
-            {scene < 2 ? <><span>{scene === 0 ? '你的日常，在这里' : 'TA 的日常，在这里'}</span><strong>{scene === 0 ? '前海湾' : '后海'}</strong></> : <><span>{rangeState === 'ready' ? scene === 3 && commonRange ? '紫色区域 · 你们都能到达' : scene === 3 ? '试着多留一点路上的时间' : '蓝色是你，橙色是 TA' : '生活圈正在准备中'}</span><strong>{rangeState === 'ready' ? `各自 ${INTRO_MINUTES} 分钟` : rangeState === 'loading' ? '正在寻找' : '暂未找到'}<small>{INTRO_MODE_LABEL} · 估算范围</small></strong></>}
+            {scene < 2 ? <><span>{scene === 0 ? '你的日常，在这里' : 'TA 的日常，在这里'}</span><strong>{scene === 0 ? '前海湾' : '后海'}</strong></> : <><span>{rangeState === 'ready' ? scene === 3 && commonRange ? '紫色区域 · 你们都能到达' : scene === 3 ? '试着多留一点路上的时间' : '蓝色是你，红色是 TA' : '生活圈正在准备中'}</span><strong>{rangeState === 'ready' ? `各自 ${INTRO_MINUTES} 分钟` : rangeState === 'loading' ? '正在寻找' : '暂未找到'}<small>{INTRO_MODE_LABEL} · 估算范围</small></strong></>}
           </div>
           <div className="welcome-scene-number" aria-hidden="true">0{scene + 1}<span> / 04</span></div>
         </>}
       </div>
       <div className="welcome-map-steps" aria-label="地图介绍步骤">
-        {['你的日常', 'TA 的日常', `各自 ${INTRO_MINUTES} 分钟`, '相约见面'].map((title, index) => <button key={title} className="welcome-step" aria-pressed={scene === index} onClick={() => selectScene(index)}><span>0{index + 1}</span>{title}<i aria-hidden="true" style={{ transform: `scaleX(${index < scene ? 1 : index === scene ? progress : 0})` }} /></button>)}
-        <button className="welcome-map-play" disabled={mapState !== 'ready'} aria-label={paused ? '继续自动播放' : '暂停自动播放'} onClick={() => setPaused(value => !value)}>{paused ? '播放 →' : '暂停 ‖'}</button>
-        <button className="welcome-map-replay" disabled={mapState !== 'ready'} aria-label="从头自动播放" onClick={() => { selectScene(0); setPaused(false) }}>重播 ↗</button>
+        {['你的日常', 'TA 的日常', `各自 ${INTRO_MINUTES} 分钟`, '相约见面'].map((title, index) => <button key={title} className="welcome-step" aria-pressed={scene === index} onClick={() => selectScene(index)}><span>{index + 1}</span>{title}<i aria-hidden="true" style={{ transform: `scaleX(${index < scene ? 1 : index === scene ? progress : 0})` }} /></button>)}
+        <button className="welcome-map-play" disabled={mapState !== 'ready'} aria-label={paused ? '继续自动播放' : '暂停自动播放'} onClick={() => setPaused(value => !value)}>{paused ? '▶ 播放' : '❚❚ 暂停'}</button>
+        <button className="welcome-map-replay" disabled={mapState !== 'ready'} aria-label="从头自动播放" onClick={() => { selectScene(0); setPaused(false) }}>↺ 重播</button>
       </div>
       <p className="welcome-map-note">{INTRO_MODE_LABEL} {INTRO_MINUTES} 分钟，含候车与换乘；暂不含公交车线路。</p>
       {(mapState === 'error' || rangeState === 'error' || rangeState === 'empty') && <p className="welcome-map-note" role="status">
         {mapState === 'error' ? '地图暂时未能展开，请重试。' : '生活圈暂时未能加载，重试后再看看哪里适合见面。'}
         {mapState === 'ready' && <button onClick={() => setAttempt(value => value + 1)}>重试 ↗</button>}
       </p>}
-    </section>
+    </figure>
   )
 }

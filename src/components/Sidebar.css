@@ -166,39 +166,39 @@
 }
 .origin-summary:hover { background: var(--origin-tint); }
 
+/* 与地图上的出发地标记同一造型（见 ui/originMarker）：白底圆角方块、不描边，两层柔和投影；
+   里面放彩色类型图标，「地点」则用识别色写字母；字母小圆牌在右上角，识别色实心、白字。 */
 .origin-badge {
   position: relative;
   display: grid;
-  width: 31px;
-  height: 31px;
+  width: 30px;
+  height: 30px;
   flex: none;
   place-items: center;
-  border: 2px solid #fff;
-  border-radius: 50% 50% 50% 8px;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--origin-color);
   font: 750 16px/1 "Bahnschrift", sans-serif;
-  box-shadow: 0 0 0 1px var(--origin-color), 0 2px 6px rgba(var(--c-shadow), .16);
-  transform: rotate(-4deg);
+  box-shadow: 0 1px 1.5px rgba(var(--c-shadow), .3), 0 3px 8px rgba(var(--c-shadow), .18);
 }
-.origin-badge > svg {
-  width: 17px;
-  height: 17px;
-  transform: rotate(4deg);
+.origin-badge > img {
+  width: 20px;
+  height: 20px;
 }
 .origin-badge-code {
   position: absolute;
-  right: -5px;
-  bottom: -4px;
+  top: -7px;
+  right: -7px;
   display: grid;
-  min-width: 15px;
-  height: 15px;
+  min-width: 16px;
+  height: 16px;
   padding: 0 3px;
   place-items: center;
-  border: 1px solid var(--origin-color);
   border-radius: 99px;
-  background: var(--c-surface);
-  color: var(--c-ink);
-  font: 750 14px/1 "Bahnschrift", sans-serif;
-  transform: rotate(4deg);
+  background: var(--origin-color);
+  color: #fff;
+  font: 750 13px/1 "Bahnschrift", sans-serif;
+  box-shadow: 0 1px 2px rgba(var(--c-shadow), .28);
 }
 .origin-summary-copy {
   min-width: 0;
@@ -297,7 +297,7 @@
   color: var(--origin-color);
   box-shadow: inset 0 -3px 0 var(--origin-color);
 }
-.marker-option svg { width: 20px; height: 20px; }
+.marker-option img { width: 24px; height: 24px; }
 .marker-option span { color: var(--c-muted); font-size: 14px; font-weight: 650; }
 .mode-options {
   display: grid;
@@ -624,7 +624,7 @@
   .mode-option svg { width: 22px; height: 22px; }
   .mode-option span { font-size: 16px; }
   .marker-option { min-height: 58px; }
-  .marker-option svg { width: 22px; height: 22px; }
+  .marker-option img { width: 26px; height: 26px; }
   .marker-option span { font-size: 14px; }
 
   .chip,

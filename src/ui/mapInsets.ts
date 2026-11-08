@@ -5,23 +5,29 @@
  */
 export type Insets = { top: number; right: number; bottom: number; left: number }
 
-type RectSource = { querySelector(selector: string): { getBoundingClientRect(): { right: number; bottom: number } } | null }
+/**
+ * 只读布局位置（offset*，相对于和地图同一个定位容器），不受 transform 影响：
+ * 面板滑入、滑出或播放入场动画的途中量到的仍是它停稳后的位置。
+ */
+type LayoutBox = { offsetLeft: number; offsetTop: number; offsetWidth: number; offsetHeight: number }
+type BoxSource = { querySelector(selector: string): unknown }
 
 const ZERO: Insets = { top: 0, right: 0, bottom: 0, left: 0 }
 export const MOBILE_MAX_WIDTH = 768
 
 export function overlayInsets(
-  doc: RectSource = document,
+  doc: BoxSource = document,
   viewportWidth: number = window.innerWidth,
 ): Insets {
   if (viewportWidth <= MOBILE_MAX_WIDTH) return ZERO
-  const panel = doc.querySelector('.workspace-panel')?.getBoundingClientRect()
-  const nav = doc.querySelector('.scene-switch')?.getBoundingClientRect()
+  // 收起的面板滑出了屏幕，不再遮挡地图
+  const panel = doc.querySelector('.workspace-panel:not(.is-collapsed)') as LayoutBox | null
+  const nav = doc.querySelector('.scene-switch') as LayoutBox | null
   return {
-    top: nav ? Math.max(0, Math.round(nav.bottom)) : 0,
+    top: nav ? Math.max(0, nav.offsetTop + nav.offsetHeight) : 0,
     right: 0,
     bottom: 0,
-    left: panel ? Math.max(0, Math.round(panel.right)) : 0,
+    left: panel ? Math.max(0, panel.offsetLeft + panel.offsetWidth) : 0,
   }
 }
 

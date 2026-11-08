@@ -1,11 +1,5 @@
-@font-face {
-  font-family: 'Landing Serif';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url('/fonts/noto-serif-sc-landing-500.woff2') format('woff2');
-}
-
+/* 首页字体：思源黑体（Noto Sans SC）子集，只含首页实际用到的字（见 public/fonts/README.md）。
+   400 正文、500 标签与按钮、700 小标题、900 大标题。 */
 @font-face {
   font-family: 'Landing Sans';
   font-style: normal;
@@ -20,4 +14,20 @@
   font-weight: 500;
   font-display: swap;
   src: url('/fonts/noto-sans-sc-landing-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Landing Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/noto-sans-sc-landing-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Landing Sans';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('/fonts/noto-sans-sc-landing-900.woff2') format('woff2');
 }

@@ -1,197 +1,214 @@
 @import './WelcomeFonts.css';
 
+/* 首页：温暖插画风。字体用自托管的思源黑体子集（Landing Sans，400/500/700/900）。
+   主色和工作区一样是靛紫（直接取 App.css 的 --c-brand*）：按钮、标题重点、标签、链接、演示控件、行动召唤。
+   插画和地图里的人和场景保留自己的颜色，与工作区地图一致：你＝蓝、TA＝珊瑚、相遇＝紫；
+   租房通勤＝蓝、多点见面＝紫、生活探索＝玫瑰。文字对比度都在 4.5:1 以上。 */
 .welcome {
-  /* Local aliases of the global palette in App.css; rules below use the --c-* tokens directly. */
-  --paper: var(--c-paper);
-  --ink: var(--c-ink);
-  --muted: var(--c-muted);
-  --olive: var(--c-brand);
-  --clay: var(--c-brand);
-  --paper-line: var(--c-line);
-  --type-blue: var(--c-commute);
-  --type-accent: var(--c-explore);
-  --type-purple: var(--c-meet);
-  --landing-display: "Landing Serif", "Songti SC", "STSong", serif;
-  --landing-body: "Landing Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
-  --welcome-ease: cubic-bezier(.2, .8, .2, 1);
+  --w-ink: #1f2329;
+  --w-muted: #5f6672;
+  --w-sky: #f6f4ff;
+  --w-line: #e9e6f5;
+  --w-brand: var(--c-brand);
+  --w-brand-deep: var(--c-brand-strong);
+  --w-brand-tint: var(--c-brand-tint);
+  --w-brand-line: #d6d0fc;
+  --w-brand-rgb: var(--c-brand-rgb);
+  --w-blue: #1668e3;
+  --w-blue-deep: #0e58c9;
+  --w-blue-tint: #e8f1ff;
+  --w-coral: #c8452a;
+  --w-coral-tint: #fdeee9;
+  --w-violet: #6e56cf;
+  --w-violet-tint: #f0ecfd;
+  --w-rose: #b83e64;
+  --w-rose-tint: #fdedf2;
+  --landing: "Landing Sans", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
   position: relative;
   min-height: 100%;
   overflow: clip;
-  color: var(--ink);
-  background: var(--paper);
-  font-family: var(--editorial-sans);
-  isolation: isolate;
+  color: var(--w-ink);
+  background: #fff;
+  font-family: var(--landing);
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
 }
-.welcome-header, .welcome-copy, .welcome-discover, .welcome-colophon { font-family: var(--landing-body); font-synthesis: none; }
-.welcome button, .welcome a { -webkit-tap-highlight-color: transparent; transition: color .2s, background-color .2s, box-shadow .2s, transform .2s; }
 .welcome button { font: inherit; cursor: pointer; }
-.welcome :is(button, a):focus-visible { outline: 2px solid var(--c-focus); outline-offset: 5px; }
-.welcome-header { position: relative; z-index: 4; display: flex; align-items: center; justify-content: space-between; gap: 24px; max-width: 1440px; margin: 0 auto; padding: 26px 54px; }
-.welcome-brand { display: flex; align-items: center; gap: 12px; color: var(--c-brand-strong); text-decoration: none; font-size: 24px; font-family: var(--landing-display); font-weight: 500; letter-spacing: .08em; }
-.welcome-brand small { display: block; margin-top: 3px; color: var(--c-explore); font: italic 13px Georgia, serif; letter-spacing: .03em; }
-/* Brand mark (base rules in App.css): the two radii open a few degrees on hover/focus,
-   and the centre dot sends out a soft rose ping. */
-.welcome-brand .radius-symbol i { transition: transform .5s cubic-bezier(.34, 1.4, .5, 1); }
-.welcome-brand:is(:hover, :focus-visible) .radius-symbol i { transform: rotate(37deg); }
-.welcome-brand:is(:hover, :focus-visible) .radius-symbol i + i { transform: rotate(-37deg); }
-.welcome-brand .radius-symbol::after { animation: welcome-ping 2.8s ease-out infinite; }
-.welcome-nav { display: flex; align-items: center; gap: 34px; margin-right: 40px; }
-.welcome-nav button, .welcome-nav a { position: relative; color: var(--c-muted); border: 0; background: none; padding: 10px 0; font-size: 14px; text-decoration: none; }
-.welcome-nav :is(button, a):hover { color: var(--c-brand); }
-/* Underline that grows out from the centre of the word. */
-.welcome-nav :is(button, a)::after { content: ''; position: absolute; left: 0; right: 0; bottom: 6px; height: 2px; border-radius: 2px; background: currentColor; transform: scaleX(0); transition: transform .3s var(--welcome-ease); }
-.welcome-nav :is(button, a):is(:hover, :focus-visible)::after { transform: scaleX(1); }
-.welcome .welcome-skip { border: 1px solid transparent; border-radius: 30px; background: var(--c-brand-strong); color: #fff; min-height: 44px; padding: 11px 22px; font-size: 14px; }
-.welcome-skip .welcome-arrow { padding-left: 15px; }
-.welcome .welcome-skip:hover, .welcome .welcome-primary:hover { background: var(--c-brand-hover); transform: translateY(-2px); box-shadow: 0 6px 14px rgba(var(--c-shadow), .08); }
-.welcome .welcome-skip:active, .welcome .welcome-primary:active { transform: translateY(0); }
-/* CTA micro-interactions: a light sheen sweeps across once on hover, painted between the
-   button fill and its text (z-index -1 inside the isolated button), and the arrow nudges
-   toward where it points. The sheen peak keeps white text above 4.5:1. */
-.welcome :is(.welcome-skip, .welcome-primary) { position: relative; overflow: hidden; isolation: isolate; }
-.welcome :is(.welcome-skip, .welcome-primary)::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, .22) 50%, transparent 70%); transform: translateX(-101%); }
-.welcome :is(.welcome-skip, .welcome-primary):hover::before { animation: welcome-sheen .85s cubic-bezier(.4, 0, .2, 1); }
-.welcome-arrow { display: inline-block; transition: translate .3s var(--welcome-ease); }
-.welcome :is(.welcome-skip, .welcome-primary):is(:hover, :focus-visible) .welcome-arrow { translate: 3px -3px; }
-.welcome-hero { position: relative; isolation: isolate; }
-/* Aurora: three soft glows drifting behind the hero copy. It starts above the hero so the
-   glow also sits behind the transparent header (which paints above the hero), and it never
-   covers the opaque map figure's content (z-index -1 inside the isolated hero).
-   Peak alphas are deliberately low: with the glows overlapping at their worst, muted 12px
-   text still measures about 4.6:1, and the brand's rose small text about 4.7:1. */
-.welcome-aurora { position: absolute; z-index: -1; top: -200px; left: 0; right: 0; height: 1060px; overflow: hidden; pointer-events: none; }
-.welcome-aurora > span { position: absolute; width: var(--size); height: var(--size); margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2); }
-.welcome-aurora > :nth-child(1) { --size: clamp(320px, 48vw, 720px); left: 22%; top: 260px; background: radial-gradient(closest-side, rgba(106, 85, 176, .14), rgba(106, 85, 176, 0)); }
-.welcome-aurora > :nth-child(2) { --size: clamp(320px, 48vw, 720px); left: 80%; top: 350px; background: radial-gradient(closest-side, rgba(176, 71, 106, .12), rgba(176, 71, 106, 0)); }
-.welcome-aurora > :nth-child(3) { --size: clamp(340px, 52vw, 760px); left: 50%; top: 600px; background: radial-gradient(closest-side, rgba(45, 95, 146, .11), rgba(45, 95, 146, 0)); }
-.welcome-copy { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; padding: 35px 24px 0; text-align: center; pointer-events: none; }
-.welcome-copy > * { pointer-events: auto; }
-.welcome-eyebrow { display: flex; align-items: center; gap: 9px; margin: 0 0 23px; font-size: 12px; letter-spacing: .16em; color: var(--c-muted); }
-.welcome-eyebrow > span { width: 5px; height: 5px; border-radius: 50%; background: var(--c-explore); box-shadow: 0 0 0 4px var(--c-explore-tint); }
-.welcome h1 { margin: 0; font-size: clamp(38px, 4.4vw, 64px); font-family: var(--landing-display); font-weight: 500; line-height: 1.35; letter-spacing: .015em; color: var(--c-commute); }
-.welcome h1 span { white-space: nowrap; color: var(--c-meet); }
-@supports ((-webkit-background-clip: text) or (background-clip: text)) {
-  /* Looping violet -> rose -> violet (both stops >= 5:1 on white) on a double-width
-     background that flows slowly back and forth across the words. */
-  .welcome h1 span { background-image: linear-gradient(100deg, #6a55b0 0%, #b0476a 50%, #6a55b0 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: welcome-headline-flow 8s ease-in-out infinite alternate; }
-  @media (forced-colors: active) { .welcome h1 span { -webkit-text-fill-color: currentColor; animation: none; } }
-}
-.welcome-description { margin: 20px 0 28px; color: var(--c-muted); font-size: 16px; line-height: 1.9; letter-spacing: .025em; }
-/* Translucent white lets the aurora glow through softly (there is no alpha surface token).
-   No backdrop blur: the backdrop is only soft gradients, and blurring the drifting aurora
-   would cost a filter pass every frame. The underglow takes the selected scene's colour. */
-.journey-card { --scene-color: var(--c-explore); --scene-tint: var(--c-explore-tint); width: min(680px, 100%); padding: 18px 24px 19px; text-align: left; border: 2px solid #ffffffed; border-radius: 30px; background: #ffffffa8; box-shadow: 0 6px 36px rgba(var(--c-shadow), .045), inset 0 0 0 1px #ffffff2e; transition: box-shadow .5s ease; }
-@supports (color: color-mix(in srgb, red 50%, transparent)) {
-  .journey-card { box-shadow: 0 20px 44px -30px color-mix(in srgb, var(--scene-color) 50%, transparent), 0 6px 36px rgba(var(--c-shadow), .045), inset 0 0 0 1px #ffffff2e; }
-}
-.journey-options { display: flex; flex-wrap: wrap; gap: 5px; }
-.journey-options button { display: flex; align-items: center; gap: 7px; padding: 9px 13px; min-height: 40px; border: 0; border-radius: 22px; background: transparent; font-size: 13px; white-space: nowrap; transition: color .3s ease, background-color .3s ease, box-shadow .3s ease; }
-.welcome [data-scene="commute"] { --scene-color: var(--c-commute); --scene-tint: var(--c-commute-tint); }
-.welcome [data-scene="isochrone"] { --scene-color: var(--c-meet); --scene-tint: var(--c-meet-tint); }
-.welcome [data-scene="explore"] { --scene-color: var(--c-explore); --scene-tint: var(--c-explore-tint); }
-.journey-options button { color: var(--scene-color); font-weight: 500; }
-.journey-options button[aria-pressed="true"] { background: var(--scene-tint); color: var(--scene-color); box-shadow: inset 0 0 0 1px currentColor; }
-.journey-options button:hover { background: var(--scene-tint); color: var(--scene-color); }
-/* One-shot pop of the icon each time a tab becomes selected. */
-.journey-options button[aria-pressed="true"] svg { animation: welcome-pop .5s ease-out; }
-.journey-copy { min-height: 88px; padding: 19px 4px 13px; }
-.journey-copy-inner { animation: welcome-swap .45s var(--welcome-ease) backwards; }
-.journey-copy p { margin: 0 0 8px; color: var(--scene-color); font-size: 19px; font-weight: 500; line-height: 1.8; }
-.journey-copy-inner > span { color: var(--c-muted); font-size: 14px; line-height: 1.6; }
-.journey-bottom { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-top: 8px; }
-.journey-hint { display: flex; align-items: center; gap: 8px; color: var(--c-muted); font-size: 12px; }
-.journey-hint > span { display: grid; place-items: center; flex: none; border: 1px solid var(--c-surface); border-radius: 50%; width: 32px; height: 32px; color: var(--c-brand); }
-.journey-hint svg { display: block; }
-.welcome .welcome-primary { display: flex; justify-content: space-between; align-items: center; gap: 27px; border: 0; border-radius: 30px; min-height: 47px; padding: 12px 21px; background: var(--c-brand-strong); color: #fff; font-size: 14px; }
-.welcome-primary > .welcome-arrow { font-size: 19px; line-height: 1; }
-/* The label is keyed by scene in Welcome.tsx, so the new wording fades up on every switch. */
-.welcome-primary-label { animation: welcome-label-swap .4s var(--welcome-ease) backwards; }
-.welcome-footnote { display: flex; gap: 10px; justify-content: center; margin: 17px 0 0; font-size: 12px; line-height: 1.8; color: var(--c-muted); letter-spacing: .04em; }
-.welcome-story-link { display: inline-flex; align-items: center; gap: 12px; padding: 12px 8px; margin-top: 4px; color: var(--c-brand-strong); font-size: 13px; font-weight: 500; text-decoration: none; }
-.welcome-story-link:hover { color: var(--c-brand-hover); }
-.welcome-story-arrow { animation: welcome-bob 1.8s ease-in-out infinite; }
-.welcome-colophon { width: min(1200px, calc(100% - 108px)); display: flex; justify-content: space-between; gap: 20px; margin: auto; padding: 23px 0 30px; border-top: 1px solid var(--c-line); color: var(--c-muted); font-size: 10px; letter-spacing: .09em; line-height: 1.6; }
-.welcome-colophon > span:first-child span { padding-inline: 10px; color: var(--c-line-strong); }
-.welcome-colophon > span:last-child span { margin-left: 25px; color: var(--c-brand); font-size: 16px; }
+.welcome button, .welcome a { -webkit-tap-highlight-color: transparent; transition: color .2s, background-color .2s, border-color .2s, box-shadow .25s, transform .25s; }
+.welcome :is(button, a):focus-visible { outline: 2px solid var(--w-brand); outline-offset: 3px; }
+/* 中文标题均衡换行、段落避免末行只剩一两个字 */
+.welcome :is(h1, h2, h3, .hero-sub, .section-head p, .journey-copy p) { text-wrap: balance; }
+.welcome :is(p, blockquote, li, .journey-copy-inner > span) { text-wrap: pretty; }
 
-/* Load entrance: the header drops in, then the hero copy rises line by line (70ms stagger).
-   Fill mode is backwards only, so hover and state styles own each element once it lands. */
-.welcome-header { animation: welcome-drop .6s var(--welcome-ease) backwards; }
-.welcome-copy > * { animation: welcome-rise .75s var(--welcome-ease) .14s backwards; }
-.welcome-copy > :nth-child(2) { animation-delay: .21s; }
-.welcome-copy > :nth-child(3) { animation-delay: .28s; }
-.welcome-copy > :nth-child(4) { animation-delay: .35s; }
-.welcome-copy > :nth-child(5) { animation-delay: .42s; }
-.welcome-copy > :nth-child(6) { animation-delay: .49s; }
-/* The aurora blooms in, then each glow drifts on its own slow cycle so they never sync. */
-.welcome-aurora { animation: welcome-fade 1.6s ease-out backwards; }
-.welcome-aurora > :nth-child(1) { animation: welcome-aurora-a 22s ease-in-out -5s infinite alternate; }
-.welcome-aurora > :nth-child(2) { animation: welcome-aurora-b 27s ease-in-out -11s infinite alternate; }
-.welcome-aurora > :nth-child(3) { animation: welcome-aurora-c 19s ease-in-out -2s infinite alternate; }
+/* ===== 首屏 ===== */
+.welcome-hero { position: relative; isolation: isolate; overflow: hidden; padding: 0 20px 64px; border-radius: 0 0 48px 48px; background: var(--w-sky); text-align: center; }
+.welcome-hero::before, .welcome-hero::after { content: ''; position: absolute; z-index: -1; border-radius: 50%; pointer-events: none; }
+.welcome-hero::before { top: -220px; left: -160px; width: 620px; height: 620px; background: radial-gradient(closest-side, rgba(255, 255, 255, .95), rgba(255, 255, 255, 0)); }
+.welcome-hero::after { top: -120px; right: -180px; width: 560px; height: 560px; background: radial-gradient(closest-side, rgba(110, 86, 207, .1), rgba(110, 86, 207, 0)); }
 
+.welcome-header { display: flex; align-items: center; gap: 20px; max-width: 1200px; margin: 0 auto; padding: 22px 12px; text-align: left; }
+.welcome-brand { display: flex; align-items: center; gap: 6px; margin-right: auto; color: var(--w-ink); text-decoration: none; font-size: 20px; font-weight: 700; letter-spacing: .02em; }
+.welcome-brand .radius-symbol { width: 32px; color: var(--w-brand); transform: scale(.84); transform-origin: left center; }
+.welcome-nav { display: flex; align-items: center; gap: 2px; }
+.welcome-nav :is(button, a) { padding: 8px 14px; border: 0; border-radius: 999px; background: none; color: var(--w-muted); font-size: 15px; font-weight: 500; text-decoration: none; }
+.welcome-nav :is(button, a):hover { color: var(--w-brand-deep); background: rgba(var(--w-brand-rgb), .08); }
+.welcome-skip, .welcome-primary { display: inline-flex; align-items: center; gap: 10px; border: 0; border-radius: 999px; background: var(--w-brand); color: #fff; font-weight: 700; box-shadow: 0 14px 26px -14px rgba(var(--w-brand-rgb), .85); }
+.welcome .welcome-skip { min-height: 44px; padding: 10px 20px; font-size: 15px; }
+.welcome :is(.welcome-skip, .welcome-primary):hover { background: var(--w-brand-deep); transform: translateY(-2px); box-shadow: 0 18px 30px -14px rgba(var(--w-brand-rgb), .9); }
+.welcome :is(.welcome-skip, .welcome-primary):active { transform: translateY(0) scale(.98); }
+.welcome-arrow { display: inline-block; transition: transform .25s; }
+.welcome :is(.welcome-skip, .welcome-primary):is(:hover, :focus-visible) .welcome-arrow { transform: translateX(4px); }
+
+.hero-copy { max-width: 900px; margin: 30px auto 0; }
+.hero-badge { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 22px; padding: 7px 16px; border-radius: 999px; background: #fff; color: var(--w-brand-deep); font-size: 15px; font-weight: 500; box-shadow: 0 8px 20px -14px rgba(var(--w-brand-rgb), .7); }
+.hero-badge > span { width: 8px; height: 8px; border-radius: 50%; background: var(--w-brand); box-shadow: 0 0 0 4px var(--w-brand-tint); }
+.welcome h1 { margin: 0; color: var(--w-ink); font-size: clamp(40px, 6.4vw, 80px); font-weight: 900; line-height: 1.18; letter-spacing: -.02em; }
+.welcome h1 em { position: relative; display: inline-block; font-style: normal; color: var(--w-brand); }
+.welcome h1 em svg { position: absolute; left: 2%; bottom: -.08em; z-index: -1; width: 96%; height: .3em; overflow: visible; }
+.welcome h1 em path { fill: none; stroke: #d2cbfc; stroke-width: 12; stroke-linecap: round; stroke-dasharray: 210; stroke-dashoffset: 0; }
+.hero-break { display: none; }
+.hero-sub { max-width: 640px; margin: 24px auto 0; color: var(--w-muted); font-size: 18px; line-height: 1.85; }
+
+.hero-stage { position: relative; max-width: 1040px; margin: 10px auto 0; }
+.hero-art { display: block; width: 100%; height: auto; overflow: visible; }
+.hero-ground { fill: #ebe7fd; }
+.hero-ground-inner { fill: #f1eefe; }
+.hero-river { fill: none; stroke: #cfe2ff; stroke-width: 26; stroke-linecap: round; }
+.hero-blocks rect { fill: rgba(255, 255, 255, .55); }
+.hero-roads path { fill: none; stroke: #fff; stroke-width: 10; stroke-linecap: round; }
+.hero-ring circle { stroke-width: 2.5; stroke-dasharray: 8 7; }
+.hero-ring-you circle { fill: rgba(22, 104, 227, .12); stroke: var(--w-blue); }
+.hero-ring-ta circle { fill: rgba(200, 69, 42, .1); stroke: var(--w-coral); }
+.hero-lens { fill: rgba(110, 86, 207, .3); }
+.hero-route { fill: none; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 2 9; }
+.hero-route-you { stroke: var(--w-blue); }
+.hero-route-ta { stroke: var(--w-coral); }
+.hero-chip rect { fill: #fff; stroke: #e2ddf6; stroke-width: 1.5; }
+.hero-chip text { font-size: 14px; font-weight: 500; text-anchor: middle; }
+.hero-chip-you text { fill: var(--w-blue-deep); }
+.hero-chip-ta text { fill: var(--w-coral); }
+.hero-pin circle { stroke: #fff; stroke-width: 5; }
+.hero-pin-you circle { fill: var(--w-blue); }
+.hero-pin-ta circle { fill: var(--w-coral); }
+.hero-pin text { fill: #fff; font-size: 17px; font-weight: 700; text-anchor: middle; }
+.hero-meet-dot { fill: var(--w-violet); stroke: #fff; stroke-width: 4; }
+.hero-bubble rect, .hero-bubble path { fill: #fff; }
+.hero-bubble rect { stroke: #e2dcf7; stroke-width: 1.5; }
+.hero-bubble text { fill: #4b32b3; font-size: 16px; font-weight: 700; text-anchor: middle; }
+.hero-sticker circle { fill: #fff; stroke: #e5e1f6; stroke-width: 1.5; }
+.hero-sticker path { fill: none; stroke: var(--w-blue); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.hero-sticker-1 path { stroke: var(--w-coral); }
+.hero-sticker-3 path { stroke: var(--w-violet); }
+.hero-sticker-5 path { stroke: var(--w-rose); }
+
+.journey-card { --scene-color: var(--w-rose); --scene-tint: var(--w-rose-tint); position: relative; z-index: 2; width: min(760px, 100%); margin: -64px auto 0; padding: 22px 26px 24px; border: 1px solid var(--w-line); border-radius: 28px; background: #fff; text-align: left; box-shadow: 0 30px 60px -38px rgba(var(--w-brand-rgb), .5), 0 2px 8px rgba(15, 35, 70, .05); }
+.journey-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.journey-ask { color: var(--w-muted); font-size: 15px; font-weight: 500; }
+.journey-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.journey-options button { --tab-color: var(--w-rose); --tab-tint: var(--w-rose-tint); display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 8px 14px; border: 1px solid #e3e8f0; border-radius: 999px; background: #fff; color: var(--w-muted); font-size: 14px; font-weight: 500; }
+.journey-options button[data-scene="commute"] { --tab-color: var(--w-blue-deep); --tab-tint: var(--w-blue-tint); }
+.journey-options button[data-scene="isochrone"] { --tab-color: var(--w-violet); --tab-tint: var(--w-violet-tint); }
+.journey-options button:hover { color: var(--tab-color); border-color: var(--tab-color); }
+.journey-options button[aria-pressed="true"] { border-color: var(--tab-color); background: var(--tab-tint); color: var(--tab-color); }
+.journey-copy { min-height: 96px; padding: 18px 2px 16px; }
+.journey-copy p { margin: 0 0 6px; color: var(--w-ink); font-size: 21px; font-weight: 700; line-height: 1.6; }
+.journey-copy-inner > span { color: var(--w-muted); font-size: 15px; line-height: 1.7; }
+.journey-bottom { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 16px; border-top: 1px dashed #e2def0; }
+.journey-hint { color: var(--w-muted); font-size: 14px; }
+.welcome .welcome-primary { min-height: 50px; padding: 12px 24px; font-size: 16px; }
+.welcome-story-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 28px; color: var(--w-brand-deep); font-size: 15px; font-weight: 500; text-decoration: none; }
+.welcome-story-link:hover { color: var(--w-brand); }
+.welcome-story-arrow { display: inline-block; }
+
+/* ===== 通用分区 ===== */
+.welcome-section { max-width: 1160px; margin: 0 auto; padding: 100px 24px 0; scroll-margin-top: 24px; }
+.section-head { max-width: 700px; margin: 0 auto 40px; text-align: center; }
+.section-eyebrow { display: inline-block; margin-bottom: 14px; padding: 6px 14px; border-radius: 999px; background: var(--w-brand-tint); color: var(--w-brand-deep); font-size: 14px; font-weight: 500; line-height: 1.4; }
+.section-head h2 { margin: 0; color: var(--w-ink); font-size: clamp(28px, 3.6vw, 44px); font-weight: 900; line-height: 1.3; letter-spacing: -.01em; }
+.section-head p { margin: 14px 0 0; color: var(--w-muted); font-size: 17px; line-height: 1.8; }
+
+.welcome-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; max-width: 1160px; margin: 80px auto 0; padding: 26px 24px 36px; border-top: 1px solid var(--w-line); color: var(--w-muted); font-size: 14px; }
+.welcome-footer-brand { display: inline-flex; align-items: center; gap: 4px; color: var(--w-ink); font-weight: 700; }
+.welcome-footer-brand .radius-symbol { width: 26px; color: var(--w-brand); transform: scale(.66); transform-origin: left center; }
+.welcome-footer-meta { margin-left: auto; font-size: 13px; }
+
+/* ===== 动效 ===== */
 @keyframes welcome-drop { from { opacity: 0; transform: translateY(-14px); } }
-@keyframes welcome-rise { from { opacity: 0; transform: translateY(18px); } }
-@keyframes welcome-fade { from { opacity: 0; } }
-@keyframes welcome-aurora-a { to { transform: translate(10%, 6%) scale(1.08); } }
-@keyframes welcome-aurora-b { to { transform: translate(-11%, 7%) scale(1.06); } }
-@keyframes welcome-aurora-c { to { transform: translate(6%, -7%) scale(1.1); } }
-@keyframes welcome-headline-flow { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
-@keyframes welcome-ping { from { box-shadow: 0 0 0 0 rgba(168, 71, 106, .34); } 70%, to { box-shadow: 0 0 0 7px rgba(168, 71, 106, 0); } }
+@keyframes welcome-rise { from { opacity: 0; transform: translateY(20px); } }
+@keyframes welcome-stage { from { opacity: 0; transform: translateY(24px) scale(.97); } }
+@keyframes welcome-underline { from { stroke-dashoffset: 210; } }
 @keyframes welcome-swap { from { opacity: 0; transform: translateY(8px); } }
-@keyframes welcome-label-swap { from { opacity: 0; transform: translateY(6px); } }
-@keyframes welcome-pop { 40% { transform: scale(1.22); } 70% { transform: scale(.95); } }
-@keyframes welcome-sheen { from { transform: translateX(-101%); } to { transform: translateX(101%); } }
-@keyframes welcome-bob { 50% { transform: translateY(3px); } }
+@keyframes welcome-pop { 0% { transform: scale(1); } 45% { transform: scale(1.25); } 100% { transform: scale(1); } }
+@keyframes ring-breathe { 50% { transform: scale(1.035); } }
+@keyframes lens-glow { 50% { opacity: .6; } }
+@keyframes pin-bob { 50% { transform: translateY(-6px); } }
+@keyframes bubble-pop { 0% { opacity: 0; transform: translateY(12px) scale(.6); } 70% { opacity: 1; transform: scale(1.06); } 100% { transform: none; } }
+@keyframes bubble-float { 50% { transform: translateY(-5px); } }
+@keyframes route-march { to { stroke-dashoffset: -44; } }
+@keyframes sticker-float { 50% { transform: translateY(-9px) rotate(-5deg); } }
+@keyframes story-bob { 50% { transform: translateY(4px); } }
+.welcome-header { animation: welcome-drop .6s cubic-bezier(.2, .8, .2, 1) backwards; }
+.hero-badge { animation: welcome-rise .7s .08s cubic-bezier(.2, .8, .2, 1) backwards; }
+.welcome h1 { animation: welcome-rise .75s .16s cubic-bezier(.2, .8, .2, 1) backwards; }
+.welcome h1 em path { animation: welcome-underline .9s .85s cubic-bezier(.6, .1, .2, 1) backwards; }
+.hero-sub { animation: welcome-rise .75s .26s cubic-bezier(.2, .8, .2, 1) backwards; }
+.hero-stage { animation: welcome-stage .9s .34s cubic-bezier(.2, .8, .2, 1) backwards; }
+.journey-card { animation: welcome-rise .8s .46s cubic-bezier(.2, .8, .2, 1) backwards; }
+.welcome-story-link { animation: welcome-rise .7s .56s cubic-bezier(.2, .8, .2, 1) backwards; }
+.welcome-story-arrow { animation: story-bob 1.8s ease-in-out infinite; }
+.journey-copy-inner, .welcome-primary-label { animation: welcome-swap .45s cubic-bezier(.2, .8, .2, 1) backwards; }
+.journey-options button[aria-pressed="true"] svg { animation: welcome-pop .45s ease; }
+.hero-ring, .hero-pin, .hero-bubble, .hero-sticker { transform-box: fill-box; transform-origin: center; }
+.hero-ring-you { animation: ring-breathe 6s ease-in-out infinite; }
+.hero-ring-ta { animation: ring-breathe 6s ease-in-out -3s infinite; }
+.hero-lens { animation: lens-glow 6s ease-in-out infinite; }
+.hero-pin-you { animation: pin-bob 3.2s ease-in-out infinite; }
+.hero-pin-ta { animation: pin-bob 3.2s ease-in-out -1.6s infinite; }
+.hero-bubble { animation: bubble-pop .7s 1.1s cubic-bezier(.2, .9, .3, 1.3) backwards, bubble-float 4s 1.9s ease-in-out infinite; }
+.hero-route { animation: route-march 2.4s linear infinite; }
+.hero-sticker-1 { animation: sticker-float 5.2s ease-in-out infinite; }
+.hero-sticker-2 { animation: sticker-float 6s ease-in-out -2s infinite; }
+.hero-sticker-3 { animation: sticker-float 5.6s ease-in-out -1s infinite; }
+.hero-sticker-4 { animation: sticker-float 6.4s ease-in-out -3s infinite; }
+.hero-sticker-5 { animation: sticker-float 5s ease-in-out -2.5s infinite; }
 
-@media (min-width: 1500px) { .welcome-copy { padding-top: 48px; } }
-@media (max-width: 900px) {
-  .welcome-header { padding: 23px 30px; }
-  .welcome-nav { gap: 20px; margin-right: 0; }
-  .welcome-brand { font-size: 21px; }
-  .welcome h1 { font-size: clamp(38px, 5.6vw, 55px); }
-  .welcome-colophon { width: calc(100% - 60px); }
-}
-@media (max-width: 600px) {
-  .welcome-header { padding: 19px 20px; gap: 12px; }
-  .welcome-brand { font-size: 21px; gap: 9px; }
-  .welcome-brand small { font-size: 11px; }
-  .welcome .radius-symbol { transform: scale(.85); transform-origin: left center; width: 31px; }
+@media (max-width: 960px) {
   .welcome-nav { display: none; }
-  .welcome .welcome-skip { min-height: 40px; font-size: 12px; padding: 10px 15px; }
-  .welcome-skip .welcome-arrow { padding-left: 8px; }
-  /* Glows clamp to their 320/340px minimum here; a shorter box still contains them while drifting. */
-  .welcome-aurora { height: 820px; }
-  .welcome-copy { padding: 32px 18px 0; }
-  .welcome-eyebrow { margin-bottom: 19px; font-size: 11px; letter-spacing: .12em; }
-  .welcome h1 { max-width: 100%; font-size: clamp(31px, 8vw, 44px); line-height: 1.45; letter-spacing: .015em; }
-  /* fit-content keeps the gradient on the words, not across the whole line */
-  .welcome h1 span { display: block; width: fit-content; margin-inline: auto; }
-  .welcome-description { font-size: 14px; margin: 16px 0 23px; line-height: 1.9; }
-  .journey-card { padding: 13px 14px 16px; border-radius: 25px; }
-  .journey-options { justify-content: space-between; flex-wrap: nowrap; gap: 2px; }
-  .journey-options button { gap: 5px; padding: 7px 7px; font-size: 11px; min-height: 38px; }
-  .journey-options svg { width: 16px; height: 16px; flex: none; }
-  .journey-copy { min-height: 113px; padding: 18px 3px 12px; }
-  .journey-copy p { font-size: 16px; line-height: 1.7; }
-  .journey-copy-inner > span { font-size: 13px; line-height: 1.7; }
-  .journey-bottom { gap: 8px; padding-top: 4px; }
-  .journey-hint { font-size: 10px; gap: 4px; }
-  .journey-hint > span { width: 25px; height: 25px; }
-  .journey-hint svg { width: 14px; height: 14px; }
-  .welcome .welcome-primary { gap: 12px; font-size: 12px; padding: 12px 14px; min-height: 44px; }
-  .welcome-footnote { font-size: 11px; flex-wrap: wrap; gap: 4px; letter-spacing: 0; }
-  .welcome-colophon { width: calc(100% - 40px); flex-direction: column; gap: 12px; padding-block: 20px; font-size: 9px; }
+  .welcome-section { padding-top: 80px; }
 }
-@media (max-width: 350px) {
-  .welcome-copy { padding-inline: 12px; }
-  .journey-options button { padding-inline: 5px; font-size: 10px; }
-  .journey-hint > span { display: none; }
-  .welcome-footnote { max-width: 270px; }
+@media (max-width: 700px) {
+  .welcome-hero { padding: 0 16px 48px; border-radius: 0 0 32px 32px; }
+  .welcome-header { padding: 16px 4px; }
+  .welcome-brand { font-size: 18px; }
+  .welcome .welcome-skip { min-height: 40px; padding: 8px 16px; font-size: 14px; }
+  .hero-copy { margin-top: 18px; }
+  .hero-break { display: inline; }
+  .welcome h1 { font-size: clamp(38px, 11vw, 52px); line-height: 1.25; }
+  .hero-sub { font-size: 16px; }
+  .hero-stage { margin: 8px -16px 0; overflow: hidden; }
+  .hero-art { width: 150%; margin-left: -25%; }
+  .journey-card { margin-top: -30px; padding: 18px 18px 20px; border-radius: 24px; }
+  .journey-top { flex-direction: column; align-items: stretch; }
+  .journey-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .journey-options button { justify-content: center; padding: 8px 4px; font-size: 14px; white-space: nowrap; }
+  .journey-options button svg { display: none; }
+  .journey-copy { min-height: 118px; }
+  .journey-copy p { font-size: 18px; }
+  .journey-bottom { flex-direction: column; align-items: stretch; }
+  .journey-hint { text-align: center; }
+  .welcome .welcome-primary { justify-content: center; }
+  .welcome-section { padding: 72px 18px 0; }
+  .section-head { margin-bottom: 28px; }
+  .section-head p { font-size: 16px; }
+  .welcome-footer { flex-direction: column; align-items: flex-start; margin-top: 64px; padding-inline: 18px; }
+  .welcome-footer-meta { margin-left: 0; }
 }
-/* Sections scrolled out of view pause their loops and resume near the viewport (src/ui/usePauseOffscreen.ts). */
+@media (max-width: 360px) {
+  .journey-options button { font-size: 13px; }
+}
+
+/* 滚出屏幕的区域暂停循环动画，回到视口附近再继续（见 src/ui/usePauseOffscreen.ts）。 */
 .welcome [data-offscreen], .welcome [data-offscreen] *, .welcome [data-offscreen] *::before, .welcome [data-offscreen] *::after { animation-play-state: paused !important; }
-/* Reduced motion: every entrance, loop, hover transition and the aurora drift above lives
-   under .welcome, so this one rule stills them all; each element rests in its normal style. */
+/* 减少动态效果：所有入场、循环与过渡都停下，元素停在正常状态（下划线完整显示）。 */
 @media (prefers-reduced-motion: reduce) { .welcome *, .welcome *::before, .welcome *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
-/* High-contrast themes: drop the purely decorative glow and sheen layers. */
-@media (forced-colors: active) { .welcome-aurora, .welcome :is(.welcome-skip, .welcome-primary)::before { display: none; } }
+@media (forced-colors: active) { .hero-stage, .welcome-hero::before, .welcome-hero::after { display: none; } }

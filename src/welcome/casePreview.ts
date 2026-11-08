@@ -31,13 +31,13 @@ export type PreviewServices = {
 }
 // Overlay and map-label colours, aligned with the scene tokens in App.css.
 // Commute; mirrors --c-commute.
-const BLUE = '#2d5f92'
+const BLUE = '#1668e3'
 // Meeting / intersection; the violet end of --c-headline, close to --c-meet.
-const PURPLE = '#6a55b0'
+const PURPLE = '#6e56cf'
 // Explore card accent; mirrors --c-explore in App.css (no green or yellow text on the landing page).
-const CORAL = '#a8476a'
+const CORAL = '#b83e64'
 // Second origin (home B in the commute example, "TA" in the meeting example); orange, not yellow.
-const ORANGE = '#a85a22'
+const ORANGE = '#c8452a'
 const message = (error: unknown) => error instanceof Error ? error.message : String(error)
 const minutes = (route: Route) => `${Math.ceil(route.seconds / 60)} 分`
 function defaultServices(): PreviewServices {

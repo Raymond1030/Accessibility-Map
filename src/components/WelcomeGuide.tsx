@@ -5,6 +5,7 @@ import { getMapboxToken } from '../mapbox/token'
 import type { Scene } from '../state/navigation'
 import { loadCasePreview, type CasePreview } from '../welcome/casePreview'
 import { RANGE_DASH } from '../ui/mapStyle'
+import { SceneIcon } from './SceneIcon'
 import './WelcomeGuide.css'
 
 const USE_CASES: { scene: Scene; tag: string; title: string; description: string; example: string; action: string }[] = [
@@ -17,7 +18,7 @@ const USE_CASES: { scene: Scene; tag: string; title: string; description: string
 const revealDelay = (ms: number) => ({ '--reveal-delay': `${ms}ms` }) as CSSProperties
 
 function GuideIcon({ kind }: { kind: 'place' | 'time' | 'area' }) {
-  return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  return <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
     {kind === 'place' ? <><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z" /><circle cx="12" cy="10" r="2.5" /></> : kind === 'time' ? <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></> : <><circle cx="8" cy="12" r="6.5" /><circle cx="16" cy="12" r="6.5" /></>}
   </svg>
 }
@@ -146,31 +147,70 @@ function CaseDiagram({ scene }: { scene: Scene }) {
   </div></div>
 }
 
+const STEPS: { kind: 'place' | 'time' | 'area'; title: string; text: string }[] = [
+  { kind: 'place', title: '放下一个地点', text: '搜索家、公司或朋友的位置，也可以直接在地图上点一下。' },
+  { kind: 'time', title: '设好愿意花的时间', text: '选择出行方式和可以接受的时长，范围会贴近你的日常节奏。' },
+  { kind: 'area', title: '看看能到哪里', text: '看可达范围、比较具体路线，找到更适合生活的落脚点。' },
+]
+
+const CTA_SCENES: { scene: Scene; label: string }[] = [
+  { scene: 'commute', label: '比较通勤' },
+  { scene: 'isochrone', label: '约个见面点' },
+  { scene: 'explore', label: '探索附近' },
+]
+
 export function WelcomeGuide({ onEnter }: { onEnter: (scene: Scene) => void }) {
-  return <section className="welcome-discover" id="how-it-works" aria-labelledby="guide-title">
-    <div className="guide-heading" data-reveal>
-      <div><p className="guide-eyebrow">从一个地点，到一种生活 / HOW IT WORKS</p><h2 id="guide-title">把抽象的距离，<br /><span>变成具体的日常。</span></h2></div>
-      <p>地图上的远近，不一定是生活里的远近。<br />从你在意的地方出发，把愿意花在路上的时间，<br className="desktop-break" />换成看得见、能比较的选择。</p>
-    </div>
+  return <>
+    <section className="welcome-section steps-section" id="how-it-works" aria-labelledby="guide-title">
+      <div className="section-head" data-reveal>
+        <span className="section-eyebrow">三步上手</span>
+        <h2 id="guide-title">从一个地点，到一种生活</h2>
+        <p>地图上的远近，不一定是生活里的远近。用愿意花在路上的时间，换成看得见、能比较的选择。</p>
+      </div>
+      <ol className="steps">
+        {STEPS.map((step, index) => <li key={step.kind} data-reveal style={revealDelay(index * 100)}>
+          <span className="step-index" aria-hidden="true">{index + 1}</span>
+          <span className="step-icon"><GuideIcon kind={step.kind} /></span>
+          <h3>{step.title}</h3>
+          <p>{step.text}</p>
+        </li>)}
+      </ol>
+    </section>
 
-    <ol className="guide-process">
-      <li data-reveal style={revealDelay(0)}><span className="guide-icon"><GuideIcon kind="place" /></span><div><span className="guide-step-label">01 / 选地点</span><h3>先放下一个生活坐标</h3><p>搜索家、公司或朋友的位置，<br />也可以直接在地图上标记。</p></div><span className="guide-step-arrow" aria-hidden="true">→</span></li>
-      <li data-reveal style={revealDelay(100)}><span className="guide-icon"><GuideIcon kind="time" /></span><div><span className="guide-step-label">02 / 设时间</span><h3>决定怎么走，愿意走多久</h3><p>选择出行方式和可接受的时长，<br />让范围贴近你的日常节奏。</p></div><span className="guide-step-arrow" aria-hidden="true">→</span></li>
-      <li data-reveal style={revealDelay(200)}><span className="guide-icon"><GuideIcon kind="area" /></span><div><span className="guide-step-label">03 / 看结果</span><h3>把合适的选择留在地图上</h3><p>看可达范围、比较具体路线，<br />找到更适合生活的落脚点。</p></div></li>
-    </ol>
+    <section className="welcome-section cases-section" aria-labelledby="cases-title">
+      <div className="section-head" data-reveal>
+        <span className="section-eyebrow">三种打开方式</span>
+        <h2 id="cases-title">一个半径，从你今天关心的事开始</h2>
+        <p>下面的小地图都是实时计算的真实结果。</p>
+      </div>
+      <div className="use-cases">
+        {USE_CASES.map((item, index) => <article className={`use-case use-case-${item.scene}`} key={item.scene} data-reveal style={revealDelay(index * 120)}>
+          <CaseDiagram scene={item.scene} />
+          <div className="use-case-copy"><span className="use-case-tag">{item.tag}</span><h3>{item.title}</h3><p>{item.description}</p><blockquote>{item.example}</blockquote><button className="case-cta" onClick={() => onEnter(item.scene)}>{item.action}<span aria-hidden="true">→</span></button></div>
+        </article>)}
+      </div>
+    </section>
 
-    <div className="use-cases-heading" data-reveal><h2>一个半径，三种打开方式。</h2><span>从你今天关心的事开始</span></div>
-    <div className="use-cases">
-      {USE_CASES.map((item, index) => <article className={`use-case use-case-${item.scene}`} key={item.scene} data-reveal style={revealDelay(index * 120)}>
-        <CaseDiagram scene={item.scene} />
-        <div className="use-case-copy"><span className="use-case-tag">{item.tag}</span><h3>{item.title}</h3><p>{item.description}</p><blockquote>{item.example}</blockquote><button onClick={() => onEnter(item.scene)}>{item.action}<span aria-hidden="true">↗</span></button></div>
-      </article>)}
-    </div>
+    <section className="welcome-section faq-section" id="faq" aria-labelledby="faq-title">
+      <div className="section-head" data-reveal>
+        <span className="section-eyebrow">常见问题</span>
+        <h2 id="faq-title">你可能还想知道</h2>
+      </div>
+      <div className="faq-list" data-reveal>
+        <details><summary>范围和路线，应该怎么看？<span aria-hidden="true">+</span></summary><p>可达范围适合先筛选区域；选定具体住处或地点后，再查看路线与耗时。地图上的圈不是直线距离圆，实际出行仍会受路网、换乘和路况影响。</p></details>
+        <details><summary>两个人的范围没有交集，怎么办？<span aria-hidden="true">+</span></summary><p>这表示当前条件下，还没有大家都能到达的共同区域。可以增加一点时间、换一种出行方式，或调整起点再试试。</p></details>
+        <details><summary>需要注册吗？选过的地点会保存吗？<span aria-hidden="true">+</span></summary><p>不用注册，可以直接开始。候选住处、探索收藏和抽取记录保留在当前页面中，刷新后会清空；多点等时圈的结果可以导出为 GeoJSON。</p></details>
+      </div>
+    </section>
 
-    <div className="guide-questions" data-reveal><div><p className="guide-eyebrow">开始之前</p><h2>你可能还想知道</h2></div><div className="guide-answers">
-      <details><summary>范围和路线，应该怎么看？<span aria-hidden="true">+</span></summary><p>可达范围适合先筛选区域；选定具体住处或地点后，再查看路线与耗时。地图上的圈不是直线距离圆，实际出行仍会受路网、换乘和路况影响。</p></details>
-      <details><summary>两个人的范围没有交集，怎么办？<span aria-hidden="true">+</span></summary><p>这表示当前条件下，还没有大家都能到达的共同区域。可以增加一点时间、换一种出行方式，或调整起点再试试。</p></details>
-      <details><summary>需要注册吗？选过的地点会保存吗？<span aria-hidden="true">+</span></summary><p>不用注册，可以直接开始。候选住处、探索收藏和抽取记录保留在当前页面中，刷新后会清空；多点等时圈的结果可以导出为 GeoJSON。</p></details>
-    </div></div>
-  </section>
+    <section className="welcome-cta" data-reveal aria-labelledby="cta-title">
+      <span className="welcome-cta-ring welcome-cta-ring-1" aria-hidden="true" />
+      <span className="welcome-cta-ring welcome-cta-ring-2" aria-hidden="true" />
+      <h2 id="cta-title">准备好了吗？从一个地点开始</h2>
+      <p>挑住处、约见面、逛附近，都能在地图上看得清清楚楚。</p>
+      <div className="cta-actions">
+        {CTA_SCENES.map(item => <button key={item.scene} onClick={() => onEnter(item.scene)}><SceneIcon scene={item.scene} />{item.label}</button>)}
+      </div>
+    </section>
+  </>
 }

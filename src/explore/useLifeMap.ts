@@ -8,9 +8,16 @@ import { selectedPair, useComparison } from '../commute/comparisonStore'
 import { useCommute } from '../commute/store'
 import { routeFeatures, stationFeatures } from '../commute/transit'
 import type { Place } from '../commute/types'
-import type { ReachablePoi } from './types'
+import { categoryLabel, type Poi, type ReachablePoi } from './types'
+import { categoryIcon } from './categoryIcons'
 import { withOverlayInsets } from '../ui/mapInsets'
 import { RANGE_DASH } from '../ui/mapStyle'
+import { markerIconSrc } from '../ui/markerIcons'
+import { createPlaceMarkerElement, type PlaceMarkerOptions } from '../ui/placeMarker'
+
+// 搬家对比时两处住处的生活圈填色；住处标记的圆牌用同一颜色，地图上一眼对得上
+const BASE_LIFE_COLOR = '#36658a'
+const CANDIDATE_LIFE_COLOR = '#a8476a'
 
 export function useLifeMap(ref: RefObject<mapboxgl.Map | null>, ready: boolean) {
   const scene = useNavigation(s => s.scene); const e = useExplore(); const c = useComparison()
@@ -38,22 +45,21 @@ export function useLifeMap(ref: RefObject<mapboxgl.Map | null>, ready: boolean) 
     const pair = [base, target].filter(h => !!h)
     const inspectingOldOrigin = e.selected?.origin && String(e.selected.origin.lngLat) !== String(e.center?.lngLat)
     const profiles = exploring ? (profile && !inspectingOldOrigin ? [profile] : []) : comparing && view === 'move' ? pair.flatMap(h => c.profiles[h.id] ? [c.profiles[h.id]] : []) : []
-    const geometry = profiles.flatMap((p, i) => p.geometry ? [{ ...p.geometry, properties: { ...p.geometry.properties, lifeColor: i ? '#a8476a' : '#36658a' } }] : [])
+    const geometry = profiles.flatMap((p, i) => p.geometry ? [{ ...p.geometry, properties: { ...p.geometry.properties, lifeColor: i ? CANDIDATE_LIFE_COLOR : BASE_LIFE_COLOR } }] : [])
     ;(map.getSource('life-areas') as mapboxgl.GeoJSONSource).setData({ type: 'FeatureCollection', features: geometry })
     const route = exploring ? e.selected?.route ?? null : comparing ? c.inspection?.route ?? null : null
     ;(map.getSource('life-route') as mapboxgl.GeoJSONSource).setData(routeFeatures(route))
     ;(map.getSource('life-stations') as mapboxgl.GeoJSONSource).setData(stationFeatures(route))
     if (!exploring && !comparing) return
     const markers: mapboxgl.Marker[] = []; const positions: Place[] = []
-    const marker = (place: Place, label: string, kind = '', onClick?: () => void) => {
-      const el = document.createElement('button'); el.className = `life-map-marker ${kind}`; el.textContent = label
-      el.title = place.name; el.setAttribute('aria-label', place.name)
-      el.onclick = event => { event.stopPropagation(); onClick?.() }
+    // 地点标记与「多点见面」同一造型：白底方块＋彩色类型图标＋编号圆牌（见 ui/placeMarker）
+    const marker = (place: Place, options: Omit<PlaceMarkerOptions, 'title' | 'label'> & { label?: string }) => {
+      const el = createPlaceMarkerElement({ ...options, title: place.name, label: options.label ?? place.name })
       markers.push(new mapboxgl.Marker({ element: el }).setLngLat(place.lngLat).addTo(map)); positions.push(place)
     }
     if (exploring) {
       const origin = e.selected?.origin ?? e.center
-      if (origin) marker(origin, '起', 'is-origin')
+      if (origin) marker(origin, { text: '起', tone: 'brand', large: true, label: `起点：${origin.name}` })
       const points = new Map<string, ReachablePoi>()
       if (!inspectingOldOrigin) {
         if (profile) Object.values(profile.categories).forEach(r => r?.places.forEach(p => points.set(p.poi.id, p)))
@@ -61,10 +67,34 @@ export function useLifeMap(ref: RefObject<mapboxgl.Map | null>, ready: boolean) 
       }
       if (e.selected) points.set(e.selected.poi.id, e.selected)
       let i = 0
-      points.forEach(p => marker(p.poi, String(++i), p.poi.id === e.selected?.poi.id ? 'is-selected' : '', () => useExplore.getState().select(p)))
+      points.forEach(p => {
+        const n = String(++i)
+        const selected = p.poi.id === e.selected?.poi.id
+        const icon = categoryIcon(p.poi.category)
+        marker(p.poi, {
+          // 认得的类别画彩色图标、编号放圆牌；旧缓存里不认识的类别退回只写编号
+          ...(icon ? { icon, chip: n } : { text: n }),
+          tone: selected ? 'result' : 'explore',
+          selected,
+          label: icon ? `${n}. ${categoryLabel(p.poi.category)}：${p.poi.name}` : `${n}. ${p.poi.name}`,
+          onClick: () => useExplore.getState().select(p),
+        })
+      })
     } else {
-      pair.forEach((h, i) => marker(h, i ? '候' : '基', 'is-origin'))
-      if (c.inspection) { marker(c.inspection.origin, '起', 'is-origin'); marker(c.inspection.destination, '终', 'is-selected') }
+      pair.forEach((h, i) => marker(h, {
+        icon: markerIconSrc('home'),
+        chip: i ? '候' : '基',
+        tone: 'brand',
+        color: i ? CANDIDATE_LIFE_COLOR : BASE_LIFE_COLOR,
+        large: true,
+        label: `${i ? '候选住处' : '基准住处'}：${h.name}`,
+      }))
+      if (c.inspection) {
+        const { origin, destination } = c.inspection
+        marker(origin, { text: '起', tone: 'brand', large: true, label: `起点：${origin.name}` })
+        const icon = categoryIcon((destination as Partial<Poi>).category)
+        marker(destination, { ...(icon ? { icon, chip: '终' } : { text: '终' }), tone: 'result', selected: true, label: `终点：${destination.name}` })
+      }
     }
     if (positions.length) {
       const bounds = new mapboxgl.LngLatBounds()

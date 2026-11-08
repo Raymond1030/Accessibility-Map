@@ -5,8 +5,8 @@ import { useStore } from '../state/store'
 import { computeBand, computeCustomBand } from '../state/compute'
 import { cellKey, MAX_MINUTES, MODE_LABEL, type MarkerIcon, type Mode, type SetOp } from '../types'
 import { useIsMobile } from '../ui/responsive'
-import { colorWithAlpha, contrastText, originCode } from '../ui/mapStyle'
-import { MARKER_ICON_OPTIONS, MarkerIconGlyph, resolveMarkerIcon } from '../ui/markerIcons'
+import { colorWithAlpha, originCode } from '../ui/mapStyle'
+import { MARKER_ICON_OPTIONS, MarkerIconImage, markerShowsCode, resolveMarkerIcon } from '../ui/markerIcons'
 import './Sidebar.css'
 import { isLocalEngineEnabled } from '../providers/local'
 import { LocalEngineStatus, LocalQueryInputs } from './LocalEnginePanel'
@@ -251,13 +251,14 @@ export function Sidebar() {
                   aria-expanded={expanded}
                   aria-controls={`origin-editor-${origin.id}`}
                 >
-                  <span
-                    className="origin-badge"
-                    style={{ backgroundColor: origin.color, color: contrastText(origin.color) }}
-                    aria-hidden="true"
-                  >
-                    <MarkerIconGlyph icon={markerIcon} />
-                    <span className="origin-badge-code">{code}</span>
+                  <span className="origin-badge" aria-hidden="true">
+                    {/* 与地图标记同一规则：默认「地点」用识别色写字母，其他类型放彩色图标、字母放角标 */}
+                    {markerShowsCode(markerIcon)
+                      ? <span className="origin-badge-letter">{code}</span>
+                      : <>
+                          <MarkerIconImage icon={markerIcon} />
+                          <span className="origin-badge-code">{code}</span>
+                        </>}
                   </span>
                   <span className="origin-summary-copy">
                     <strong>{origin.label}</strong>
@@ -290,7 +291,7 @@ export function Sidebar() {
                             aria-pressed={markerIcon === option.id}
                             aria-label={`地图标记：${option.label}`}
                           >
-                            <MarkerIconGlyph icon={option.id} />
+                            <MarkerIconImage icon={option.id} />
                             <span>{option.label}</span>
                           </button>
                         ))}
