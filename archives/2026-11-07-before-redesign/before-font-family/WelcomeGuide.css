@@ -1,0 +1,69 @@
+.welcome-discover { position: relative; width: min(1200px, calc(100% - 108px)); margin: 58px auto 0; padding: 55px 0 0; border-top: 1px solid #dce4e8; scroll-margin-top: 30px; }
+.guide-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 36px; }
+.guide-eyebrow { margin: 0 0 18px; color: var(--type-purple); font-size: 12px; letter-spacing: .13em; line-height: 1.8; }
+.guide-heading h2 { margin: 0; font-size: clamp(28px, 2.5vw, 37px); font-family: var(--landing-display); font-weight: 700; letter-spacing: .01em; color: var(--type-blue); line-height: 1.5; }
+.guide-heading h2 > span { color: var(--type-teal); }
+.guide-heading > p { max-width: 400px; margin: 0 0 4px; font-size: 15px; color: #5b6f7c; line-height: 2; }
+.guide-process { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; padding: 32px; margin: 36px 0 64px; list-style: none; border: 1px solid #e0e8ec; border-radius: 20px; background: #ffffffa6; }
+.guide-process li { --step-color: var(--type-blue); position: relative; display: flex; align-items: flex-start; gap: 17px; min-width: 0; }
+.guide-process li:nth-child(2) { --step-color: var(--type-purple); }
+.guide-process li:nth-child(3) { --step-color: var(--type-teal); }
+.guide-icon { flex: none; display: grid; place-items: center; width: 43px; height: 43px; border: 1px solid #dbe7ed; border-radius: 13px; color: var(--step-color); background: #eef4f7; }
+.guide-step-label { font-size: 12px; font-weight: 600; letter-spacing: .08em; color: var(--step-color); }
+.guide-process h3 { font-size: 15px; font-weight: 600; line-height: 1.7; margin: 9px 0; color: var(--step-color); }
+.guide-process p { margin: 0; color: #5b6f7c; font-size: 13px; line-height: 1.9; }
+.guide-step-arrow { position: absolute; top: 13px; right: -14px; color: #a5bac6; font-size: 17px; }
+.use-cases-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.use-cases-heading h2 { margin: 0; font-size: 24px; font-family: var(--landing-display); font-weight: 700; letter-spacing: .01em; color: var(--type-blue); }
+.use-cases-heading > span { color: #5b6f7c; font-size: 11px; }
+.use-cases { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.use-case { --case-color: var(--type-blue); display: flex; flex-direction: column; overflow: hidden; border: 1px solid #e0e8ec; border-radius: 19px; background: #ffffffbf; }
+.case-diagram { position: relative; height: 210px; overflow: hidden; background: #edf3f7; isolation: isolate; }
+.case-map { position: absolute; inset: 0; }
+.case-map-location { position: absolute; top: 12px; left: 12px; padding: 6px 10px; border: 1px solid #dce4e8; border-radius: 6px; background: #fffffff0; color: #354e5e; font-size: 11px; pointer-events: none; }
+.case-map-status { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #edf3f7; color: #5b6f7c; font-size: 12px; }
+.use-case .case-map-status button { width: auto; min-height: 36px; padding: 6px 14px; border: 1px solid #a5bac6; border-radius: 6px; background: white; }
+.use-case-copy { display: flex; flex: 1; flex-direction: column; padding: 24px; }
+.use-case-tag { color: var(--case-color); font-size: 12px; font-weight: 600; letter-spacing: .08em; }
+.use-case-isochrone { --case-color: var(--type-purple); }.use-case-explore { --case-color: var(--type-teal); }
+.use-case h3 { margin: 13px 0 14px; max-width: 14em; color: var(--case-color); font-family: var(--landing-display); font-size: 22px; line-height: 1.6; font-weight: 700; letter-spacing: .01em; }
+.use-case p { flex: 1; margin: 0; color: #5b6f7c; font-size: 14px; line-height: 1.95; }
+.use-case blockquote { margin: 19px 0 24px; padding: 12px 0 0; border-top: 1px solid #e8edf0; color: var(--case-color); font-size: 13px; line-height: 1.8; }
+.welcome .use-case button { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 44px; padding: 9px 0; border: 0; background: transparent; color: var(--case-color); text-align: left; font-size: 14px; font-weight: 600; }
+.use-case button > span { display: grid; place-items: center; width: 29px; height: 29px; border: 1px solid #d8e3e9; border-radius: 50%; font-size: 17px; transition: transform .2s, background-color .2s; }
+.use-case button:hover > span { transform: translate(2px, -2px); background: #e7f0f5; }
+.guide-questions { display: grid; grid-template-columns: 1fr 2fr; gap: 60px; padding: 58px 0; margin-top: 58px; border-top: 1px solid #dce4e8; }
+.guide-questions h2 { font-size: 24px; font-family: var(--landing-display); font-weight: 700; margin: 0; letter-spacing: .01em; color: var(--type-blue); }
+.guide-answers details { padding: 0 0 17px; border-bottom: 1px solid #e0e8ec; margin-bottom: 17px; }
+.guide-answers details:last-child { margin: 0; }
+.guide-answers summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; cursor: pointer; list-style: none; font-size: 15px; font-weight: 600; color: var(--type-purple); min-height: 30px; }
+.guide-answers summary::-webkit-details-marker { display: none; }
+.guide-answers summary > span { font-size: 20px; color: #8aa1b0; font-weight: 300; transition: transform .2s; }
+.guide-answers details[open] summary > span { transform: rotate(45deg); }
+.guide-answers p { margin: 14px 22px 2px 0; color: #5b6f7c; font-size: 14px; line-height: 1.95; }
+@media (max-width: 1000px) {
+  .welcome-discover { width: calc(100% - 60px); }
+  .guide-process { padding: 24px; gap: 24px; }
+  .guide-process li { flex-direction: column; gap: 13px; }
+  .guide-step-arrow { right: 0; }
+  .use-cases { gap: 15px; }.use-case-copy { padding: 19px; }.use-case h3 { font-size: 20px; }
+}
+@media (max-width: 700px) {
+  .welcome-discover { width: calc(100% - 40px); margin-top: 35px; padding-top: 34px; }
+  .guide-heading { display: block; }
+  .guide-eyebrow { font-size: 11px; margin-bottom: 15px; letter-spacing: .08em; }
+  .guide-heading h2 { font-size: 29px; }
+  .guide-heading > p { margin: 20px 0 0; font-size: 14px; line-height: 1.95; }
+  .desktop-break { display: none; }
+  .guide-process { grid-template-columns: 1fr; gap: 0; margin: 26px 0 40px; padding: 7px 22px; border-radius: 18px; }
+  .guide-process li { flex-direction: row; gap: 16px; padding: 21px 0; border-bottom: 1px solid #e4ebef; }
+  .guide-process li:last-child { border: 0; }
+  .guide-icon { margin-top: 2px; width: 40px; height: 40px; }
+  .guide-process h3 { font-size: 14px; }
+  .guide-process p { font-size: 13px; }.guide-step-arrow { display: none; }
+  .use-cases-heading { display: block; margin-bottom: 20px; }.use-cases-heading h2 { font-size: 21px; }.use-cases-heading > span { display: block; margin-top: 10px; font-size: 10px; }
+  .use-cases { grid-template-columns: 1fr; gap: 20px; }
+  .case-diagram { height: 210px; }.use-case-copy { padding: 23px; }.use-case h3 { max-width: none; margin-block: 11px; font-size: 21px; }.use-case p { font-size: 14px; }.use-case blockquote { margin-bottom: 14px; }
+  .guide-questions { grid-template-columns: 1fr; gap: 25px; margin-top: 38px; padding: 32px 0 36px; }
+  .guide-questions h2 { font-size: 22px; }.guide-answers summary { font-size: 14px; min-height: 36px; }.guide-answers p { font-size: 13px; }
+}

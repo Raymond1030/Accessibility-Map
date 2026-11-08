@@ -5,6 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:local": "node engine/dev.mjs",
+    "engine:prepare": "python engine/prepare.py",
+    "engine:start": "node engine/start.mjs",
+    "engine:test": "node --test engine/gateway.test.mjs engine/lifecycle.test.mjs engine/host.test.mjs",
+    "engine:smoke": "node engine/smoke.mjs",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",

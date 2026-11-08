@@ -31,6 +31,7 @@ async function overpass(query) {
       try {
         const res = await fetch(url, {
           method: 'POST',
+          signal: AbortSignal.timeout(70000),
           headers: {
             // Overpass 镜像对无 UA 的请求直接 429/406
             'User-Agent': 'accessibility-map/0.1 (metro data build script; github.com/Raymond1030/Accessibility-Map)',
@@ -81,9 +82,9 @@ for (const [ref, { rel, stops }] of [...byRef.entries()].sort(([a], [b]) => a.lo
   const stations = []
   for (const s of stops) {
     const node = nodes.get(s.ref)
-    if (!node) continue
+    if (!node) throw new Error(`线路 ${ref} 缺少站点 ${s.ref}，中止以免跨站造边`)
     const name = node.tags?.name
-    if (!name) continue // 无名 stop 多半是数据残缺，跳过比编造名字好
+    if (!name) throw new Error(`线路 ${ref} 站点 ${s.ref} 无名，请核对数据后重试`)
     stations.push({
       id: `${ref}-${stations.length + 1}`,
       name,
@@ -92,6 +93,19 @@ for (const [ref, { rel, stops }] of [...byRef.entries()].sort(([a], [b]) => a.lo
   }
   if (stations.length < 2) continue
   lines.push({ id: String(ref), name: rel.tags.name ?? `${ref}号线`, stations })
+}
+
+// 2/8 贯通运营在 OSM 常以两个反向完整关系重复出现；仅在全序列一致时归并。
+const line2 = lines.find(line => line.id === '2')
+const line8 = lines.find(line => line.id === '8')
+if (line2 && line8 && JSON.stringify(line2.stations.map(s => s.name)) === JSON.stringify(line8.stations.map(s => s.name).reverse())) {
+  line2.id = '2/8'
+  line2.name = '2/8号线（贯通运营）'
+  lines.splice(lines.indexOf(line8), 1)
+}
+const limitations = ['静态 OSM 线网可能遗漏新线或延伸段，未覆盖区域不代表实际不可达。']
+if (lines.find(line => line.id === '13')?.stations.length === 15) {
+  limitations.push('当前 13 号线数据仅含深圳湾口岸至上屋，不含北延段。')
 }
 
 const out = {
@@ -108,6 +122,7 @@ const out = {
     runSpeedKmph: 35,
   },
   lines,
+  limitations,
 }
 
 const dir = join(dirname(fileURLToPath(import.meta.url)), '../src/data/metro')

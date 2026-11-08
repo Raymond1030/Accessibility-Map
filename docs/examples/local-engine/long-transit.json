@@ -1,0 +1,32 @@
+[
+  {
+    "query": {
+      "lngLat": [
+        114.1722,
+        22.2988
+      ],
+      "mode": "transit-walking",
+      "minutes": 45,
+      "direction": "arrive",
+      "dateTime": "2026-11-07T08:00:00+08:00"
+    },
+    "status": 200,
+    "elapsedMs": 8920,
+    "areaSqKm": 59.524743548113754
+  },
+  {
+    "query": {
+      "lngLat": [
+        114.1722,
+        22.2988
+      ],
+      "mode": "transit-walking",
+      "minutes": 60,
+      "direction": "arrive",
+      "dateTime": "2026-11-07T08:00:00+08:00"
+    },
+    "status": 200,
+    "elapsedMs": 11242,
+    "areaSqKm": 136.51007835544192
+  }
+]

@@ -1,0 +1,110 @@
+.welcome {
+  --paper: #f7f9fa;
+  --ink: #25343d;
+  --muted: #5b6f7c;
+  --olive: #597c8b;
+  --clay: #537d99;
+  --paper-line: #dce4e8;
+  position: relative;
+  min-height: 100%;
+  overflow: clip;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--editorial-sans);
+  isolation: isolate;
+}
+.welcome::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  opacity: .045;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23000' filter='url(%23grain)' opacity='.7' d='M0 0h180v180H0z'/%3E%3C/svg%3E");
+}
+.welcome button, .welcome a { -webkit-tap-highlight-color: transparent; transition: color .2s, background-color .2s, box-shadow .2s, transform .2s; }
+.welcome button { font: inherit; cursor: pointer; }
+.welcome :is(button, a):focus-visible { outline: 2px solid var(--olive); outline-offset: 5px; }
+.welcome-header { position: relative; z-index: 4; display: flex; align-items: center; justify-content: space-between; gap: 24px; max-width: 1440px; margin: 0 auto; padding: 26px 54px; }
+.welcome-brand { display: flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; font-size: 24px; font-weight: 650; letter-spacing: .035em; }
+.welcome-brand small { display: block; margin-top: 3px; color: var(--muted); font: italic 13px Georgia, serif; letter-spacing: .03em; }
+.radius-symbol { position: relative; display: block; flex: none; width: 36px; height: 39px; }
+.radius-symbol i { position: absolute; left: 0; top: 3px; width: 27px; height: 33px; border: 1.6px solid currentColor; border-radius: 50%; transform: rotate(30deg); }
+.radius-symbol i + i { left: 9px; transform: rotate(-30deg); }
+.radius-symbol::after { content: ''; position: absolute; width: 5px; height: 5px; border-radius: 50%; background: var(--clay); top: 17px; left: 15px; }
+.welcome-nav { display: flex; align-items: center; gap: 34px; margin-right: 40px; }
+.welcome-nav button, .welcome-nav a { color: #526571; border: 0; background: none; padding: 10px 0; font-size: 14px; text-decoration: none; }
+.welcome-nav :is(button, a):hover { color: var(--clay); }
+.welcome .welcome-skip { border: 1px solid var(--ink); border-radius: 30px; background: var(--ink); color: #ffffff; min-height: 44px; padding: 11px 22px; font-size: 14px; }
+.welcome-skip span { padding-left: 15px; }
+.welcome .welcome-skip:hover, .welcome .welcome-primary:hover { background: #3a596b; transform: translateY(-2px); box-shadow: 0 6px 14px #25343d14; }
+.welcome .welcome-skip:active, .welcome .welcome-primary:active { transform: translateY(0); }
+.welcome-hero { position: relative; }
+.welcome-copy { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; padding: 35px 24px 0; text-align: center; pointer-events: none; }
+.welcome-copy > * { pointer-events: auto; }
+.welcome-eyebrow { display: flex; align-items: center; gap: 9px; margin: 0 0 23px; font-size: 12px; letter-spacing: .18em; color: var(--olive); }
+.welcome-eyebrow > span { width: 5px; height: 5px; border-radius: 50%; background: var(--olive); box-shadow: 0 0 0 4px #597c8b0c; }
+.welcome h1 { margin: 0; font-size: clamp(38px, 4.4vw, 64px); font-weight: 550; line-height: 1.3; letter-spacing: -.065em; }
+.welcome h1 span { white-space: nowrap; }
+.welcome-description { margin: 20px 0 28px; color: var(--muted); font-size: 16px; line-height: 1.9; letter-spacing: .025em; }
+.journey-card { width: min(680px, 100%); padding: 18px 24px 19px; text-align: left; border: 2px solid #ffffffed; border-radius: 30px; background: #ffffffa8; box-shadow: 0 6px 36px #41617b0b, inset 0 0 0 1px #ffffff2e; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+.journey-options { display: flex; flex-wrap: wrap; gap: 5px; }
+.journey-options button { display: flex; align-items: center; gap: 7px; padding: 9px 13px; min-height: 40px; border: 0; border-radius: 22px; background: transparent; color: var(--muted); font-size: 13px; white-space: nowrap; }
+.journey-options button[aria-pressed="true"] { background: #e7eef2; color: #42667c; }
+.journey-options button:hover { background: #e7eef28c; color: #42667c; }
+.journey-copy { min-height: 88px; padding: 19px 4px 13px; }
+.journey-copy p { margin: 0 0 8px; color: #53758b; font-size: 18px; font-weight: 500; line-height: 1.6; }
+.journey-copy > span { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.journey-bottom { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-top: 8px; }
+.journey-hint { display: flex; align-items: center; gap: 8px; color: #5b6f7c; font-size: 12px; }
+.journey-hint > span { display: grid; place-items: center; border: 1px solid #ffffff; border-radius: 50%; width: 32px; height: 32px; color: var(--olive); font-size: 23px; }
+.welcome .welcome-primary { display: flex; justify-content: space-between; align-items: center; gap: 27px; border: 0; border-radius: 30px; min-height: 47px; padding: 12px 21px; background: var(--ink); color: #ffffff; font-size: 14px; }
+.welcome-primary > span { font-size: 19px; line-height: 1; }
+.welcome-footnote { display: flex; gap: 10px; justify-content: center; margin: 17px 0 0; font-size: 11px; line-height: 1.8; color: #5b6f7c; letter-spacing: .04em; }
+.welcome-colophon { width: min(1200px, calc(100% - 108px)); display: flex; justify-content: space-between; gap: 20px; margin: auto; padding: 23px 0 30px; border-top: 1px solid var(--paper-line); color: var(--muted); font-size: 10px; letter-spacing: .09em; line-height: 1.6; }
+.welcome-colophon > span:first-child span { padding-inline: 10px; color: #b9c8d0; }
+.welcome-colophon > span:last-child span { margin-left: 25px; color: var(--olive); font-size: 16px; }
+@media (min-width: 1500px) { .welcome-copy { padding-top: 48px; } }
+@media (max-width: 900px) {
+  .welcome-header { padding: 23px 30px; }
+  .welcome-nav { gap: 20px; margin-right: 0; }
+  .welcome-brand { font-size: 21px; }
+  .welcome h1 { font-size: clamp(38px, 5.6vw, 55px); }
+  .welcome-colophon { width: calc(100% - 60px); }
+}
+@media (max-width: 600px) {
+  .welcome-header { padding: 19px 20px; gap: 12px; }
+  .welcome-brand { font-size: 21px; gap: 9px; }
+  .welcome-brand small { font-size: 11px; }
+  .radius-symbol { transform: scale(.85); transform-origin: left center; width: 31px; }
+  .welcome-nav { display: none; }
+  .welcome .welcome-skip { min-height: 40px; font-size: 12px; padding: 10px 15px; }
+  .welcome-skip span { padding-left: 8px; }
+  .welcome-copy { padding: 32px 18px 0; }
+  .welcome-eyebrow { margin-bottom: 19px; font-size: 10px; letter-spacing: .12em; }
+  .welcome h1 { max-width: 100%; font-size: clamp(31px, 8vw, 44px); line-height: 1.45; letter-spacing: -.065em; }
+  .welcome h1 span { display: block; }
+  .welcome-description { font-size: 13px; margin: 16px 0 23px; line-height: 1.9; }
+  .journey-card { padding: 13px 14px 16px; border-radius: 25px; }
+  .journey-options { justify-content: space-between; flex-wrap: nowrap; gap: 2px; }
+  .journey-options button { gap: 5px; padding: 7px 7px; font-size: 11px; min-height: 38px; }
+  .journey-options svg { width: 16px; height: 16px; flex: none; }
+  .journey-copy { min-height: 113px; padding: 18px 3px 12px; }
+  .journey-copy p { font-size: 16px; line-height: 1.7; }
+  .journey-copy > span { font-size: 11px; line-height: 1.7; }
+  .journey-bottom { gap: 8px; padding-top: 4px; }
+  .journey-hint { font-size: 10px; gap: 4px; }
+  .journey-hint > span { width: 25px; height: 25px; font-size: 20px; }
+  .welcome .welcome-primary { gap: 12px; font-size: 12px; padding: 12px 14px; min-height: 44px; }
+  .welcome-footnote { font-size: 9px; gap: 6px; letter-spacing: 0; }
+  .welcome-colophon { width: calc(100% - 40px); flex-direction: column; gap: 12px; padding-block: 20px; font-size: 9px; }
+}
+@media (max-width: 350px) {
+  .welcome-copy { padding-inline: 12px; }
+  .journey-options button { padding-inline: 5px; font-size: 10px; }
+  .journey-hint > span { display: none; }
+  .welcome-footnote { font-size: 8px; }
+}
+@media (prefers-reduced-motion: reduce) { .welcome *, .welcome *::before, .welcome *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+.welcome-story-link { display: inline-flex; align-items: center; gap: 12px; padding: 12px 8px; margin-top: 4px; color: #537d99; font-size: 13px; text-decoration: none; }
+.welcome-story-link:hover { color: #25343d; }

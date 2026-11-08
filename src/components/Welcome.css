@@ -1,0 +1,214 @@
+@import './WelcomeFonts.css';
+
+/* 首页：温暖插画风。字体用自托管的思源黑体子集（Landing Sans，400/500/700/900）。
+   主色和工作区一样是靛紫（直接取 App.css 的 --c-brand*）：按钮、标题重点、标签、链接、演示控件、行动召唤。
+   插画和地图里的人和场景保留自己的颜色，与工作区地图一致：你＝蓝、TA＝珊瑚、相遇＝紫；
+   租房通勤＝蓝、多点见面＝紫、生活探索＝玫瑰。文字对比度都在 4.5:1 以上。 */
+.welcome {
+  --w-ink: #1f2329;
+  --w-muted: #5f6672;
+  --w-sky: #f6f4ff;
+  --w-line: #e9e6f5;
+  --w-brand: var(--c-brand);
+  --w-brand-deep: var(--c-brand-strong);
+  --w-brand-tint: var(--c-brand-tint);
+  --w-brand-line: #d6d0fc;
+  --w-brand-rgb: var(--c-brand-rgb);
+  --w-blue: #1668e3;
+  --w-blue-deep: #0e58c9;
+  --w-blue-tint: #e8f1ff;
+  --w-coral: #c8452a;
+  --w-coral-tint: #fdeee9;
+  --w-violet: #6e56cf;
+  --w-violet-tint: #f0ecfd;
+  --w-rose: #b83e64;
+  --w-rose-tint: #fdedf2;
+  --landing: "Landing Sans", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  position: relative;
+  min-height: 100%;
+  overflow: clip;
+  color: var(--w-ink);
+  background: #fff;
+  font-family: var(--landing);
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+.welcome button { font: inherit; cursor: pointer; }
+.welcome button, .welcome a { -webkit-tap-highlight-color: transparent; transition: color .2s, background-color .2s, border-color .2s, box-shadow .25s, transform .25s; }
+.welcome :is(button, a):focus-visible { outline: 2px solid var(--w-brand); outline-offset: 3px; }
+/* 中文标题均衡换行、段落避免末行只剩一两个字 */
+.welcome :is(h1, h2, h3, .hero-sub, .section-head p, .journey-copy p) { text-wrap: balance; }
+.welcome :is(p, blockquote, li, .journey-copy-inner > span) { text-wrap: pretty; }
+
+/* ===== 首屏 ===== */
+.welcome-hero { position: relative; isolation: isolate; overflow: hidden; padding: 0 20px 64px; border-radius: 0 0 48px 48px; background: var(--w-sky); text-align: center; }
+.welcome-hero::before, .welcome-hero::after { content: ''; position: absolute; z-index: -1; border-radius: 50%; pointer-events: none; }
+.welcome-hero::before { top: -220px; left: -160px; width: 620px; height: 620px; background: radial-gradient(closest-side, rgba(255, 255, 255, .95), rgba(255, 255, 255, 0)); }
+.welcome-hero::after { top: -120px; right: -180px; width: 560px; height: 560px; background: radial-gradient(closest-side, rgba(110, 86, 207, .1), rgba(110, 86, 207, 0)); }
+
+.welcome-header { display: flex; align-items: center; gap: 20px; max-width: 1200px; margin: 0 auto; padding: 22px 12px; text-align: left; }
+.welcome-brand { display: flex; align-items: center; gap: 6px; margin-right: auto; color: var(--w-ink); text-decoration: none; font-size: 20px; font-weight: 700; letter-spacing: .02em; }
+.welcome-brand .radius-symbol { width: 32px; color: var(--w-brand); transform: scale(.84); transform-origin: left center; }
+.welcome-nav { display: flex; align-items: center; gap: 2px; }
+.welcome-nav :is(button, a) { padding: 8px 14px; border: 0; border-radius: 999px; background: none; color: var(--w-muted); font-size: 15px; font-weight: 500; text-decoration: none; }
+.welcome-nav :is(button, a):hover { color: var(--w-brand-deep); background: rgba(var(--w-brand-rgb), .08); }
+.welcome-skip, .welcome-primary { display: inline-flex; align-items: center; gap: 10px; border: 0; border-radius: 999px; background: var(--w-brand); color: #fff; font-weight: 700; box-shadow: 0 14px 26px -14px rgba(var(--w-brand-rgb), .85); }
+.welcome .welcome-skip { min-height: 44px; padding: 10px 20px; font-size: 15px; }
+.welcome :is(.welcome-skip, .welcome-primary):hover { background: var(--w-brand-deep); transform: translateY(-2px); box-shadow: 0 18px 30px -14px rgba(var(--w-brand-rgb), .9); }
+.welcome :is(.welcome-skip, .welcome-primary):active { transform: translateY(0) scale(.98); }
+.welcome-arrow { display: inline-block; transition: transform .25s; }
+.welcome :is(.welcome-skip, .welcome-primary):is(:hover, :focus-visible) .welcome-arrow { transform: translateX(4px); }
+
+.hero-copy { max-width: 900px; margin: 30px auto 0; }
+.hero-badge { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 22px; padding: 7px 16px; border-radius: 999px; background: #fff; color: var(--w-brand-deep); font-size: 15px; font-weight: 500; box-shadow: 0 8px 20px -14px rgba(var(--w-brand-rgb), .7); }
+.hero-badge > span { width: 8px; height: 8px; border-radius: 50%; background: var(--w-brand); box-shadow: 0 0 0 4px var(--w-brand-tint); }
+.welcome h1 { margin: 0; color: var(--w-ink); font-size: clamp(40px, 6.4vw, 80px); font-weight: 900; line-height: 1.18; letter-spacing: -.02em; }
+.welcome h1 em { position: relative; display: inline-block; font-style: normal; color: var(--w-brand); }
+.welcome h1 em svg { position: absolute; left: 2%; bottom: -.08em; z-index: -1; width: 96%; height: .3em; overflow: visible; }
+.welcome h1 em path { fill: none; stroke: #d2cbfc; stroke-width: 12; stroke-linecap: round; stroke-dasharray: 210; stroke-dashoffset: 0; }
+.hero-break { display: none; }
+.hero-sub { max-width: 640px; margin: 24px auto 0; color: var(--w-muted); font-size: 18px; line-height: 1.85; }
+
+.hero-stage { position: relative; max-width: 1040px; margin: 10px auto 0; }
+.hero-art { display: block; width: 100%; height: auto; overflow: visible; }
+.hero-ground { fill: #ebe7fd; }
+.hero-ground-inner { fill: #f1eefe; }
+.hero-river { fill: none; stroke: #cfe2ff; stroke-width: 26; stroke-linecap: round; }
+.hero-blocks rect { fill: rgba(255, 255, 255, .55); }
+.hero-roads path { fill: none; stroke: #fff; stroke-width: 10; stroke-linecap: round; }
+.hero-ring circle { stroke-width: 2.5; stroke-dasharray: 8 7; }
+.hero-ring-you circle { fill: rgba(22, 104, 227, .12); stroke: var(--w-blue); }
+.hero-ring-ta circle { fill: rgba(200, 69, 42, .1); stroke: var(--w-coral); }
+.hero-lens { fill: rgba(110, 86, 207, .3); }
+.hero-route { fill: none; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 2 9; }
+.hero-route-you { stroke: var(--w-blue); }
+.hero-route-ta { stroke: var(--w-coral); }
+.hero-chip rect { fill: #fff; stroke: #e2ddf6; stroke-width: 1.5; }
+.hero-chip text { font-size: 14px; font-weight: 500; text-anchor: middle; }
+.hero-chip-you text { fill: var(--w-blue-deep); }
+.hero-chip-ta text { fill: var(--w-coral); }
+.hero-pin circle { stroke: #fff; stroke-width: 5; }
+.hero-pin-you circle { fill: var(--w-blue); }
+.hero-pin-ta circle { fill: var(--w-coral); }
+.hero-pin text { fill: #fff; font-size: 17px; font-weight: 700; text-anchor: middle; }
+.hero-meet-dot { fill: var(--w-violet); stroke: #fff; stroke-width: 4; }
+.hero-bubble rect, .hero-bubble path { fill: #fff; }
+.hero-bubble rect { stroke: #e2dcf7; stroke-width: 1.5; }
+.hero-bubble text { fill: #4b32b3; font-size: 16px; font-weight: 700; text-anchor: middle; }
+.hero-sticker circle { fill: #fff; stroke: #e5e1f6; stroke-width: 1.5; }
+.hero-sticker path { fill: none; stroke: var(--w-blue); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.hero-sticker-1 path { stroke: var(--w-coral); }
+.hero-sticker-3 path { stroke: var(--w-violet); }
+.hero-sticker-5 path { stroke: var(--w-rose); }
+
+.journey-card { --scene-color: var(--w-rose); --scene-tint: var(--w-rose-tint); position: relative; z-index: 2; width: min(760px, 100%); margin: -64px auto 0; padding: 22px 26px 24px; border: 1px solid var(--w-line); border-radius: 28px; background: #fff; text-align: left; box-shadow: 0 30px 60px -38px rgba(var(--w-brand-rgb), .5), 0 2px 8px rgba(15, 35, 70, .05); }
+.journey-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.journey-ask { color: var(--w-muted); font-size: 15px; font-weight: 500; }
+.journey-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.journey-options button { --tab-color: var(--w-rose); --tab-tint: var(--w-rose-tint); display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 8px 14px; border: 1px solid #e3e8f0; border-radius: 999px; background: #fff; color: var(--w-muted); font-size: 14px; font-weight: 500; }
+.journey-options button[data-scene="commute"] { --tab-color: var(--w-blue-deep); --tab-tint: var(--w-blue-tint); }
+.journey-options button[data-scene="isochrone"] { --tab-color: var(--w-violet); --tab-tint: var(--w-violet-tint); }
+.journey-options button:hover { color: var(--tab-color); border-color: var(--tab-color); }
+.journey-options button[aria-pressed="true"] { border-color: var(--tab-color); background: var(--tab-tint); color: var(--tab-color); }
+.journey-copy { min-height: 96px; padding: 18px 2px 16px; }
+.journey-copy p { margin: 0 0 6px; color: var(--w-ink); font-size: 21px; font-weight: 700; line-height: 1.6; }
+.journey-copy-inner > span { color: var(--w-muted); font-size: 15px; line-height: 1.7; }
+.journey-bottom { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 16px; border-top: 1px dashed #e2def0; }
+.journey-hint { color: var(--w-muted); font-size: 14px; }
+.welcome .welcome-primary { min-height: 50px; padding: 12px 24px; font-size: 16px; }
+.welcome-story-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 28px; color: var(--w-brand-deep); font-size: 15px; font-weight: 500; text-decoration: none; }
+.welcome-story-link:hover { color: var(--w-brand); }
+.welcome-story-arrow { display: inline-block; }
+
+/* ===== 通用分区 ===== */
+.welcome-section { max-width: 1160px; margin: 0 auto; padding: 100px 24px 0; scroll-margin-top: 24px; }
+.section-head { max-width: 700px; margin: 0 auto 40px; text-align: center; }
+.section-eyebrow { display: inline-block; margin-bottom: 14px; padding: 6px 14px; border-radius: 999px; background: var(--w-brand-tint); color: var(--w-brand-deep); font-size: 14px; font-weight: 500; line-height: 1.4; }
+.section-head h2 { margin: 0; color: var(--w-ink); font-size: clamp(28px, 3.6vw, 44px); font-weight: 900; line-height: 1.3; letter-spacing: -.01em; }
+.section-head p { margin: 14px 0 0; color: var(--w-muted); font-size: 17px; line-height: 1.8; }
+
+.welcome-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; max-width: 1160px; margin: 80px auto 0; padding: 26px 24px 36px; border-top: 1px solid var(--w-line); color: var(--w-muted); font-size: 14px; }
+.welcome-footer-brand { display: inline-flex; align-items: center; gap: 4px; color: var(--w-ink); font-weight: 700; }
+.welcome-footer-brand .radius-symbol { width: 26px; color: var(--w-brand); transform: scale(.66); transform-origin: left center; }
+.welcome-footer-meta { margin-left: auto; font-size: 13px; }
+
+/* ===== 动效 ===== */
+@keyframes welcome-drop { from { opacity: 0; transform: translateY(-14px); } }
+@keyframes welcome-rise { from { opacity: 0; transform: translateY(20px); } }
+@keyframes welcome-stage { from { opacity: 0; transform: translateY(24px) scale(.97); } }
+@keyframes welcome-underline { from { stroke-dashoffset: 210; } }
+@keyframes welcome-swap { from { opacity: 0; transform: translateY(8px); } }
+@keyframes welcome-pop { 0% { transform: scale(1); } 45% { transform: scale(1.25); } 100% { transform: scale(1); } }
+@keyframes ring-breathe { 50% { transform: scale(1.035); } }
+@keyframes lens-glow { 50% { opacity: .6; } }
+@keyframes pin-bob { 50% { transform: translateY(-6px); } }
+@keyframes bubble-pop { 0% { opacity: 0; transform: translateY(12px) scale(.6); } 70% { opacity: 1; transform: scale(1.06); } 100% { transform: none; } }
+@keyframes bubble-float { 50% { transform: translateY(-5px); } }
+@keyframes route-march { to { stroke-dashoffset: -44; } }
+@keyframes sticker-float { 50% { transform: translateY(-9px) rotate(-5deg); } }
+@keyframes story-bob { 50% { transform: translateY(4px); } }
+.welcome-header { animation: welcome-drop .6s cubic-bezier(.2, .8, .2, 1) backwards; }
+.hero-badge { animation: welcome-rise .7s .08s cubic-bezier(.2, .8, .2, 1) backwards; }
+.welcome h1 { animation: welcome-rise .75s .16s cubic-bezier(.2, .8, .2, 1) backwards; }
+.welcome h1 em path { animation: welcome-underline .9s .85s cubic-bezier(.6, .1, .2, 1) backwards; }
+.hero-sub { animation: welcome-rise .75s .26s cubic-bezier(.2, .8, .2, 1) backwards; }
+.hero-stage { animation: welcome-stage .9s .34s cubic-bezier(.2, .8, .2, 1) backwards; }
+.journey-card { animation: welcome-rise .8s .46s cubic-bezier(.2, .8, .2, 1) backwards; }
+.welcome-story-link { animation: welcome-rise .7s .56s cubic-bezier(.2, .8, .2, 1) backwards; }
+.welcome-story-arrow { animation: story-bob 1.8s ease-in-out infinite; }
+.journey-copy-inner, .welcome-primary-label { animation: welcome-swap .45s cubic-bezier(.2, .8, .2, 1) backwards; }
+.journey-options button[aria-pressed="true"] svg { animation: welcome-pop .45s ease; }
+.hero-ring, .hero-pin, .hero-bubble, .hero-sticker { transform-box: fill-box; transform-origin: center; }
+.hero-ring-you { animation: ring-breathe 6s ease-in-out infinite; }
+.hero-ring-ta { animation: ring-breathe 6s ease-in-out -3s infinite; }
+.hero-lens { animation: lens-glow 6s ease-in-out infinite; }
+.hero-pin-you { animation: pin-bob 3.2s ease-in-out infinite; }
+.hero-pin-ta { animation: pin-bob 3.2s ease-in-out -1.6s infinite; }
+.hero-bubble { animation: bubble-pop .7s 1.1s cubic-bezier(.2, .9, .3, 1.3) backwards, bubble-float 4s 1.9s ease-in-out infinite; }
+.hero-route { animation: route-march 2.4s linear infinite; }
+.hero-sticker-1 { animation: sticker-float 5.2s ease-in-out infinite; }
+.hero-sticker-2 { animation: sticker-float 6s ease-in-out -2s infinite; }
+.hero-sticker-3 { animation: sticker-float 5.6s ease-in-out -1s infinite; }
+.hero-sticker-4 { animation: sticker-float 6.4s ease-in-out -3s infinite; }
+.hero-sticker-5 { animation: sticker-float 5s ease-in-out -2.5s infinite; }
+
+@media (max-width: 960px) {
+  .welcome-nav { display: none; }
+  .welcome-section { padding-top: 80px; }
+}
+@media (max-width: 700px) {
+  .welcome-hero { padding: 0 16px 48px; border-radius: 0 0 32px 32px; }
+  .welcome-header { padding: 16px 4px; }
+  .welcome-brand { font-size: 18px; }
+  .welcome .welcome-skip { min-height: 40px; padding: 8px 16px; font-size: 14px; }
+  .hero-copy { margin-top: 18px; }
+  .hero-break { display: inline; }
+  .welcome h1 { font-size: clamp(38px, 11vw, 52px); line-height: 1.25; }
+  .hero-sub { font-size: 16px; }
+  .hero-stage { margin: 8px -16px 0; overflow: hidden; }
+  .hero-art { width: 150%; margin-left: -25%; }
+  .journey-card { margin-top: -30px; padding: 18px 18px 20px; border-radius: 24px; }
+  .journey-top { flex-direction: column; align-items: stretch; }
+  .journey-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .journey-options button { justify-content: center; padding: 8px 4px; font-size: 14px; white-space: nowrap; }
+  .journey-options button svg { display: none; }
+  .journey-copy { min-height: 118px; }
+  .journey-copy p { font-size: 18px; }
+  .journey-bottom { flex-direction: column; align-items: stretch; }
+  .journey-hint { text-align: center; }
+  .welcome .welcome-primary { justify-content: center; }
+  .welcome-section { padding: 72px 18px 0; }
+  .section-head { margin-bottom: 28px; }
+  .section-head p { font-size: 16px; }
+  .welcome-footer { flex-direction: column; align-items: flex-start; margin-top: 64px; padding-inline: 18px; }
+  .welcome-footer-meta { margin-left: 0; }
+}
+@media (max-width: 360px) {
+  .journey-options button { font-size: 13px; }
+}
+
+/* 滚出屏幕的区域暂停循环动画，回到视口附近再继续（见 src/ui/usePauseOffscreen.ts）。 */
+.welcome [data-offscreen], .welcome [data-offscreen] *, .welcome [data-offscreen] *::before, .welcome [data-offscreen] *::after { animation-play-state: paused !important; }
+/* 减少动态效果：所有入场、循环与过渡都停下，元素停在正常状态（下划线完整显示）。 */
+@media (prefers-reduced-motion: reduce) { .welcome *, .welcome *::before, .welcome *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+@media (forced-colors: active) { .hero-stage, .welcome-hero::before, .welcome-hero::after { display: none; } }

@@ -1,0 +1,345 @@
+{
+  "testedAt": "2026-11-06T20:18:22.485Z",
+  "sources": {
+    "status": "ready",
+    "engine": "GraphHopper",
+    "engineVersion": "11.0",
+    "region": "guangdong",
+    "label": "广东（含香港、澳门）",
+    "dataVersion": "923b0cb44ffcf02d9c31",
+    "bbox": [
+      109.5,
+      20,
+      117.6,
+      25.6
+    ],
+    "osm": {
+      "url": "https://download.geofabrik.de/asia/china/guangdong-latest.osm.pbf",
+      "sha256": "62a95e8dadf1f710355d17755f8fafa77a81a4b54bfcfa56843ac44d90b57603",
+      "downloadedAt": "2026-11-06T17:52:47.513455+00:00",
+      "attribution": "OpenStreetMap contributors / Geofabrik"
+    },
+    "transit": [
+      {
+        "id": "hk-td",
+        "url": "https://static.data.gov.hk/td/pt-headway-en/gtfs.zip",
+        "sha256": "f03742e8ce06b2f508e69e9c7ea4526b35cf02acd2cc1fea65bd54b33878f7cb",
+        "downloadedAt": "2026-11-06T17:52:00.387108+00:00",
+        "attribution": "Hong Kong Transport Department / DATA.GOV.HK",
+        "limitations": [
+          "不含港铁重铁时刻表",
+          "班距数据不是实时车辆预报",
+          "跨境通关时间未建模"
+        ],
+        "stops": 9436,
+        "routes": 2455,
+        "routeTypes": {
+          "0": 6,
+          "3": 2389,
+          "4": 59,
+          "7": 1
+        },
+        "hasRail": false,
+        "serviceStart": "20200101",
+        "serviceEnd": "20991231",
+        "frequencyRows": 76543
+      }
+    ],
+    "limitations": [
+      "静态路网不含实时拥堵",
+      "跨境通关时间与口岸限制未完整建模",
+      "等时圈边界为路网插值，非逐地块可达保证"
+    ]
+  },
+  "results": [
+    {
+      "name": "guangzhou",
+      "query": {
+        "lngLat": [
+          113.2644,
+          23.1291
+        ],
+        "mode": "walking",
+        "minutes": 15,
+        "direction": "arrive"
+      },
+      "elapsedMs": 115,
+      "areaSqKm": 1.8894,
+      "features": 1,
+      "file": "guangzhou-walking-arrive.geojson"
+    },
+    {
+      "name": "guangzhou",
+      "query": {
+        "lngLat": [
+          113.2644,
+          23.1291
+        ],
+        "mode": "cycling",
+        "minutes": 15,
+        "direction": "arrive"
+      },
+      "elapsedMs": 800,
+      "areaSqKm": 18.5252,
+      "features": 1,
+      "file": "guangzhou-cycling-arrive.geojson"
+    },
+    {
+      "name": "guangzhou",
+      "query": {
+        "lngLat": [
+          113.2644,
+          23.1291
+        ],
+        "mode": "driving",
+        "minutes": 15,
+        "direction": "arrive"
+      },
+      "elapsedMs": 1179,
+      "areaSqKm": 425.2016,
+      "features": 1,
+      "file": "guangzhou-driving-arrive.geojson"
+    },
+    {
+      "name": "shenzhen",
+      "query": {
+        "lngLat": [
+          114.0579,
+          22.5431
+        ],
+        "mode": "walking",
+        "minutes": 15,
+        "direction": "arrive"
+      },
+      "elapsedMs": 18,
+      "areaSqKm": 2.3826,
+      "features": 1,
+      "file": "shenzhen-walking-arrive.geojson"
+    },
+    {
+      "name": "shenzhen",
+      "query": {
+        "lngLat": [
+          114.0579,
+          22.5431
+        ],
+        "mode": "cycling",
+        "minutes": 15,
+        "direction": "arrive"
+      },
+      "elapsedMs": 187,
+      "areaSqKm": 19.348,
+      "features": 1,
+      "file": "shenzhen-cycling-arrive.geojson"
+    },
+    {
+      "name": "shenzhen",
+      "query": {
+        "lngLat": [
+          114.0579,
+          22.5431
+        ],
+        "mode": "driving",
+        "minutes": 15,
+        "direction": "arrive"
+      },
+      "elapsedMs": 889,
+      "areaSqKm": 335.8856,
+      "features": 1,
+      "file": "shenzhen-driving-arrive.geojson"
+    },
+    {
+      "name": "hong-kong",
+      "query": {
+        "lngLat": [
+          114.1722,
+          22.2988
+        ],
+        "mode": "walking",
+        "minutes": 15,
+        "direction": "arrive"
+      },
+      "elapsedMs": 53,
+      "areaSqKm": 2.1688,
+      "features": 1,
+      "file": "hong-kong-walking-arrive.geojson"
+    },
+    {
+      "name": "hong-kong",
+      "query": {
+        "lngLat": [
+          114.1722,
+          22.2988
+        ],
+        "mode": "cycling",
+        "minutes": 15,
+        "direction": "arrive"
+      },
+      "elapsedMs": 303,
+      "areaSqKm": 12.3464,
+      "features": 1,
+      "file": "hong-kong-cycling-arrive.geojson"
+    },
+    {
+      "name": "hong-kong",
+      "query": {
+        "lngLat": [
+          114.1722,
+          22.2988
+        ],
+        "mode": "driving",
+        "minutes": 15,
+        "direction": "arrive"
+      },
+      "elapsedMs": 603,
+      "areaSqKm": 284.8548,
+      "features": 1,
+      "file": "hong-kong-driving-arrive.geojson"
+    },
+    {
+      "name": "macau",
+      "query": {
+        "lngLat": [
+          113.539,
+          22.194
+        ],
+        "mode": "walking",
+        "minutes": 15,
+        "direction": "arrive"
+      },
+      "elapsedMs": 143,
+      "areaSqKm": 2.4208,
+      "features": 1,
+      "file": "macau-walking-arrive.geojson"
+    },
+    {
+      "name": "macau",
+      "query": {
+        "lngLat": [
+          113.539,
+          22.194
+        ],
+        "mode": "cycling",
+        "minutes": 15,
+        "direction": "arrive"
+      },
+      "elapsedMs": 67,
+      "areaSqKm": 11.5506,
+      "features": 1,
+      "file": "macau-cycling-arrive.geojson"
+    },
+    {
+      "name": "macau",
+      "query": {
+        "lngLat": [
+          113.539,
+          22.194
+        ],
+        "mode": "driving",
+        "minutes": 15,
+        "direction": "arrive"
+      },
+      "elapsedMs": 271,
+      "areaSqKm": 177.6831,
+      "features": 1,
+      "file": "macau-driving-arrive.geojson"
+    },
+    {
+      "name": "hong-kong-transit",
+      "query": {
+        "lngLat": [
+          114.1722,
+          22.2988
+        ],
+        "mode": "transit-walking",
+        "minutes": 30,
+        "direction": "depart",
+        "dateTime": "2026-11-07T08:00:00+08:00"
+      },
+      "elapsedMs": 1568,
+      "areaSqKm": 19.5167,
+      "features": 1,
+      "file": "hong-kong-transit-transit-walking-depart.geojson"
+    },
+    {
+      "name": "hong-kong-transit",
+      "query": {
+        "lngLat": [
+          114.1722,
+          22.2988
+        ],
+        "mode": "transit-walking",
+        "minutes": 30,
+        "direction": "arrive",
+        "dateTime": "2026-11-07T08:00:00+08:00"
+      },
+      "elapsedMs": 2654,
+      "areaSqKm": 25.5396,
+      "features": 1,
+      "file": "hong-kong-transit-transit-walking-arrive.geojson"
+    }
+  ],
+  "negativeCases": [
+    {
+      "name": "invalid-minutes",
+      "query": {
+        "name": "guangzhou",
+        "lngLat": [
+          113.2644,
+          23.1291
+        ],
+        "mode": "walking",
+        "minutes": 0,
+        "direction": "arrive"
+      },
+      "status": 400,
+      "code": "INVALID_REQUEST",
+      "message": "时间须为 1–60 整数分钟。"
+    },
+    {
+      "name": "expired-service",
+      "query": {
+        "lngLat": [
+          114.1722,
+          22.2988
+        ],
+        "mode": "transit-walking",
+        "minutes": 30,
+        "dateTime": "2100-01-02T08:00:00+08:00"
+      },
+      "status": 422,
+      "code": "DATA_UNAVAILABLE",
+      "message": "查询日期没有已导入的公交服务；请更新 GTFS 或改选服务日期。"
+    },
+    {
+      "name": "shenzhen-transit-gap",
+      "query": {
+        "lngLat": [
+          114.0579,
+          22.5431
+        ],
+        "mode": "transit-walking",
+        "minutes": 30,
+        "dateTime": "2026-11-07T08:00:00+08:00"
+      },
+      "status": 422,
+      "code": "DATA_UNAVAILABLE",
+      "message": "附近 2.5 公里没有已导入 GTFS 的站点；当地公交数据尚未覆盖。"
+    },
+    {
+      "name": "macau-transit-gap",
+      "query": {
+        "lngLat": [
+          113.539,
+          22.194
+        ],
+        "mode": "transit-walking",
+        "minutes": 30,
+        "dateTime": "2026-11-07T08:00:00+08:00"
+      },
+      "status": 422,
+      "code": "DATA_UNAVAILABLE",
+      "message": "附近 2.5 公里没有已导入 GTFS 的站点；当地公交数据尚未覆盖。"
+    }
+  ]
+}
