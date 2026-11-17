@@ -1,9 +1,9 @@
 .results-panel {
-  --results-ink: #17233b;
-  --results-muted: #687389;
-  --results-line: #d8e0eb;
+  --results-ink: var(--c-heading);
+  --results-muted: var(--c-muted);
+  --results-line: var(--c-line);
   color: var(--results-ink);
-  font: 13px/1.45 "Aptos", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font: 16px/1.45 "Aptos", "Noto Sans SC", "Microsoft YaHei", sans-serif;
 }
 
 .results-panel.overlay {
@@ -14,10 +14,10 @@
   width: 264px;
   max-height: calc(100% - 96px);
   overflow: hidden;
-  border: 1px solid rgba(190, 201, 216, .96);
+  border: 1px solid var(--c-line-strong);
   border-radius: 13px;
-  background: rgba(255, 255, 255, .96);
-  box-shadow: 0 12px 30px rgba(23, 35, 59, .18);
+  background: color-mix(in srgb, var(--c-surface) 96%, transparent);
+  box-shadow: 0 12px 30px rgba(var(--c-shadow), .18);
   backdrop-filter: blur(8px);
 }
 
@@ -29,8 +29,8 @@
 .results-panel.inline {
   flex: none;
   padding: 14px 16px;
-  border-top: 1px solid #ccd5e2;
-  background: #fff;
+  border-top: 1px solid var(--c-line);
+  background: var(--c-surface);
 }
 
 .results-panel-header {
@@ -60,7 +60,7 @@
   margin: 0;
   overflow: hidden;
   color: var(--results-ink);
-  font: 700 11px/1.2 "Bahnschrift", "Noto Sans SC", sans-serif;
+  font: 700 15px/1.2 "Bahnschrift", "Noto Sans SC", sans-serif;
   letter-spacing: .07em;
   text-overflow: ellipsis;
   text-transform: uppercase;
@@ -69,13 +69,13 @@
 
 .results-panel.has-empty-conclusion .results-panel-heading h2 {
   color: #9f2f25;
-  font-size: 12px;
+  font-size: 16px;
   letter-spacing: .015em;
   text-transform: none;
 }
 
 .results-panel.is-collapsed .results-panel-heading h2 {
-  font: 700 12px/1.25 "Aptos", "Noto Sans SC", sans-serif;
+  font: 700 16px/1.25 "Aptos", "Noto Sans SC", sans-serif;
   letter-spacing: 0;
   text-transform: none;
 }
@@ -85,7 +85,7 @@
   align-items: center;
   gap: 4px;
   color: var(--results-muted);
-  font-size: 9px;
+  font-size: 14px;
   white-space: nowrap;
 }
 
@@ -94,7 +94,7 @@
   height: 8px;
   border: 2px solid #fff;
   border-radius: 50%;
-  box-shadow: 0 0 0 1px #5138c9;
+  box-shadow: 0 0 0 1px var(--c-result);
 }
 
 .results-panel-actions { display: flex; flex: none; align-items: center; gap: 2px; }
@@ -107,9 +107,9 @@
   border: none;
   border-radius: 7px;
   background: transparent;
-  color: #536078;
+  color: var(--c-muted);
   cursor: pointer;
-  font: 650 10px/1 "Aptos", "Noto Sans SC", sans-serif;
+  font: 650 14px/1 "Aptos", "Noto Sans SC", sans-serif;
 }
 
 .results-export { gap: 4px; padding: 0 7px; }
@@ -122,14 +122,14 @@
   stroke-linejoin: round;
   stroke-width: 1.5;
 }
-.results-collapse { width: 30px; padding: 0; font-size: 12px; }
+.results-collapse { width: 30px; padding: 0; font-size: 16px; }
 .results-export:hover,
-.results-collapse:hover { background: #edf1f6; color: #33248f; }
+.results-collapse:hover { background: var(--c-surface-sunk); color: var(--c-brand-strong); }
 
 .results-export:focus-visible,
 .results-collapse:focus-visible {
-  outline: 3px solid rgba(81, 56, 201, .22);
-  outline-offset: 1px;
+  outline: 2px solid var(--c-focus);
+  outline-offset: 2px;
 }
 
 .results-panel-body { padding: 0 13px 9px; }
@@ -141,7 +141,7 @@
   min-height: 38px;
   align-items: center;
   gap: 7px;
-  border-top: 1px solid #edf0f4;
+  border-top: 1px solid var(--c-line);
 }
 
 .result-item.is-empty {
@@ -184,19 +184,19 @@
 }
 .empty-result-copy strong {
   color: #8f251d;
-  font-size: 12px;
+  font-size: 16px;
   line-height: 1.25;
   text-align: right;
 }
 .empty-result-time {
   color: #6e3a35;
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 750;
 }
 .empty-result-copy small {
   grid-column: 1 / -1;
   color: #8b514b;
-  font-size: 9px;
+  font-size: 14px;
   line-height: 1.35;
 }
 
@@ -208,23 +208,24 @@
   transform: rotate(-6deg);
 }
 
-.result-item b { font-size: 11px; }
+.result-item b { font-size: 15px; }
 .result-item strong {
-  color: #33248f;
-  font: 750 12px/1 "Bahnschrift", "Noto Sans SC", sans-serif;
+  color: var(--c-result);
+  font: 750 16px/1 "Bahnschrift", "Noto Sans SC", sans-serif;
   white-space: nowrap;
 }
 
 .result-muted,
 .result-warning {
   max-width: 128px;
-  font-size: 9px;
+  font-size: 14px;
   line-height: 1.25;
   text-align: right;
 }
-.result-muted { color: #8791a2; }
-.result-warning { color: #9b5a19; }
-.result-hint { margin: 8px 0 4px; color: #7f8a9c; font-size: 11px; }
+.result-muted { color: var(--c-muted); }
+/* 数据不全提示：暖砖红（不用黄/琥珀），白底对比度约 6.1:1 */
+.result-warning { color: #9c4a2e; }
+.result-hint { margin: 8px 0 4px; color: var(--c-muted); font-size: 15px; }
 
 @media (prefers-reduced-motion: reduce) {
   .results-panel { scroll-behavior: auto; }
@@ -234,12 +235,12 @@
   .results-panel.inline .results-panel-header { min-height: 44px; }
   .results-export,
   .results-collapse { min-height: 44px; }
-  .results-export { padding-inline: 10px; font-size: 12px; }
+  .results-export { padding-inline: 10px; font-size: 16px; }
   .result-item { min-height: 44px; }
-  .result-item b { font-size: 12px; }
-  .result-item strong { font-size: 13px; }
+  .result-item b { font-size: 16px; }
+  .result-item strong { font-size: 16px; }
   .result-item.is-empty { padding-block: 11px; }
-  .empty-result-copy strong { font-size: 13px; }
+  .empty-result-copy strong { font-size: 16px; }
   .empty-result-time,
-  .empty-result-copy small { font-size: 11px; }
+  .empty-result-copy small { font-size: 15px; }
 }

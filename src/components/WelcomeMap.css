@@ -1,0 +1,76 @@
+/* 首页的真实地图演示：亮色街道底图，白色字卡浮在地图上。颜色变量来自 Welcome.css 的 .welcome。 */
+.welcome-real-figure { display: block; margin: 0; }
+.welcome-map-frame { position: relative; height: clamp(460px, 46vw, 580px); overflow: hidden; isolation: isolate; border: 1px solid var(--w-line); border-radius: 32px; background: #f2efe9; box-shadow: 0 40px 80px -52px rgba(var(--w-brand-rgb), .55), 0 2px 8px rgba(15, 35, 70, .05); }
+.welcome-real-map { position: absolute; inset: 0; }
+.welcome-real-map .mapboxgl-ctrl-attrib { font: 12px/1.5 system-ui, sans-serif; }
+
+.welcome-cinematic-caption { position: absolute; z-index: 1; top: 18px; left: 18px; max-width: min(430px, calc(100% - 36px)); padding: 18px 20px; border-radius: 22px; background: rgba(255, 255, 255, .96); box-shadow: 0 22px 44px -28px rgba(15, 35, 70, .55); pointer-events: none; }
+.welcome-scene-kicker { display: flex; align-items: center; gap: 8px; color: var(--w-muted); font-size: 14px; font-weight: 500; }
+.welcome-status-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--w-brand); }
+.welcome-cinematic-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; color: var(--w-muted); font-size: 13px; font-weight: 500; }
+.welcome-cinematic-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.welcome-cinematic-legend span::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--w-blue); }
+.welcome-cinematic-legend span:nth-child(2)::before { background: var(--w-coral); }
+.welcome-cinematic-legend span:nth-child(3)::before { background: var(--w-violet); }
+.welcome-cinematic-copy { margin-top: 12px; color: var(--w-ink); font-size: clamp(20px, 2vw, 26px); font-weight: 700; line-height: 1.6; }
+.welcome-cinematic-copy mark { padding: 0 8px; border-radius: 8px; white-space: nowrap; }
+.welcome-cinematic-copy .ink-place { background: var(--w-blue-tint); color: var(--w-blue-deep); }
+.welcome-cinematic-copy .ink-destination { background: var(--w-coral-tint); color: #a8381f; }
+.welcome-cinematic-copy .ink-route { background: #eef2f8; color: var(--w-ink); }
+.welcome-cinematic-copy .ink-area { background: var(--w-violet-tint); color: #4b32b3; }
+
+.welcome-map-readout { position: absolute; z-index: 1; left: 18px; bottom: 34px; max-width: calc(100% - 140px); padding: 12px 16px; border-radius: 18px; background: rgba(255, 255, 255, .96); box-shadow: 0 18px 36px -24px rgba(15, 35, 70, .55); pointer-events: none; }
+.welcome-map-readout > span { display: block; margin-bottom: 2px; color: var(--w-muted); font-size: 13px; }
+.welcome-map-readout strong { display: block; color: var(--w-ink); font-size: 22px; font-weight: 900; line-height: 1.4; }
+.welcome-map-readout small { display: block; color: var(--w-muted); font-size: 13px; font-weight: 500; }
+.welcome-scene-number { position: absolute; z-index: 1; right: 18px; bottom: 34px; padding: 6px 14px; border-radius: 999px; background: rgba(255, 255, 255, .96); color: var(--w-ink); font-size: 16px; font-weight: 900; box-shadow: 0 12px 24px -18px rgba(15, 35, 70, .6); }
+.welcome-scene-number span { color: var(--w-muted); font-size: 12px; font-weight: 500; }
+
+.welcome-place { display: grid; place-items: center; width: 34px; height: 34px; pointer-events: none; }
+.welcome-place > span { display: grid; place-items: center; width: 34px; height: 34px; border: 3px solid #fff; border-radius: 50%; background: var(--place-color); color: #fff; font-size: 13px; font-weight: 700; box-shadow: 0 8px 16px -8px rgba(15, 35, 70, .7); }
+.welcome-place > strong { position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); white-space: nowrap; padding: 6px 12px; border-radius: 999px; background: #fff; color: var(--place-color); font-size: 14px; font-weight: 700; box-shadow: 0 10px 20px -12px rgba(15, 35, 70, .6); }
+.welcome-map-scene-1 .welcome-place-1 > strong { bottom: auto; top: calc(100% + 10px); }
+.welcome-map-scene-0 .welcome-place-1, .welcome-map-scene-1 .welcome-place-0 { visibility: hidden; }
+.welcome-map-scene-3 .welcome-place > strong { visibility: hidden; }
+
+.welcome-map-status { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 32px; background: var(--w-sky); text-align: center; }
+.welcome-map-status strong { color: var(--w-ink); font-size: 22px; font-weight: 700; }
+.welcome-map-status p { margin: 0; color: var(--w-muted); font-size: 15px; line-height: 1.8; }
+.welcome .welcome-map-status button, .welcome .welcome-map-note button { min-height: 40px; margin-top: 8px; padding: 6px 18px; border: 1px solid var(--w-brand-line); border-radius: 999px; background: #fff; color: var(--w-brand-deep); font-size: 14px; font-weight: 500; }
+.welcome .welcome-map-note button { margin: 0 0 0 8px; min-height: 34px; padding: 4px 14px; }
+
+.welcome-map-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto auto; align-items: stretch; gap: 10px; margin-top: 18px; }
+.welcome .welcome-map-steps button { position: relative; display: flex; align-items: center; gap: 8px; min-height: 50px; padding: 8px 14px; overflow: hidden; border: 1px solid var(--w-line); border-radius: 18px; background: #fff; color: var(--w-muted); font-size: 15px; font-weight: 500; text-align: left; white-space: nowrap; }
+.welcome-map-steps .welcome-step > span { display: grid; place-items: center; flex: none; width: 24px; height: 24px; border-radius: 50%; background: #eef2f8; color: var(--w-muted); font-size: 12px; font-weight: 700; transition: background-color .3s, color .3s; }
+.welcome .welcome-map-steps .welcome-step[aria-pressed="true"] { border-color: var(--w-brand-line); background: var(--w-brand-tint); color: var(--w-brand-deep); }
+.welcome-map-steps .welcome-step[aria-pressed="true"] > span { background: var(--w-brand); color: #fff; }
+.welcome-map-steps .welcome-step i { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--w-brand); transform-origin: left; }
+.welcome .welcome-map-steps :is(.welcome-map-play, .welcome-map-replay) { justify-content: center; color: var(--w-brand-deep); }
+.welcome .welcome-map-steps button:hover:not(:disabled) { border-color: var(--w-brand-line); color: var(--w-brand-deep); }
+.welcome-map-steps button:disabled { opacity: .5; cursor: default; }
+.welcome-map-note { margin: 14px 0 0; color: var(--w-muted); font-size: 14px; line-height: 1.8; text-align: center; }
+.welcome-real-figure .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+
+@keyframes story-ping { from { box-shadow: 0 0 0 0 rgba(var(--w-brand-rgb), .5); } to { box-shadow: 0 0 0 9px rgba(var(--w-brand-rgb), 0); } }
+@keyframes story-caption { from { opacity: 0; transform: translateY(6px); } }
+.welcome-map-frame[data-playing="true"] .welcome-status-dot { animation: story-ping 1.8s ease-out infinite; }
+.welcome-cinematic-copy > span { display: inline-block; animation: story-caption .5s cubic-bezier(.2, .8, .2, 1) backwards; }
+.welcome-cinematic-copy > span + br + span { animation-delay: .12s; }
+
+@media (max-width: 1000px) {
+  .welcome-map-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .welcome-map-steps :is(.welcome-map-play, .welcome-map-replay) { grid-column: span 2; }
+}
+@media (max-width: 700px) {
+  .welcome-map-frame { height: 520px; border-radius: 24px; }
+  .welcome-cinematic-caption { top: 12px; left: 12px; max-width: calc(100% - 24px); padding: 14px 16px; border-radius: 18px; }
+  .welcome-scene-kicker, .welcome-cinematic-legend { font-size: 12px; }
+  .welcome-cinematic-copy { font-size: 18px; }
+  .welcome-map-readout { left: 12px; bottom: 30px; padding: 10px 12px; max-width: calc(100% - 110px); }
+  .welcome-map-readout strong { font-size: 18px; }
+  .welcome-scene-number { right: 12px; bottom: 30px; }
+  .welcome-map-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .welcome-map-steps :is(.welcome-map-play, .welcome-map-replay) { grid-column: auto; }
+  .welcome .welcome-map-steps button { min-height: 46px; padding: 6px 12px; font-size: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .welcome-status-dot, .welcome-cinematic-copy > span, .welcome-map-steps .welcome-step i { animation: none !important; transition: none !important; } }

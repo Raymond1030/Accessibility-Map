@@ -21,10 +21,10 @@
   gap: 10px;
   padding: 8px 12px;
   border-radius: 10px;
-  background: rgba(23, 35, 59, .94);
+  background: color-mix(in srgb, var(--c-ink) 94%, transparent);
   color: #fff;
-  font: 13px system-ui, -apple-system, "PingFang SC", sans-serif;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, .25);
+  font: 16px system-ui, -apple-system, "PingFang SC", sans-serif;
+  box-shadow: 0 2px 12px rgba(var(--c-shadow), .25);
   white-space: nowrap;
 }
 
@@ -36,7 +36,7 @@
   background: transparent;
   color: #fff;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .locate-btn {
@@ -46,16 +46,69 @@
   z-index: 200;
   width: 44px;
   height: 44px;
-  border: 1px solid #cbd4e1;
+  border: 1px solid var(--c-line-strong);
   border-radius: 12px;
-  background: #fff;
-  color: #17233b;
+  background: var(--c-surface);
+  color: var(--c-brand-strong);
+  display: grid;
+  place-items: center;
+  padding: 0;
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
-  box-shadow: 0 5px 15px rgba(23, 35, 59, .2);
+  box-shadow: 0 5px 15px rgba(var(--c-shadow), .2);
 }
-.locate-btn:disabled { color: #9ca3af; cursor: default; }
+.locate-btn svg { width: 22px; height: 22px; }
+.locate-btn:disabled { color: var(--c-faint); cursor: default; }
+/* 定位中：按钮虽然禁用，图标保持品牌色，中心点呼吸闪烁表示「正在找」。
+   选择器多带一层 .app，压过 App.css 里禁用态的浅灰；减弱动效时 App.css 会统一关掉动画。 */
+.app .map-view-wrap .locate-btn.is-locating { color: var(--c-brand); }
+.locate-btn.is-locating .locate-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: locate-pulse 1s ease-in-out infinite;
+}
+@keyframes locate-pulse { 50% { opacity: .3; transform: scale(.55); } }
+
+/* 「租房通勤」「生活探索」的地点标记（ui/placeMarker）：与「多点见面」出发地标记同一造型——
+   白底圆角方块、不描边、两层柔和投影；彩色图标或一个字，编号放在右上角的识别色小圆牌里。
+   位置由 Mapbox 写在元素自己的 transform 上，这里不能再用 transform 做动效。 */
+.place-marker {
+  --marker-tone: var(--c-explore);
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 1px 1.5px rgba(var(--c-shadow), .32), 0 3px 8px rgba(var(--c-shadow), .22);
+  cursor: pointer;
+}
+.place-marker.is-brand { --marker-tone: var(--c-brand-strong); }
+.place-marker.is-result { --marker-tone: var(--c-result); }
+.place-marker.is-large { width: 34px; height: 34px; border-radius: 10px; }
+.place-marker > img { width: 20px; height: 20px; pointer-events: none; }
+.place-marker.is-large > img { width: 23px; height: 23px; }
+.place-marker-text { color: var(--marker-tone); font: 750 15px/1 var(--editorial-sans); }
+.place-marker.is-large .place-marker-text { font-size: 17px; }
+.place-marker-chip {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  display: grid;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  place-items: center;
+  border-radius: 99px;
+  background: var(--marker-tone);
+  color: #fff;
+  font: 750 12px/1 "Bahnschrift", var(--editorial-sans);
+  box-shadow: 0 1px 2px rgba(var(--c-shadow), .3);
+}
 
 .locate-msg {
   position: absolute;
@@ -67,10 +120,10 @@
   gap: 10px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: rgba(23, 35, 59, .95);
+  background: color-mix(in srgb, var(--c-ink) 95%, transparent);
   color: #fff;
-  font: 13px/1.5 system-ui, -apple-system, "PingFang SC", sans-serif;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, .25);
+  font: 16px/1.5 system-ui, -apple-system, "PingFang SC", sans-serif;
+  box-shadow: 0 2px 12px rgba(var(--c-shadow), .25);
   max-width: min(360px, calc(100% - 28px));
 }
 
@@ -83,16 +136,20 @@
   background: transparent;
   color: #fff;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 16px;
 }
 
+/* 深色提示条上的按钮：全局焦点色与深底对比不足，改为白色焦点框 */
+.picking-hint button:focus-visible,
+.locate-msg button:focus-visible { outline-color: #fff; }
+
 @media (max-width: 768px) {
-  /* 抽屉折叠时露出 88px，定位按钮要抬到它上面 */
-  .locate-btn { top: auto; bottom: 104px; }
+  /* 抽屉折叠时露出 88px，右下 ⓘ 版权按钮抬到它上面（见 App.css），定位按钮再往上让开 ⓘ */
+  .locate-btn { top: auto; bottom: 134px; }
   .locate-msg {
     top: auto;
     right: 12px;
-    bottom: 160px;
+    bottom: 190px;
     left: 12px;
     max-width: none;
   }

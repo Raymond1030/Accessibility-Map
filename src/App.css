@@ -1,22 +1,326 @@
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }
-.app {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background: #eef2f7;
-  color: #17233b;
+:root {
+  --editorial-serif: var(--editorial-sans);
+  --editorial-sans: "Microsoft YaHei", "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* 中性色：白底，浅紫衬底，不用灰底。正文和次要文字在这些底色上都满足 WCAG AA（≥4.5:1）。 */
+  --c-page: #ffffff;
+  --c-paper: #ffffff;
+  --c-surface: #ffffff;
+  --c-surface-soft: #f8f7ff;
+  --c-surface-sunk: #f1effe;
+  --c-line: #e5e8ee;
+  --c-line-strong: #d3d8e0;
+  --c-ink: #1f2329;
+  --c-heading: #1f2329;
+  --c-muted: #5f6672;
+  --c-faint: #8f959e; /* 只用于图标、箭头等装饰，不用于正文 */
+
+  /* 靛紫：主按钮、步骤编号、选中态与链接。它和街道底图的蓝（水面）、绿（山地）、黄（道路）都不撞色，
+     又和多点结果的紫色（--c-result）呼应。白字在 --c-brand 上 6.0:1；浅紫底上的文字用 --c-brand-strong（7.6:1）。 */
+  --c-brand: #5b4bdb;
+  --c-brand-rgb: 91, 75, 219; /* rgba(var(--c-brand-rgb), α)：按钮阴影、输入框焦点光晕 */
+  --c-brand-strong: #4433b8;
+  --c-brand-hover: #4d3dcc;
+  --c-brand-tint: #efedff;
+  --c-brand-line: #c4bcfa;
+
+  /* 首页三张场景卡的颜色：深蓝＝租房通勤，蓝紫＝多点见面，玫瑰＝生活探索。全站文字不用绿色和黄色。 */
+  --c-commute: #2d5f92;
+  --c-commute-tint: #eaf2fb;
+  --c-meet: #5f53a6;
+  --c-meet-tint: #f1effc;
+  --c-explore: #a8476a;
+  --c-explore-tint: #fcedf3;
+  --c-headline: linear-gradient(100deg, #6a55b0 0%, #b0476a 85%);
+
+  /* 地图结果与状态 */
+  --c-result: #5138c9;
+  --c-danger: #c8322b;
+  --c-danger-tint: #fff1f0;
+  --c-danger-line: #f5c2bf;
+  --c-focus: #5b4bdb;
+  --c-shadow: 15, 35, 70; /* rgba(var(--c-shadow), α) */
+
+  /* 旧变量名保留为别名 */
+  --editorial-ink: var(--c-ink);
+  --editorial-blue: var(--c-brand);
+  --editorial-plum: var(--c-meet);
+  --editorial-rust: var(--c-explore);
+  --editorial-muted: var(--c-muted);
+  --editorial-line: var(--c-line);
+  --surface: var(--c-surface);
+  --surface-soft: var(--c-surface-soft);
 }
-.app-body { flex: 1; display: flex; min-height: 0; }
-.fatal {
-  background: #fef2f2; color: #991b1b; padding: 8px 12px;
-  border-bottom: 1px solid #fecaca;
-  font: 13px system-ui, -apple-system, "PingFang SC", sans-serif;
+body { color: var(--c-ink); background: var(--c-paper); font-family: var(--editorial-sans); }
+button, input, select, summary { -webkit-tap-highlight-color: transparent; }
+:is(button, a, input, select, summary):focus-visible { outline: 2px solid var(--c-focus); outline-offset: 3px; }
+
+/* 滚动入场（配合 src/ui/useReveal.ts）：只在根元素加上 reveal-ready 后才先隐藏，
+   用 animation 而不是 transition，避免覆盖元素自己的悬停过渡；减少动态效果时不隐藏也不动画。 */
+@keyframes reveal-in { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+@media screen and (prefers-reduced-motion: no-preference) {
+  .reveal-ready [data-reveal]:not([data-revealed]) { opacity: 0; }
+  .reveal-ready [data-reveal][data-revealed] { animation: reveal-in .85s cubic-bezier(.2, .8, .2, 1) var(--reveal-delay, 0s) backwards; }
 }
 
-@media (max-width: 768px) {
-  /* 地图占满整个 app-body，抽屉用 fixed 浮在它上面。
-     侧栏不再参与 flex 排布，所以这里不用改 flex-direction。 */
-  .app-body { position: relative; }
-  .map-view-wrap { position: absolute; inset: 0; }
+/* 品牌标识：首页与工作区共用的两个相交半径 */
+.radius-symbol { position: relative; display: block; flex: none; width: 36px; height: 39px; color: var(--c-brand-strong); }
+.radius-symbol i { position: absolute; left: 0; top: 3px; width: 27px; height: 33px; border: 1.6px solid currentColor; border-radius: 50%; transform: rotate(30deg); }
+.radius-symbol i + i { left: 9px; transform: rotate(-30deg); }
+.radius-symbol::after { content: ''; position: absolute; width: 5px; height: 5px; border-radius: 50%; background: var(--c-explore); top: 17px; left: 15px; }
+
+/* ===== 工作区：地图铺满窗口，场景切换栏和控制面板悬浮在地图上 ===== */
+.app { --panel-w: 392px; --gap: 12px; --logo-room: 41px; --scene-accent: var(--c-brand); --scene-tint: var(--c-brand-tint); position: relative; height: 100%; overflow: hidden; background: #f2efe9; color: var(--c-ink); font: 15px/1.6 var(--editorial-sans); }
+.app-body { position: absolute; inset: 0; }
+.app :is(button, input, select) { font-family: inherit; }
+.app button { transition: color .2s, background-color .2s, border-color .2s, box-shadow .2s; }
+.app button:disabled { cursor: not-allowed; }
+.fatal { position: absolute; z-index: 40; top: 70px; left: 50%; translate: -50% 0; max-width: calc(100% - 24px); padding: 10px 16px; border: 1px solid var(--c-danger-line); border-radius: 12px; background: var(--c-danger-tint); color: var(--c-danger); font-size: 14px; box-shadow: 0 10px 26px -14px rgba(var(--c-shadow), .35); }
+
+.app .map-view-wrap { position: absolute; inset: 0; z-index: 0; border: 0; border-radius: 0; background: #f2efe9; }
+
+/* 面板底部给 Mapbox 标识留出 --logo-room：标识固定在地图最左下角，按 Mapbox 的使用条款不能被遮住 */
+.workspace-panel { position: absolute; z-index: 20; top: var(--gap); left: var(--gap); max-height: calc(100% - var(--gap) - var(--logo-room)); width: var(--panel-w); display: flex; flex-direction: column; overflow: hidden; background: var(--c-surface); border: 1px solid rgba(var(--c-shadow), .08); border-radius: 20px; box-shadow: 0 16px 40px -18px rgba(var(--c-shadow), .35), 0 2px 6px rgba(var(--c-shadow), .06); }
+.panel-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px 4px 16px; }
+.app .app-brand { display: flex; align-items: center; gap: 6px; padding: 4px 6px 4px 0; border: 0; border-radius: 10px; background: transparent; color: var(--c-brand); cursor: pointer; }
+.app .app-brand .radius-symbol { width: 28px; transform: scale(.74); transform-origin: left center; color: var(--c-brand); }
+.app .app-brand strong { color: var(--c-heading); font: 600 17px/1.4 var(--editorial-sans); letter-spacing: .02em; }
+.app .intro-link { padding: 5px 12px; border: 1px solid var(--c-line); border-radius: 999px; background: var(--c-surface); color: var(--c-muted); font-size: 13px; cursor: pointer; }
+.app .intro-link:hover { border-color: var(--c-brand-line); color: var(--c-brand-strong); }
+.panel-head-actions { display: flex; align-items: center; gap: 6px; }
+/* 收起面板 / 展开面板：收起后左上角只留一个白色胶囊按钮，样式与场景切换栏一致 */
+.app .panel-collapse { display: inline-flex; align-items: center; gap: 2px; padding: 5px 11px 5px 7px; border: 1px solid var(--c-line); border-radius: 999px; background: var(--c-surface); color: var(--c-muted); font-size: 13px; cursor: pointer; }
+.app .panel-collapse svg { width: 16px; height: 16px; }
+.app .panel-collapse:hover { border-color: var(--c-brand-line); background: var(--c-brand-tint); color: var(--c-brand-strong); }
+.app .panel-reopen { position: absolute; z-index: 25; top: var(--gap); left: var(--gap); display: inline-flex; align-items: center; gap: 6px; min-height: 48px; padding: 4px 16px 4px 12px; border: 1px solid rgba(var(--c-shadow), .08); border-radius: 999px; background: rgba(255, 255, 255, .97); color: var(--c-heading); font-size: 14px; font-weight: 600; box-shadow: 0 12px 30px -14px rgba(var(--c-shadow), .4), 0 2px 6px rgba(var(--c-shadow), .06); cursor: pointer; animation: ui-panel .45s .18s cubic-bezier(.2, .8, .2, 1) backwards; }
+.app .panel-reopen .radius-symbol { width: 24px; height: 26px; transform: scale(.64); transform-origin: left top; color: var(--c-brand); }
+.app .panel-reopen svg { color: var(--c-brand); transition: transform .2s cubic-bezier(.2, .8, .2, 1); }
+.app .panel-reopen:hover { background: var(--c-brand-tint); color: var(--c-brand-strong); }
+.app .panel-reopen:hover svg { transform: translateX(2px); }
+
+/* 场景切换栏放在窗口正中；窗口较窄、面板又展开时，向右让到刚好不压住面板（--nav-half 由 App.tsx 量出） */
+.app .scene-switch { position: absolute; z-index: 30; top: var(--gap); left: max(50%, calc(var(--panel-w) + var(--gap) * 2 + var(--nav-half, 150px))); translate: -50% 0; display: flex; align-items: center; gap: 2px; min-height: 0; padding: 4px; border: 1px solid rgba(var(--c-shadow), .08); border-radius: 999px; background: rgba(255, 255, 255, .97); box-shadow: 0 12px 30px -14px rgba(var(--c-shadow), .4), 0 2px 6px rgba(var(--c-shadow), .06); font-family: inherit; }
+.app .scene-switch > button { position: relative; z-index: 1; min-height: 38px; padding: 8px 18px; border: 0; border-radius: 999px; background: transparent; color: var(--c-muted); font-size: 14px; font-weight: 500; white-space: nowrap; cursor: pointer; }
+.app .scene-switch > button:hover:not([aria-pressed="true"]) { color: var(--c-heading); background: var(--c-surface-sunk); }
+.app .scene-switch > button[aria-pressed="true"] { color: var(--c-brand-strong); background: var(--c-brand-tint); }
+.app .scene-switch .nav-brand { display: none; }
+/* 场景切换时，选中底色从旧按钮滑到新按钮 */
+.app .scene-indicator { position: absolute; left: 0; top: 0; z-index: 0; border-radius: 999px; background: var(--c-brand-tint); pointer-events: none; transition: transform .45s cubic-bezier(.34, 1.25, .5, 1), width .45s cubic-bezier(.34, 1.25, .5, 1), height .3s ease; }
+.app .scene-switch.has-indicator > button[aria-pressed="true"] { background: transparent; }
+
+/* 地图上的控件避开悬浮面板与切换栏 */
+.app .locate-btn { top: var(--gap); right: var(--gap); width: 44px; min-width: 44px; height: 44px; border: 1px solid rgba(var(--c-shadow), .08); border-radius: 14px; background: #fff; color: var(--c-brand); font-size: 20px; box-shadow: 0 10px 24px -12px rgba(var(--c-shadow), .4); }
+.app .locate-btn:hover:not(:disabled) { color: var(--c-brand-strong); background: var(--c-brand-tint); }
+.app .locate-btn:disabled { color: var(--c-faint); }
+.app .locate-msg { top: 66px; right: var(--gap); }
+.app :is(.locate-msg, .picking-hint) { max-width: min(420px, calc(100% - 24px)); white-space: normal; background: rgba(31, 35, 41, .94); color: #fff; border-radius: 14px; font: 14px/1.6 var(--editorial-sans); box-shadow: 0 12px 28px -12px rgba(var(--c-shadow), .5); }
+.app .picking-hint { top: 70px; left: max(50%, calc(var(--panel-w) + var(--gap) * 2 + 210px)); }
+.app .picking-hint button { flex: none; }
+.app .range-map-caption { top: 70px; left: calc(var(--panel-w) + var(--gap) * 2); max-width: 320px; padding: 10px 14px; border: 1px solid rgba(var(--c-shadow), .08); border-radius: 14px; background: #fffffff5; color: var(--c-brand-strong); font: 14px/1.6 var(--editorial-sans); box-shadow: 0 10px 24px -12px rgba(var(--c-shadow), .35); }
+.app .range-map-caption span { color: var(--c-muted); }
+
+/* ===== 面板内容 ===== */
+.app .sidebar { --ink: var(--c-ink); --muted: var(--c-muted); --line: var(--c-line); --panel: var(--c-surface-soft); --result: var(--c-brand); font: inherit; }
+.app .pane { padding: 10px 18px 16px; }
+.app .pane.controls { border-top: 1px solid var(--c-line); background: var(--c-surface-soft); padding-top: 4px; }
+.app :is(.pane.origins, .pane.controls, .commute-scroll) { scrollbar-width: thin; scrollbar-color: var(--c-line-strong) transparent; }
+.app .commute-scroll { padding: 6px 18px 20px; }
+.app :is(.sidebar-intro, .commute-intro) { display: block; margin: 2px 0 6px; }
+.app :is(.sidebar-intro h1, .commute-intro h1) { margin: 0 0 4px; color: var(--c-heading); font: 600 21px/1.4 var(--editorial-sans); letter-spacing: 0; }
+.app :is(.sidebar-intro p, .commute-intro p) { margin: 0; color: var(--c-muted); font-size: 14px; line-height: 1.7; }
+.app .step-heading { display: flex; align-items: center; gap: 8px; margin: 18px 0 10px; }
+.app .step-heading h2 { margin: 0; color: var(--c-heading); font: 600 16px/1.5 var(--editorial-sans); }
+.app .step-meta { margin-left: auto; color: var(--c-muted); font-size: 13px; }
+.app .step-no { display: inline-grid; place-items: center; flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--c-brand); color: #fff; font: 600 12px/1 var(--editorial-sans); }
+.app .commute-section { border-color: var(--c-line); }
+.app .commute-section h2 { display: flex; align-items: center; gap: 8px; color: var(--c-heading); font: 600 16px/1.5 var(--editorial-sans); letter-spacing: 0; }
+.app .commute-section h2 > small { color: var(--c-muted); font-size: 13px; font-weight: 400; }
+.app .section-heading h2 { color: var(--c-heading); font: 600 16px/1.5 var(--editorial-sans); letter-spacing: 0; }
+.app :is(.commute-note, .commute-fields label, .commute-empty, .route-facts, .home-card details, .workplace small, .origin-summary-copy small, .marker-option span, .time-disclosure > summary, .map-help > summary, .map-help p, .hint, .inline-guidance, .range-success p) { color: var(--c-muted); line-height: 1.7; }
+.app .inline-guidance { margin: 8px 0 0; font-size: 13px; }
+.app .eyebrow { color: var(--c-brand-strong); font-size: 12px; font-weight: 600; letter-spacing: .08em; }
+
+/* 输入框：圆角、蓝色聚焦光圈；搜索框带放大镜 */
+.app :is(.search-box input, .editor-field input, .editor-field select, .commute-panel input:not([type="checkbox"]):not([type="range"]), .commute-panel select) { min-height: 44px; border: 1px solid var(--c-line-strong); border-radius: 12px; box-shadow: none; color: var(--c-ink); background: var(--c-surface); font-size: 15px; padding-inline: 12px; transition: border-color .2s, box-shadow .2s; }
+.app :is(.search-box input, .editor-field input, .editor-field select, .commute-panel input:not([type="checkbox"]):not([type="range"]), .commute-panel select):focus { border-color: var(--c-brand); box-shadow: 0 0 0 3px rgba(var(--c-brand-rgb), .18); outline: none; }
+.app :is(.search-box input, .commute-search form input) { padding-left: 38px; background: var(--c-surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238f959e' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 13px 50% / 16px; }
+.app :is(input, select)::placeholder { color: var(--c-muted); opacity: 1; }
+.app input[type="range"] { accent-color: var(--c-brand); }
+.app input[type="checkbox"] { accent-color: var(--c-brand); }
+
+/* 主按钮：明亮蓝实心 */
+.app :is(.search-box button, .commute-primary, .pick-btn.on) { min-height: 44px; border: 1px solid var(--c-brand); border-radius: 12px; background: var(--c-brand); color: #fff; font-weight: 500; }
+.app .search-box button { padding-inline: 16px; }
+.app .commute-primary { padding: 12px; font-size: 16px; font-weight: 500 !important; box-shadow: 0 10px 20px -12px rgba(var(--c-brand-rgb), .65); }
+.app :is(.search-box button, .commute-primary, .pick-btn.on):hover:not(:disabled) { background: var(--c-brand-hover); border-color: var(--c-brand-hover); color: #fff; }
+.app :is(.search-box button, .commute-primary):disabled { background: var(--c-surface-sunk); border-color: var(--c-line); color: var(--c-muted); box-shadow: none; opacity: 1; }
+.app .pick-btn { min-height: 44px; border: 1px dashed var(--c-brand-line); border-radius: 12px; background: var(--c-surface-soft); color: var(--c-brand-strong); }
+.app .commute-search form button { border-radius: 12px; background: var(--c-brand-tint); color: var(--c-brand-strong); }
+.app :is(.commute-text-button, .home-card summary, .range-success button, .transit-heading button) { color: var(--c-brand); font-weight: 500; }
+
+/* 选项胶囊：未选白底灰字，选中浅蓝底＋蓝字＋勾 */
+.app :is(.chip, .custom-time-toggle, .commute-mode-tabs button, .range-presets button, .life-interests button) { min-height: 40px; border: 1px solid var(--c-line-strong); border-radius: 999px; background: var(--c-surface); color: var(--c-muted); box-shadow: none; font-size: 14px; font-weight: 400; }
+.app :is(.chip.on, .custom-time-toggle.on, .commute-mode-tabs .active, .range-presets button[aria-pressed="true"], .life-interests button[aria-pressed="true"]) { border-color: var(--c-brand); background: var(--c-brand-tint); color: var(--c-brand-strong); font-weight: 500; }
+.app .life-interests button[aria-pressed="true"]::before { content: '✓'; margin-right: 4px; font-weight: 700; }
+.app :is(.chips.time-presets .chip, .range-presets button) { padding-inline: 4px; white-space: nowrap; }
+.app :is(.chip, .custom-time-toggle, .commute-mode-tabs button, .range-presets button, .life-interests button, .mode-option, .marker-option, .home-routes button):hover:not(:disabled):not(.on):not(.active):not([aria-pressed="true"]) { border-color: var(--c-brand-line); color: var(--c-brand-strong); }
+.app .chips.time-presets { gap: 8px; }
+.app .custom-time-toggle { margin-top: 10px; padding-inline: 14px; }
+.app .custom-time-controls { padding: 4px 0 8px; }
+
+/* 分段切换：浅蓝底槽，选中项白底浮起 */
+.app :is(.chips.segmented, .commute-view-tabs) { display: flex; gap: 3px; margin: 0; padding: 3px; border-radius: 12px; background: var(--c-surface-sunk); }
+.app :is(.chips.segmented .chip, .commute-view-tabs button) { flex: 1; min-height: 36px; margin: 0; padding: 6px 8px; border: 0; border-radius: 9px; background: transparent; color: var(--c-muted); font-size: 14px; }
+.app :is(.chips.segmented .chip.on, .commute-view-tabs button[aria-pressed="true"]) { background: var(--c-surface); color: var(--c-brand-strong); font-weight: 600; box-shadow: 0 2px 8px -2px rgba(var(--c-shadow), .22); }
+.app :is(.chips.segmented .chip, .commute-view-tabs button):hover:not(.on):not([aria-pressed="true"]) { color: var(--c-heading); }
+.app .commute-view-tabs { margin-bottom: 16px; }
+.app .chips.op-options .chip { padding-inline: 4px; font-size: 13px; }
+
+/* 卡片与选项块 */
+.app :is(.mode-option, .marker-option, .home-routes button) { border: 1px solid var(--c-line-strong); border-radius: 12px; background: var(--c-surface); color: var(--c-muted); box-shadow: none; }
+.app :is(.mode-option.on, .marker-option.on, .home-routes .active) { border-color: var(--c-brand); background: var(--c-brand-tint); color: var(--c-brand-strong); }
+.app :is(.mode-option.on, .marker-option.on) svg { color: var(--origin-color); }
+.app :is(.mode-option, .time-disclosure > summary, .map-help > summary) { min-height: 40px; }
+.app :is(.origin-card, .home-card, .workplace, .commute-empty) { border: 1px solid var(--c-line); border-radius: 14px; background: var(--c-surface); box-shadow: none; }
+.app .origin-card { border-left: 3px solid var(--origin-color); }
+.app .origin-card.inactive { border-left-color: var(--c-line-strong); }
+.app .origin-summary { background: var(--c-surface); padding-block: 12px; }
+.app .origin-summary:hover { background: var(--origin-tint); }
+.app .origin-editor { gap: 14px; background: var(--c-surface-soft); }
+.app :is(.origin-summary-copy strong, .home-heading button) { color: var(--c-heading); font-weight: 500; }
+.app .empty-card { margin-top: 10px; border: 1px dashed var(--c-brand-line); border-radius: 14px; background: var(--c-surface-soft); }
+.app .empty-card strong { color: var(--c-heading); font-size: 15px; }
+.app .empty-card p { color: var(--c-muted); font-size: 14px; }
+.app .empty-pin { border-color: var(--c-brand-line); background: var(--c-surface); color: var(--c-brand); }
+.app .workplace { border-color: #dcd6fd; background: var(--c-brand-tint); }
+.app .workplace > span { flex: none; border-radius: 10px; background: var(--c-brand); }
+.app .home-card { padding: 14px; }
+.app .home-card.selected { border-color: var(--c-brand); box-shadow: 0 0 0 1px var(--c-brand); }
+.app .verdict { border-radius: 999px; padding-inline: 10px; background: var(--c-surface-sunk); color: var(--c-muted); }
+.app .verdict.pass { background: var(--c-brand-tint); color: var(--c-brand-strong); }
+.app :is(.commute-error, .hint.error) { color: var(--c-danger); }
+.app .home-heading .home-remove { color: var(--c-faint); font-weight: 400; }
+.app .home-heading .home-remove:hover { color: var(--c-danger); }
+.app .range-direction { border-radius: 12px; background: var(--c-surface-soft); color: var(--c-muted); }
+.app .range-direction strong { color: var(--c-brand-strong); }
+.app .metro-network-summary { border-radius: 12px; background: var(--c-surface-soft); }
+.app .time-disclosure, .app .map-help { border-top-color: var(--c-line); }
+
+/* 运算结果卡：悬浮在地图右下角 */
+.app .results-panel { --results-ink: var(--c-heading); --results-muted: var(--c-muted); --results-line: var(--c-line); background: #fffffff7; border-color: rgba(var(--c-shadow), .08); font-family: inherit; line-height: 1.6; }
+.app .results-panel.overlay { right: var(--gap); bottom: 34px; width: min(320px, calc(100% - var(--panel-w) - var(--gap) * 4)); overflow-y: auto; border-radius: 16px; box-shadow: 0 16px 36px -18px rgba(var(--c-shadow), .45); }
+.app .results-panel-header { flex-wrap: wrap; padding-block: 8px; }
+.app .results-panel-heading { flex-wrap: wrap; }
+.app .results-panel-heading h2 { white-space: normal; color: var(--c-heading); font: 600 15px/1.5 var(--editorial-sans); letter-spacing: 0; text-transform: none; }
+.app .result-muted, .app .result-warning { line-height: 1.6; }
+.app .empty-result-copy { grid-template-columns: 1fr; }
+.app .empty-result-copy strong { text-align: left; }
+.app .empty-result-copy small { line-height: 1.6; }
+
+/* 生活探索与搬家对比 */
+.app .mode-option span { line-height: 1.5; }
+.app .editor-field > span { width: 76px; }
+.app .slider-val { width: 64px; color: var(--c-heading); }
+.app .origin-badge-code { min-width: 20px; height: 20px; }
+.app :is(.commute-result-tools, .home-meta, .life-score, .life-poi-actions) { flex-wrap: wrap; }
+.app :is(.workplace div, .home-heading button, .commute-fields label, .life-weights label) { min-width: 0; overflow-wrap: anywhere; }
+.app .commute-mode-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.app .range-presets { gap: 8px; }
+.app .life-weights { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.app .life-weights label { flex-wrap: wrap; }
+.app .life-weights select { width: 78px; }
+.app .life-category > summary > span { float: none; display: block; }
+.app :is(.life-score strong, .life-category > summary, .life-place-title, .life-selected h3, .life-pair strong, .life-price b, .life-trips summary, .life-comparison-results > details > summary) { color: var(--c-brand-strong); }
+.app :is(.life-score span, .life-poi small) { color: var(--c-muted); }
+.app :is(.life-formula summary, .life-poi-actions button, .life-visit button) { color: var(--c-brand); }
+.app :is(.comparison-panel h3, .life-rent-result > strong) { color: var(--c-brand-strong); }
+.app .life-interests button { padding-inline: 14px; }
+.app .life-rent-result { border-radius: 14px; background: var(--c-surface-soft); border-color: var(--c-line); }
+.app .life-selected { border-color: var(--c-brand-line); }
+.app .commute-text-button:hover:not(:disabled) { text-decoration: underline; text-underline-offset: 5px; }
+
+/* 桌面：面板占满左侧高度，地点列表至少保留一张卡片；矮屏幕上设置区收缩滚动 */
+@media (min-width: 769px) {
+  .app .workspace-panel > .sidebar { position: relative; z-index: auto; flex: 1 1 auto; width: auto; height: auto; min-height: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+  /* 等时圈面板整块一起滚动：第 1、2、3 步连续排列，中间不留空白 */
+  .app .workspace-panel > .sidebar:not(.commute-panel) { overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--c-line-strong) transparent; }
+  .app .workspace-panel > .sidebar > :is(.pane.origins, .pane.controls) { flex: none; min-height: 0; overflow: visible; }
+  .app .workspace-panel > .sidebar > .pane.controls { border-top: 0; background: transparent; padding-top: 0; }
+  /* 收起：面板向左滑出窗口，动画结束后再隐藏，键盘焦点不会落进看不见的面板；展开时立刻可见再滑回来 */
+  .workspace-panel { transition: transform .42s cubic-bezier(.2, .8, .2, 1), opacity .3s ease, visibility 0s; }
+  .workspace-panel.is-collapsed { transform: translateX(calc(-100% - var(--gap) * 2)); opacity: 0; visibility: hidden; transition: transform .42s cubic-bezier(.4, 0, .2, 1), opacity .25s ease .15s, visibility 0s .42s; }
+  .app .scene-switch { transition: left .42s cubic-bezier(.2, .8, .2, 1); }
+  .app[data-panel="collapsed"] .scene-switch { left: 50%; }
+  .app[data-panel="collapsed"] .picking-hint { left: 50%; }
+  .app[data-panel="collapsed"] .range-map-caption { left: var(--gap); }
+  .app[data-panel="collapsed"] .results-panel.overlay { width: min(320px, calc(100% - var(--gap) * 2)); }
 }
+@media (max-width: 1100px) and (min-width: 769px) { .app { --panel-w: 352px; } .app .scene-switch > button { padding-inline: 14px; } }
+
+/* 手机：地图全屏，切换栏悬浮在顶部，面板是底部抽屉 */
+@media (max-width: 768px) {
+  .workspace-panel { display: contents; }
+  .panel-head, .app .panel-reopen { display: none; }
+  .app .scene-switch { top: 8px; left: 8px; right: 8px; translate: none; flex-wrap: wrap; gap: 4px; padding: 6px; border-radius: 18px; }
+  .app .scene-switch .nav-brand { display: flex; flex-basis: 100%; padding: 2px 6px 2px 4px; min-height: 0; }
+  .app .scene-switch .nav-brand .radius-symbol { width: 24px; transform: scale(.64); }
+  .app .scene-switch .nav-brand strong { font-size: 16px; }
+  .app .scene-switch > button[data-scene-tab] { flex: 1; min-height: 38px; padding: 7px 4px; font-size: 13px; }
+  /* 抽屉折叠时露出 88px：左下 Mapbox 标识和右下 ⓘ 版权按钮都抬到它上面，保持看得见；
+     定位按钮再往上让开 ⓘ（ⓘ 顶部距底 122px），定位提示放在定位按钮上方 */
+  .app .map-view-wrap :is(.mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: 88px; }
+  .app .locate-btn { top: auto; right: 12px; bottom: 134px; }
+  .app .locate-msg { top: auto; right: 12px; bottom: 190px; left: 12px; max-width: none; }
+  .app .picking-hint { top: 104px; left: 50%; }
+  .app .range-map-caption { top: 104px; left: 12px; max-width: calc(100% - 24px); }
+  .app .sidebar { width: 100%; border: 0; border-top: 1px solid var(--c-line); border-radius: 22px 22px 0 0; background: var(--c-surface); box-shadow: 0 -10px 30px rgba(var(--c-shadow), .14); }
+  .app .sidebar-intro { display: none; }
+  .app .drawer-handle { border-radius: 22px 22px 0 0; background: #fffffffa; font-family: inherit; }
+  .app .sidebar.collapsed .drawer-handle { background: var(--c-surface); }
+  .app .sidebar.collapsed .drawer-handle.has-empty-conclusion { background: #fff2ef; }
+  .app .pane { padding: 12px 16px; }
+  .app .commute-scroll { padding: 8px 16px 24px; }
+  .app .step-heading:first-of-type { margin-top: 6px; }
+  .app .editor-field > span { width: auto; }
+  .app .home-routes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .app .life-score p { text-align: left; }
+}
+
+/* 动效：面板与卡片入场、按钮反馈、加载与选中提示。
+   入场动画只用 backwards 填充，结束后不覆盖元素自身的透明度（如已排除地点的 .62）。
+   地图标记由 Mapbox 用 transform 定位，所以不给它们加 transform 过渡或动画，只用阴影光圈。 */
+@keyframes ui-panel { from { opacity: 0; transform: translateX(-18px); } }
+@keyframes ui-nav { from { opacity: 0; transform: translateY(-12px); } }
+@keyframes ui-rise { from { opacity: 0; transform: translateY(14px); } }
+@keyframes ui-item { from { opacity: 0; transform: translateY(8px) scale(.985); } }
+@keyframes ui-drop { from { opacity: 0; translate: 0 -10px; } }
+@keyframes ui-pulse { 50% { opacity: .3; } }
+@keyframes ui-float { 50% { transform: translateY(-4px); } }
+@keyframes ui-ring { from { box-shadow: 0 2px 8px rgba(var(--c-shadow), .3), 0 0 0 0 rgba(81, 56, 201, .5); } to { box-shadow: 0 2px 8px rgba(var(--c-shadow), .3), 0 0 0 14px rgba(81, 56, 201, 0); } }
+.workspace-panel { animation: ui-panel .55s cubic-bezier(.2, .8, .2, 1) backwards; }
+.app .scene-switch { animation: ui-nav .5s .08s cubic-bezier(.2, .8, .2, 1) backwards; }
+.app :is(.pane.origins, .pane.controls, .commute-scroll) > * { animation: ui-rise .55s cubic-bezier(.2, .8, .2, 1) backwards; }
+.app :is(.pane.origins, .pane.controls, .commute-scroll) > :nth-child(2) { animation-delay: .05s; }
+.app :is(.pane.origins, .pane.controls, .commute-scroll) > :nth-child(3) { animation-delay: .1s; }
+.app :is(.pane.origins, .pane.controls, .commute-scroll) > :nth-child(4) { animation-delay: .15s; }
+.app :is(.pane.origins, .pane.controls, .commute-scroll) > :nth-child(n + 5) { animation-delay: .2s; }
+/* 住处卡片会按通勤时间重新排序，DOM 移动会重播动画造成闪烁，所以不给 .home-card 入场动画 */
+.app :is(.origin-card, .life-poi, .result-item, .place-options li) { animation: ui-item .42s cubic-bezier(.2, .8, .2, 1) backwards; }
+.app :is(.origin-list, .commute-results, .life-category, .results-panel-body) > :nth-child(2) { animation-delay: .05s; }
+.app :is(.origin-list, .commute-results, .life-category, .results-panel-body) > :nth-child(3) { animation-delay: .1s; }
+.app :is(.origin-list, .commute-results, .life-category, .results-panel-body) > :nth-child(n + 4) { animation-delay: .15s; }
+.app .results-panel.overlay { animation: ui-rise .55s .15s cubic-bezier(.2, .8, .2, 1) backwards; }
+.app :is(.locate-msg, .picking-hint, .range-map-caption) { animation: ui-drop .4s cubic-bezier(.2, .8, .2, 1) backwards; }
+.app .empty-pin { animation: ui-float 3.2s ease-in-out infinite; }
+.app .tag.loading::before { animation: ui-pulse 1.1s ease-in-out infinite; }
+.app .place-marker.is-selected { animation: ui-ring 1.8s ease-out infinite; }
+.app :is(.commute-primary, .search-box button, .pick-btn, .chip, .mode-option, .marker-option, .custom-time-toggle, .commute-view-tabs button, .range-presets button, .commute-mode-tabs button, .home-routes button, .life-interests button, .locate-btn) { transition: color .2s, background-color .2s, border-color .2s, box-shadow .25s, transform .18s cubic-bezier(.2, .8, .2, 1); }
+.app :is(.commute-primary, .search-box button):hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 22px -12px rgba(var(--c-brand-rgb), .7); }
+.app :is(.commute-primary, .search-box button, .pick-btn, .chip, .mode-option, .marker-option, .custom-time-toggle, .commute-view-tabs button, .range-presets button, .commute-mode-tabs button, .home-routes button, .life-interests button, .locate-btn):active:not(:disabled) { transform: scale(.96); }
+.app :is(.origin-card, .home-card) { transition: opacity .16s ease, border-color .2s ease, box-shadow .25s ease; }
+.app :is(.origin-card, .home-card):hover { box-shadow: 0 12px 26px -18px rgba(var(--c-shadow), .5); }
+.app .home-card.selected:hover { box-shadow: 0 0 0 1px var(--c-brand), 0 12px 26px -18px rgba(var(--c-shadow), .5); }
+.app .locate-btn:hover:not(:disabled) { transform: translateY(-1px); }
+@media (prefers-reduced-motion: reduce) { .app *, .app *::before, .app *::after, .workspace-panel { animation: none !important; transition: none !important; } }

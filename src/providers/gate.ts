@@ -8,7 +8,7 @@ import type { PolyFeature } from '../geometry/ops'
  */
 export const MAX_CONCURRENCY = 4
 
-type GateOptions = { retries?: number; baseDelayMs?: number }
+type GateOptions = { retries?: number; baseDelayMs?: number; maxConcurrency?: number }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -19,12 +19,13 @@ export function withGate(inner: IsochroneProvider, opts: GateOptions = {}): Isoc
   // 0.8/1.6/3.2s 共约 5.6s 的退避能跨过多数抖动窗口。
   const retries = opts.retries ?? 3
   const baseDelayMs = opts.baseDelayMs ?? 800
+  const maxConcurrency = opts.maxConcurrency ?? MAX_CONCURRENCY
 
   let active = 0
   const waiting: Array<() => void> = []
 
   async function acquire(): Promise<void> {
-    if (active < MAX_CONCURRENCY) {
+    if (active < maxConcurrency) {
       active++
       return
     }

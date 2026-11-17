@@ -35,6 +35,19 @@ export function isochroneUrl(
 }
 
 /**
+ * Mapbox 等时圈网格边长的上限（度），交给平滑做估计时的护栏。
+ *
+ * 实测（深圳、香港、广州）：驾车 5–15 分钟 0.001°、20–30 分钟 0.002°、40–50 分钟 0.003°、
+ * 60 分钟 0.004°；步行、骑行一律 0.001°。这里按「每 15 分钟一格」取整再留 25% 余量，
+ * 只用来挡住把两格台阶误判成一格这类高估，不用来猜具体值——低估只会少平滑一点。
+ */
+export function mapboxGridCeiling(mode: MapboxMode, minutes: number): number {
+  const driving = mode === 'driving' || mode === 'driving-traffic'
+  const cells = driving ? Math.max(1, Math.ceil(minutes / 15)) : 1
+  return cells * 0.00125
+}
+
+/**
  * 从响应里取出指定档位的那一圈。
  *
  * 必须按 properties.contour 匹配，不能靠数组下标：Mapbox 返回的

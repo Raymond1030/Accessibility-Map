@@ -1,0 +1,10 @@
+.local-engine-status { margin: 12px 0; padding: 12px; border: 1px solid var(--c-line-strong); border-radius: 8px; background: var(--c-surface-soft); color: var(--c-ink); font-size: 12px; line-height: 1.6; }
+.local-engine-status > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.local-engine-status button { border: 0; background: none; color: var(--c-brand); font: inherit; text-decoration: underline; cursor: pointer; padding: 4px; }
+.local-engine-status p { margin: 4px 0; }
+.local-engine-status small { display: block; line-height: 1.6; }
+.local-query-inputs { display: grid; gap: 10px; margin: 12px 0; }
+.local-query-inputs label { display: grid; gap: 5px; color: var(--c-muted); font-size: 12px; }
+.local-query-inputs input, .local-query-inputs select { box-sizing: border-box; width: 100%; min-width: 0; min-height: 38px; padding: 7px 9px; border: 1px solid var(--c-line-strong); border-radius: 6px; background: var(--c-surface); color: var(--c-ink); font: inherit; }
+.local-query-inputs input:focus-visible, .local-query-inputs select:focus-visible, .local-engine-status button:focus-visible { outline: 2px solid var(--c-focus); outline-offset: 2px; }
+.local-engine-error { display: block; width: 100%; color: var(--c-danger); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }

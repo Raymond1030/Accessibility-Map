@@ -1,0 +1,28 @@
+{
+  "checkedOn": "2026-11-07",
+  "engine": {
+    "name": "GraphHopper", "version": "11.0", "java": 17,
+    "url": "https://github.com/graphhopper/graphhopper/releases/download/11.0/graphhopper-web-11.0.jar",
+    "sha256": "b59c024afe172ec6ec85b6327006c3138ec58c7d0bcd26253d0e42853f613def",
+    "license": "Apache-2.0"
+  },
+  "regions": {
+    "guangdong": {"label": "广东（含香港、澳门）", "bbox": [109.5, 20.0, 117.6, 25.6], "osmUrl": "https://download.geofabrik.de/asia/china/guangdong-latest.osm.pbf", "page": "https://download.geofabrik.de/asia/china/guangdong.html", "defaultTransit": true},
+    "hong-kong": {"label": "香港", "bbox": [113.8, 22.1, 114.5, 22.6], "osmUrl": "https://download.geofabrik.de/asia/china/hong-kong-latest.osm.pbf", "page": "https://download.geofabrik.de/asia/china/hong-kong.html", "defaultTransit": true},
+    "macau": {"label": "澳门", "bbox": [113.52, 22.08, 113.63, 22.23], "osmUrl": "https://download.geofabrik.de/asia/china/macau-latest.osm.pbf", "page": "https://download.geofabrik.de/asia/china/macau.html", "defaultTransit": false}
+  },
+  "hongKongGtfs": {
+    "id": "hk-td", "label": "香港运输署公共交通班次",
+    "url": "https://static.data.gov.hk/td/pt-headway-en/gtfs.zip",
+    "page": "https://data.gov.hk/en-data/dataset/hk-td-tis_11-pt-headway-en",
+    "attribution": "Hong Kong Transport Department / DATA.GOV.HK",
+    "limitations": ["不含港铁重铁时刻表", "班距数据不是实时车辆预报", "跨境通关时间未建模"]
+  },
+  "catalogOnly": [
+    {"label": "深圳地铁线路信息", "url": "https://opendata.sz.gov.cn/data/dataSet/toDataDetails/29200_63800001", "format": "XLSX/CSV/JSON", "status": "线路与站点目录，尚未核实完整 GTFS"},
+    {"label": "深圳公交线路与站点一览表", "url": "https://www.sz.gov.cn/xxgk/sydwxxgk/jt/gj/ywxx/gjlx/content/post_12601256.html", "status": "需核验站序、坐标、运行时间与服务日历后转换"},
+    {"label": "澳门巴士路线资料", "url": "https://data.gov.mo/Detail?id=e7b2e84d-3333-42f0-b676-64ce95306f0d", "format": "SHP/XLS", "status": "有路线和站点，未核实完整 GTFS"},
+    {"label": "港铁实时列车信息", "url": "https://data.gov.hk/en-data/dataset/mtr-data2-nexttrain-data/resource/103472ed-01be-4dda-92c6-30530dee022f", "format": "JSON", "status": "未来四班车信息，不能代替全日静态 GTFS"},
+    {"label": "CPTOND-2025 公交地铁网络", "url": "https://doi.org/10.6084/m9.figshare.29377427", "status": "研究数据候选，需核验授权及班次字段"}
+  ]
+}

@@ -1,6 +1,6 @@
 export type Mode =
   | 'driving' | 'driving-traffic' | 'walking' | 'cycling'
-  // 公共交通组合。前两个走高德 ArrivalRange（公交/地铁 + 步行接驳），
+  // 公交等时圈保留兼容类型但已停用；地铁使用本地线网引擎，
   // metro-cycling 是自建合成：骑行进站 + 地铁 + 骑行出站，见 providers/composite.ts
   | 'transit-walking' | 'subway-walking' | 'metro-cycling'
 
@@ -10,7 +10,7 @@ export const MODE_LABEL: Record<Mode, string> = {
   walking: '步行',
   cycling: '骑行',
   'transit-walking': '公交+步行',
-  'subway-walking': '地铁+步行',
+  'subway-walking': '地铁+步行（仅深圳）',
   'metro-cycling': '地铁+骑行（仅深圳）',
 }
 

@@ -5,6 +5,11 @@ export type IsochroneRequest = {
   lngLat: [number, number]
   mode: Mode
   minutes: number
+  direction?: 'depart' | 'arrive'
+  /** ISO 8601 with a timezone; required for timetable-based local transit. */
+  dateTime?: string
+  signal?: AbortSignal
+  onProgress?: (message: string) => void
 }
 
 export interface IsochroneProvider {
@@ -33,7 +38,8 @@ export function requestFingerprint(
     `${lng.toFixed(5)},${lat.toFixed(5)}`,
     req.mode,
     req.minutes,
-  ].join('|') + bucket
+    req.direction ?? 'depart',
+  ].join('|') + bucket + (req.dateTime ? `|at:${req.dateTime}` : '')
 }
 
 /**

@@ -62,6 +62,8 @@ export function buildGraph(net: MetroNetwork): MetroGraph {
     for (const a of idxs) {
       for (const b of idxs) {
         if (a === b || nodes[a].lineId === nodes[b].lineId) continue
+        // 同名异地车站不能瞬移换乘。
+        if (distance(point(nodes[a].station.lngLat), point(nodes[b].station.lngLat)) > 0.8) continue
         nodes[a].edges.push([b, net.defaults.transferMin + nodes[b].headwayMin / 2])
       }
     }
@@ -86,6 +88,42 @@ export function metroReachability(
   entries: MetroEntry[],
   budgetMin: number,
   boardMin: number,
+): Map<string, number> {
+  return shortestPaths(graph, entries.map(e => ({
+    stationId: e.stationId,
+    cost: e.accessMin + boardMin + (graph.nodes[graph.byStationId.get(e.stationId)!]?.headwayMin ?? 0) / 2,
+  })), budgetMin)
+}
+
+/**
+ * 到达目的地：在反向图上多源求解。终点种子只付出站 + 步行，
+ * 换乘沿原方向的权重反转；每个潜在起点再加自己的进站、候车。
+ * 返回从起点站外到目的地的耗时，不含住处到起点站的步行。
+ */
+export function metroArrivalCosts(
+  graph: MetroGraph, exits: MetroEntry[], budgetMin: number, boardMin: number, exitMin: number,
+): Map<string, number> {
+  const reverse: MetroGraph = {
+    byStationId: graph.byStationId,
+    nodes: graph.nodes.map(node => ({ ...node, edges: [] })),
+  }
+  graph.nodes.forEach((node, from) => {
+    for (const [to, cost] of node.edges) reverse.nodes[to].edges.push([from, cost])
+  })
+  const platformCosts = shortestPaths(reverse, exits.map(e => ({
+    stationId: e.stationId, cost: e.accessMin + exitMin,
+  })), budgetMin)
+  const out = new Map<string, number>()
+  for (const [id, cost] of platformCosts) {
+    const node = graph.nodes[graph.byStationId.get(id)!]
+    const total = cost + boardMin + node.headwayMin / 2
+    if (total <= budgetMin) out.set(id, total)
+  }
+  return out
+}
+
+function shortestPaths(
+  graph: MetroGraph, seeds: Array<{ stationId: string; cost: number }>, budgetMin: number,
 ): Map<string, number> {
   const n = graph.nodes.length
   const dist = new Array<number>(n).fill(Infinity)
@@ -123,10 +161,10 @@ export function metroReachability(
     return top
   }
 
-  for (const e of entries) {
+  for (const e of seeds) {
     const idx = graph.byStationId.get(e.stationId)
     if (idx === undefined) continue
-    const cost = e.accessMin + boardMin + graph.nodes[idx].headwayMin / 2
+    const cost = e.cost
     if (cost < dist[idx] && cost <= budgetMin) {
       dist[idx] = cost
       push([cost, idx])

@@ -46,7 +46,7 @@ let loading: Promise<any> | null = null
 
 /**
  * 全应用唯一的 SDK 加载入口——AMapLoader.load 不允许多处以不同插件列表调用，
- * 搜索（PlaceSearch）与到达圈（ArrivalRange）必须共用这一份。
+ * 搜索与点到点路线规划必须共用这一份。
  * SDK 懒加载，首次用到才拉取，不拖累首屏。
  */
 export function loadAmap(): Promise<any> {
@@ -60,7 +60,8 @@ export function loadAmap(): Promise<any> {
   loading = AMapLoader.load({
     key,
     version: '2.0',
-    plugins: ['AMap.ArrivalRange', 'AMap.PlaceSearch'],
+    plugins: ['AMap.PlaceSearch', 'AMap.Transfer', 'AMap.Driving', 'AMap.Walking', 'AMap.Riding'],
   })
+  loading.catch(() => { loading = null })
   return loading
 }

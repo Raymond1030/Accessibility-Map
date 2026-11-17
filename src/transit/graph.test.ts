@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildGraph, metroReachability } from './graph'
+import { buildGraph, metroReachability, metroArrivalCosts } from './graph'
 import type { MetroNetwork } from './types'
 
 /**
@@ -121,5 +121,28 @@ describe('metroReachability', () => {
 
   it('未知站点 id 被忽略而不是崩溃', () => {
     expect(metroReachability(g, [{ stationId: '不存在', accessMin: 5 }], 60, 2).size).toBe(0)
+  })
+})
+
+
+describe('反向到达寻路', () => {
+  it('与逐个起点正向寻路的最优到达耗时一致，包含不同班距、换乘和出站', () => {
+    const graph = buildGraph(NET)
+    const exits = [{ stationId: 'b3', accessMin: 3 }, { stationId: 'a4', accessMin: 12 }]
+    const incoming = metroArrivalCosts(graph, exits, 60, 2, 2)
+    for (const node of graph.nodes) {
+      const forward = metroReachability(graph, [{ stationId: node.station.id, accessMin: 0 }], 60, 2)
+      const expected = Math.min(...exits.map(exit => (forward.get(exit.stationId) ?? Infinity) + 2 + exit.accessMin))
+      expect(incoming.get(node.station.id)).toBeCloseTo(expected)
+    }
+    expect(metroArrivalCosts(graph, exits, 5, 2, 2).size).toBe(0)
+  })
+  it('同名异地车站不建立换乘边', () => {
+    const net = structuredClone(NET)
+    net.lines[1].stations[0].lngLat = [115, 23]
+    const graph = buildGraph(net)
+    const a = graph.byStationId.get('a2')!
+    const b = graph.byStationId.get('b1')!
+    expect(graph.nodes[a].edges.some(([to]) => to === b)).toBe(false)
   })
 })

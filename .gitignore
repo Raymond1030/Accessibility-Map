@@ -3,3 +3,5 @@ dist
 .env
 .superpowers/
 .DS_Store
+engine/.local/
+engine/__pycache__/
